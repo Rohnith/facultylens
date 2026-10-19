@@ -78,11 +78,16 @@ async def login(request: Request, response: Response, body: LoginIn, db: Db) -> 
     return await _issue(db, response, user)
 
 
-@router.post("/refresh", response_model=TokenOut)
-async def refresh(request: Request, response: Response, db: Db) -> TokenOut:
+@router.post(
+    "/refresh",
+    response_model=TokenOut,
+    responses={204: {"description": "No session cookie: nothing to refresh (signed out)"}},
+)
+async def refresh(request: Request, response: Response, db: Db) -> TokenOut | Response:
     token = request.cookies.get(get_settings().refresh_cookie_name)
     if not token:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "No session")
+        # Not an error: the app asks on every load whether a session exists.
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     token_hash = hash_refresh_token(token)
     doc = await db.refresh_tokens.find_one_and_update(
         {"jti_hash": token_hash, "revoked": False, "expires_at": {"$gt": now()}},

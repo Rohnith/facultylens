@@ -177,7 +177,7 @@
                 "refresh"
               ]
             },
-            "description": "Uses the refresh cookie; rotates it and returns a new access token.",
+            "description": "Uses the refresh cookie; rotates it and returns a new access token. 204 when there is no cookie (signed out); 401 when the token is expired, revoked or reused.",
             "header": [],
             "auth": {
               "type": "noauth"

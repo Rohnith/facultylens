@@ -116,16 +116,19 @@ async def test_bulk_with_any_bad_row_inserts_nothing(client, world):
         {"name": "Nowhere", "role": "faculty", "email": "n@test.edu", "department_code": "XYZ"},
         {"name": "Taken", "role": "faculty", "email": "fac@test.edu", "department_code": "CSE"},
         {"role": "student"},
+        {"name": "Two Faults", "role": "student", "roll_no": "bad", "department_code": "XYZ"},
     ]
     r = await client.post("/api/users/bulk", headers=h, json={"users": users})
     assert r.status_code == 422
     detail = r.json()["detail"]
     assert detail["code"] == "bulk_invalid"
     rows = {e["row"]: " ".join(e["errors"]) for e in detail["errors"]}
-    assert set(rows) == {2, 3, 4, 5}
+    assert set(rows) == {2, 3, 4, 5, 6}
     assert "Same roll number as row 1" in rows[2]
     assert "No department with code XYZ" in rows[3]
     assert "already exists" in rows[4]
+    assert "name:" in rows[5]
+    assert "ROLL_NO_REGEX" in rows[6] and "No department with code XYZ" in rows[6]
     assert await world["db"].users.count_documents({}) == 5
 
 

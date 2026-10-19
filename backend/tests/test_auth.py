@@ -81,6 +81,11 @@ async def test_refresh_rotates_and_detects_reuse(client, mongo):
     assert await mongo.refresh_tokens.count_documents({"revoked": False}) == 0
 
 
+async def test_refresh_without_cookie_is_no_content(client, mongo):
+    r = await client.post("/api/auth/refresh")
+    assert r.status_code == 204 and r.content == b""
+
+
 async def test_logout_revokes_refresh_token(client, mongo):
     await make_user(mongo, "admin", email="t@test.edu")
     await login(client, "t@test.edu")

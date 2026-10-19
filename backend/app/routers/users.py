@@ -156,6 +156,13 @@ def _parse_csv(raw: bytes) -> list[dict[str, Any]]:
     return rows
 
 
+def _field_message(error: dict[str, Any]) -> str:
+    """'name: String should have at least 2 characters' or the plain rule message."""
+    message = error["msg"].removeprefix("Value error, ")
+    field = ".".join(str(part) for part in error.get("loc", ()))
+    return f"{field}: {message}" if field else message
+
+
 async def _read_bulk_rows(request: Request) -> tuple[list[dict[str, Any]], int]:
     """Return the rows and the number of the first data row (CSV line 1 is the header)."""
     content_type = request.headers.get("content-type", "")
@@ -195,7 +202,11 @@ async def bulk_create(request: Request, db: Db, admin: AdminUser, dry_run: bool 
         try:
             row = BulkRow.model_validate(raw)
         except ValidationError as exc:
-            problems = [e["msg"].removeprefix("Value error, ") for e in exc.errors()]
+            problems = [_field_message(e) for e in exc.errors()]
+            # Still report an unknown department, so one pass shows everything to fix.
+            code = str(raw.get("department_code") or "").strip().upper()
+            if code and code not in departments:
+                problems.append(f"No department with code {code}.")
             errors.append({"row": index, "errors": problems, "input": raw})
             continue
         dept_id = None
