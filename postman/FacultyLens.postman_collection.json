@@ -1,0 +1,64 @@
+{
+  "info": {
+    "name": "FacultyLens",
+    "description": "FacultyLens API. Set the collection variable baseUrl (default http://127.0.0.1:8000/api). Later phases add auth and a {{token}} variable.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://127.0.0.1:8000/api" }],
+  "item": [
+    {
+      "name": "health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health",
+            "description": "Liveness: pings MongoDB. 200 with status ok, or 503 with status degraded when MongoDB is unreachable. Never loads a model."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('mongo ok', () => pm.expect(pm.response.json().mongo).to.eql('ok'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "ok",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\"status\":\"ok\",\"app\":\"FacultyLens\",\"version\":\"0.1.0\",\"institution\":\"Your College Name\",\"mongo\":\"ok\",\"ml_mode\":\"light\",\"llm_configured\":false}"
+            }
+          ]
+        },
+        {
+          "name": "GET /health/models",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health/models",
+            "description": "Model registry status: which models are loaded in this process, load time, average latency per item, process RAM. Does not load anything."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('8 models listed', () => pm.expect(pm.response.json().models.length).to.eql(8));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
