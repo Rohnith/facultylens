@@ -1,5 +1,14 @@
-import { Route, Routes } from "react-router";
+import { Navigate, Route, Routes } from "react-router";
 import { AppShell } from "./components/AppShell";
+import { RequireAuth, RequireRole } from "./components/guards";
+import { useAuth } from "./context/auth";
+import { CourseDetailPage } from "./pages/admin/CourseDetailPage";
+import { CoursesPage } from "./pages/admin/CoursesPage";
+import { DepartmentsPage } from "./pages/admin/DepartmentsPage";
+import { UsersPage } from "./pages/admin/UsersPage";
+import { ChangePasswordPage } from "./pages/ChangePasswordPage";
+import { LoginPage } from "./pages/LoginPage";
+import { MyCoursesPage } from "./pages/MyCoursesPage";
 import { StatusPage } from "./pages/StatusPage";
 
 function NotFound() {
@@ -11,12 +20,30 @@ function NotFound() {
   );
 }
 
+/** Each role lands on its own first screen. */
+function Home() {
+  const { user } = useAuth();
+  return user.role === "admin" ? <Navigate to="/admin/users" replace /> : <MyCoursesPage />;
+}
+
 export default function App() {
   return (
     <Routes>
-      <Route element={<AppShell />}>
-        <Route index element={<StatusPage />} />
-        <Route path="*" element={<NotFound />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/change-password" element={<ChangePasswordPage />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<AppShell />}>
+          <Route index element={<Home />} />
+          <Route path="admin" element={<RequireRole roles={["admin"]} />}>
+            <Route index element={<Navigate to="users" replace />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="departments" element={<DepartmentsPage />} />
+            <Route path="courses" element={<CoursesPage />} />
+            <Route path="courses/:courseId" element={<CourseDetailPage />} />
+            <Route path="status" element={<StatusPage />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Route>
       </Route>
     </Routes>
   );

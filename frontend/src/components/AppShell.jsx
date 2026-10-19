@@ -1,12 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { getHealth } from "../api/client";
+import { ROLE_LABELS, useAuth } from "../context/auth";
 import { useAsync } from "../hooks/useAsync";
+import { BookIcon, BuildingIcon, PeopleIcon } from "./icons";
 import { Mark } from "./Mark";
 import { ThemeSwitch } from "./ThemeSwitch";
 
-/** Only screens that exist are listed; later phases add theirs here. */
-const NAV = [{ to: "/", label: "System status", icon: PulseIcon, end: true }];
+/** Navigation per role. Only screens that exist are listed; later phases add theirs here. */
+const NAV_BY_ROLE = {
+  admin: [
+    { to: "/admin/users", label: "Users", icon: PeopleIcon },
+    { to: "/admin/departments", label: "Departments", icon: BuildingIcon },
+    { to: "/admin/courses", label: "Courses", icon: BookIcon },
+    { to: "/admin/status", label: "System status", icon: PulseIcon },
+  ],
+  hod: [{ to: "/", label: "Department courses", icon: BookIcon, end: true }],
+  faculty: [{ to: "/", label: "My courses", icon: BookIcon, end: true }],
+  student: [{ to: "/", label: "My courses", icon: BookIcon, end: true }],
+};
 
 function PulseIcon() {
   return (
@@ -36,10 +48,10 @@ function Brand({ institution }) {
   );
 }
 
-function NavItems({ onNavigate }) {
+function NavItems({ items, onNavigate }) {
   return (
     <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
-      {NAV.map(({ to, label, icon: Icon, end }) => (
+      {items.map(({ to, label, icon: Icon, end }) => (
         <li key={to}>
           <NavLink
             to={to}
@@ -60,13 +72,56 @@ function NavItems({ onNavigate }) {
   );
 }
 
+function Account({ onNavigate }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  async function signOut() {
+    await logout();
+    // A fresh sign-in page: never send the next person to the previous user's page.
+    navigate("/login", { replace: true, state: null });
+  }
+  return (
+    <div className="flex flex-col gap-2 border-t border-border pt-4">
+      <div className="min-w-0 leading-tight">
+        <div className="truncate text-body font-medium" title={user.name}>
+          {user.name}
+        </div>
+        <div className="truncate text-small text-muted">
+          {ROLE_LABELS[user.role]}
+          {user.roll_no ? ` · ${user.roll_no}` : ""}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-small">
+        <Link
+          to="/change-password"
+          onClick={onNavigate}
+          className="text-muted underline underline-offset-3 hover:text-text"
+        >
+          Change password
+        </Link>
+        <button
+          type="button"
+          onClick={signOut}
+          className="cursor-pointer text-muted underline underline-offset-3 hover:text-text"
+        >
+          Sign out
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function AppShell() {
+  const { user } = useAuth();
+  const nav = NAV_BY_ROLE[user.role] ?? [];
   const health = useAsync(getHealth);
   const institution = health.data?.institution ?? (health.error ? "Institution unavailable" : null);
   const sheetRef = useRef(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const location = useLocation();
-  const current = NAV.find((n) => n.to === location.pathname)?.label ?? "FacultyLens";
+  const current =
+    nav.find((n) => (n.end ? location.pathname === n.to : location.pathname.startsWith(n.to)))
+      ?.label ?? "FacultyLens";
 
   useEffect(() => {
     const dlg = sheetRef.current;
@@ -90,9 +145,10 @@ export function AppShell() {
           <Brand institution={institution} />
         </div>
         <nav aria-label="Main">
-          <NavItems />
+          <NavItems items={nav} />
         </nav>
-        <div className="mt-auto px-2.5">
+        <div className="mt-auto flex flex-col gap-4 px-2.5">
+          <Account />
           <ThemeSwitch />
         </div>
       </aside>
@@ -148,9 +204,10 @@ export function AppShell() {
             </button>
           </div>
           <nav aria-label="Main" className="mt-6">
-            <NavItems onNavigate={() => setSheetOpen(false)} />
+            <NavItems items={nav} onNavigate={() => setSheetOpen(false)} />
           </nav>
-          <div className="mt-auto">
+          <div className="mt-auto flex flex-col gap-4">
+            <Account onNavigate={() => setSheetOpen(false)} />
             <ThemeSwitch />
           </div>
         </div>
