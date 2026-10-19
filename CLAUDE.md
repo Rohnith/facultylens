@@ -85,7 +85,14 @@ facultylens/
 7. Secrets only in `.env`; keep `.env.example` current. Never commit `.env`.
 8. Write pytest tests for every router and NLP function; mock heavy models in unit tests and keep one slow, marked integration test per model (`@pytest.mark.slow`).
 9. Use Context7 for current library docs (FastAPI, PyMongo Async, Recharts, Transformers, Groq SDK) rather than guessing APIs.
-10. UI: follow the frontend-design skill — clean, academic, accessible (WCAG AA contrast, keyboard navigation), responsive. Every number on screen comes from the API.
+10. UI: clean, academic, accessible (WCAG AA contrast, keyboard navigation), responsive. Every number on screen comes from the API. For **all** UI work, load and follow these skills:
+    - `design-taste-frontend`: art direction and the app-screen rules (dashboards, admin views), plus its look-and-fix screenshot loop.
+    - `impeccable`: hierarchy, layout, typography, colour, UX copy, empty/loading/error states, accessibility audit.
+    - `emil-design-eng`: component polish, motion and interaction details (keep motion subtle and respect `prefers-reduced-motion`).
+    - `frontend-design`: overall aesthetic direction.
+    - `dataviz`: every Recharts chart (palette, labels, legends, dark mode).
+
+    Settle one design direction (type scale, colour tokens, spacing, component style) when the first UI page is built, record it in `docs/DESIGN.md`, and reuse it on every later page.
 11. After any UI change, open it in a real browser (the Playwright MCP, or the Claude desktop app's built-in browser), click through the flow, and fix console errors before reporting done.
 12. Keep `postman/FacultyLens.postman_collection.json` updated with every endpoint.
 13. Commit after each working step with a clear message. Never force-push.
