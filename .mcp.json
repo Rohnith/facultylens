@@ -29,7 +29,7 @@
         "mongodb-mcp-server"
       ],
       "env": {
-        "MDB_MCP_CONNECTION_STRING": "mongodb://localhost:27017/facultylens"
+        "MDB_MCP_CONNECTION_STRING": "mongodb://127.0.0.1:27017/facultylens"
       }
     }
   }
