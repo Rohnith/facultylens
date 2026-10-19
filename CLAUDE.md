@@ -84,7 +84,7 @@ facultylens/
 6. Roles: `admin` (IQAC), `hod`, `faculty`, `student`. Enforce on every endpoint via dependencies, and test the forbidden cases.
 7. Secrets only in `.env`; keep `.env.example` current. Never commit `.env`.
 8. Write pytest tests for every router and NLP function; mock heavy models in unit tests and keep one slow, marked integration test per model (`@pytest.mark.slow`).
-9. Use Context7 for current library docs (FastAPI, Motor, Recharts, Transformers, Groq SDK) rather than guessing APIs.
+9. Use Context7 for current library docs (FastAPI, PyMongo Async, Recharts, Transformers, Groq SDK) rather than guessing APIs.
 10. UI: follow the frontend-design skill — clean, academic, accessible (WCAG AA contrast, keyboard navigation), responsive. Every number on screen comes from the API.
 11. After any UI change, open it in a real browser (the Playwright MCP, or the Claude desktop app's built-in browser), click through the flow, and fix console errors before reporting done.
 12. Keep `postman/FacultyLens.postman_collection.json` updated with every endpoint.
