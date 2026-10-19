@@ -1,0 +1,106 @@
+# FacultyLens design system
+
+Settled in Phase 0. Every later page reuses it. Tokens are in `frontend/src/styles/tokens.css` (raw values per theme) and mapped to Tailwind utilities in `frontend/src/styles/index.css` (`@theme inline`). Change values there, never inline in components.
+
+## Direction
+
+**Calm academic, "achromatic ledger".** This style came from the design-taste-frontend app draw (`--kind analytics --style achromatic-ledger`, seed 1993640354), and it fits the user's "calm academic" choice. FacultyLens is a working tool for IQAC staff, HoDs and faculty, read in long sessions near NAAC deadlines. It should feel like a well-kept university register, not a SaaS dashboard.
+
+- **The chrome holds no colour.** Text and controls are ink; the primary action is near-black.
+- **Colour is for data and judgement only:** the one chart hue on the main data element, the sentiment pair on sentiment, and status pills where something is good or bad.
+- **Its face:** a blue-grey "ledger" ground (`#f2f4f7`) under white cards, and a serif used for one job: page titles (and later the faculty member's name on the unified page).
+- **Its signature element** (from Phase 5): the evidence link. Every strength or improvement opens the redacted sentences that support it, highlighted in place.
+
+## Colour
+
+| Role | Light | Dark | Use |
+|---|---|---|---|
+| `--ground` | `#f2f4f7` | `#0b0b0c` | page and sidebar |
+| `--surface` | `#ffffff` | `#151516` | cards, tables |
+| `--raised` / `--active` | `#f7f8fa` / `#e6e9ee` | `#1c1c1e` / `#262628` | hover, active nav pill, skeletons |
+| `--border` / `--rule` / `--control` | `#e3e6eb` / `#eef0f3` / `#cfd4db` | `#2a2a2d` / `#202022` / `#46464a` | card edge / row rule / input border |
+| `--text` / `--muted` / `--faint` | `#0e0f11` / `#535960` / `#626870` | `#f4f4f5` / `#b4b4b8` / `#9a9aa0` | three text tiers, all ≥ 4.5:1 |
+| `--primary` | `#16181b` | `#f4f4f5` (inverted) | the one primary button |
+| `--chart-main` | `#1d5fbf` | `#3987e5` | the main series in any chart |
+| `--focus` | `#1d5fbf` | `#6ea3ec` | 2px focus ring, 2px offset |
+
+**Sentiment (diverging, never red/green):** positive `#2a78d6` / `#3987e5`, neutral `#8a8a8a` / `#a3a3a3`, negative `#e34948` / `#e66767`. Validated with the dataviz `validate_palette.js`. In light mode every adjacent pair passes CVD separation. Dark neutral was lifted to `#a3a3a3` so red↔grey clears the CVD threshold (8.1). The grey midpoint "fails" the chroma check on purpose, because neutral must read as no colour. **Rule:** sentiment marks always carry a text label or legend (positive / neutral / negative); colour never carries the meaning alone.
+
+**Status pills:** pale tint plus dark ink of the same hue (positive, negative, warning, neutral). They appear only inside rows or beside a value, never above a heading.
+
+Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it both ways (the sidebar's Theme switch, stored in `localStorage` as a per-viewer convenience). An inline script in `index.html` applies it before first paint.
+
+## Type
+
+- **Geist Variable** (self-hosted via @fontsource, works offline) for everything.
+- **Source Serif 4 Variable** for page titles only.
+- Monospace (system `ui-monospace`) only for IDs and model keys.
+- Fixed rem scale, ratio ~1.2:
+
+| Token | Size / line | Use |
+|---|---|---|
+| `text-small` | 12 / 16 | labels, meta, table headers, pills |
+| `text-body` | 14 / 20 | body, nav, cells |
+| `text-section` | 16 / 24 | section headings (500) |
+| `text-lead` | 18 / 26 | values in a stat strip |
+| `text-title` | 24 / 32 | page title (serif 600, -0.01em) |
+| `text-kpi` | 30 / 36 | headline figures (max one per screen) |
+
+- Weights: 400 / 500 / 600.
+- `.num` (tabular figures) on every number in a table, stat or anything that updates. Numbers are right-aligned in columns.
+- Sentence case everywhere; no tracked uppercase labels.
+
+## Space and shape
+
+- 4px base. One gap (`--gap` 12px) between sibling cards. Card padding 20px. Canvas padding 32px on desktop and 16px on a phone.
+- Content column max 1184px. Sections 40px apart.
+- Radius: cards 8px, controls 6px, chips 4px (the tight pair, chosen once).
+- Surfaces are separated by a 1px border **or** a tone step, never a shadow. Shadows only on what floats (menus, dialogs).
+- Stat strips are one card split by 1px dividers (implemented as a 1px grid gap over `--rule`), never a row of separate KPI tiles. No icons on KPIs and no sparklines.
+
+## Shell
+
+**Open plane.**
+- A 256px labelled sidebar on the page ground, one hairline to the canvas.
+- The product mark (a lens over three feedback bars, `components/Mark.jsx`), the name and the institution sit at the top; the theme switch sits at the bottom.
+- The active nav item is a neutral grey pill. Only screens that exist are listed.
+- There is no top bar on desktop.
+- **Below 1024px** the sidebar folds into a 48px top bar (mark, screen name, menu button) and a full-screen `<dialog>` sheet. Esc closes the sheet and focus returns to the trigger.
+
+## Components (in `styles/index.css`)
+
+- `.btn` + `.btn-primary` (near-black), `.btn-secondary` (grey), `.btn-ghost`: 36px tall.
+- `.pill` + `.pill-positive|negative|warning|neutral`.
+- `.card`: white surface, 1px border, 8px radius.
+- `.skeleton`: a flat bar at the real size of the value it replaces, with no shimmer and no layout shift when data lands.
+- Tables: 12px grey sentence-case headers, 44px rows, 1px row rules, no zebra stripes and no header band. Below 768px a table becomes two-line rows (identity + status on line 1, detail on line 2). Tablet hides the least important columns.
+
+## States (every block)
+
+- **Loading:** final layout with skeleton bars.
+- **Error:** inside the failed block. One sentence saying what failed and how to recover, plus a Retry text button; never a full-screen banner.
+- **Missing value:** a grey en dash at text size.
+- **Zero:** printed as `0`.
+- **Empty:** the frame and header stay, with one sentence.
+- **Refreshing:** keeps the old values, disables the button ("Checking…"), and updates the "Checked hh:mm:ss" stamp.
+
+## Motion
+
+- Feedback only; nothing performs an entrance.
+- `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`. Press 140ms (`scale(0.97)` on `:active`), UI 180ms, sheet 240ms (rise 12px + fade via `@starting-style`).
+- Hover effects are gated behind `(hover: hover) and (pointer: fine)`.
+- `prefers-reduced-motion` drops travel and keeps state changes.
+
+## Charts (from Phase 5)
+
+Recharts, styled to these tokens, never library defaults.
+- One hue per chart (`--chart-main`); comparison series in `--chart-ink` / `--chart-muted`.
+- Sentiment uses the diverging trio above.
+- 2px lines with no area gradients; 3–5 faint gridlines; no legend for a single series. A legend plus direct labels whenever there are 2 or more series.
+- A crosshair tooltip on hover; a table view for accessibility; an empty chart draws its zero line with one sentence.
+
+## Checks used
+
+- design-taste-frontend `lint.mjs --app` and `inspect.mjs --app`: 0 FAIL, 0 WARN at 1440/768/390 on the status page. Mono is used for model IDs only.
+- impeccable `detect`: no findings.
+- Browser: light and dark, keyboard (skip link, radio group, dialog Esc/focus return), and the API-down error state all checked in the desktop app's browser.
