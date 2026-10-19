@@ -22,6 +22,7 @@ async def health(response: Response) -> dict:
         "status": "ok" if mongo_ok else "degraded",
         "app": settings.app_name,
         "version": settings.app_version,
+        "institution": settings.institution_name,
         "mongo": "ok" if mongo_ok else "unreachable",
         "ml_mode": settings.ml_mode,
         "llm_configured": settings.llm_configured,
