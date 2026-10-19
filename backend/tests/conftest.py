@@ -75,7 +75,8 @@ async def login(client, username, password=PASSWORD):
 @pytest.fixture
 async def world(mongo, client):
     """Two departments, one user per role, and one CSE offering with a teacher and a student."""
-    cse = (await mongo.departments.insert_one({"name": "Computer Science", "code": "CSE"})).inserted_id
+    cse = await mongo.departments.insert_one({"name": "Computer Science", "code": "CSE"})
+    cse = cse.inserted_id
     ece = (await mongo.departments.insert_one({"name": "Electronics", "code": "ECE"})).inserted_id
     admin = await make_user(mongo, "admin", email="admin@test.edu")
     hod = await make_user(mongo, "hod", department_id=cse, email="hod@test.edu", gender="female")
