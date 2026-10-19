@@ -34,3 +34,8 @@ desktop.ini
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Design-skill working files
+.taste-skill/
+.impeccable/review/
+.impeccable/mocks/
