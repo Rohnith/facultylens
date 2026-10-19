@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     roll_no_regex: str = r"\b\d{2}[A-Z0-9]{2,4}\d{1,2}[A-Z]\d{2}[0-9A-Z]\d\b"
     min_responses_for_display: int = 5
 
+    # ---- Auth ----
+    login_rate_limit: str = "5/minute"
+    refresh_cookie_name: str = "fl_refresh"
+    cookie_secure: bool = False  # set true when served over HTTPS
+    bcrypt_rounds: int = Field(default=12, ge=4, le=15)
+
     # ---- Database ----
     mongodb_uri: str = "mongodb://127.0.0.1:27017"
     mongodb_db: str = "facultylens"
