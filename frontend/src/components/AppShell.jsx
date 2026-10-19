@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router";
 import { getHealth } from "../api/client";
 import { useAsync } from "../hooks/useAsync";
 import { Mark } from "./Mark";

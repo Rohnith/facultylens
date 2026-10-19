@@ -22,7 +22,7 @@ One page per faculty member that joins two things no public system currently com
 Code-mixed (Hinglish/Telugu-English) models, semester trend alerts, RAG chatbot, CSV/Excel feedback upload, mobile app, GPU training.
 
 ## 2. Fixed tech stack (do not swap without asking me)
-- **Frontend:** React 18 + Vite, React Router v6, Axios, **Recharts**, Tailwind CSS
+- **Frontend:** React 18 + Vite, React Router v7 (`react-router` 7.18+, declarative mode; v6 had unpatched advisories), Axios, **Recharts**, Tailwind CSS
 - **Backend:** **FastAPI** on Python 3.13, Pydantic v2 + pydantic-settings, **PyMongo Async API** (`pymongo.AsyncMongoClient`, async MongoDB; Motor is deprecated and past end of life, so don't use it), **PyJWT** (JWT), **pwdlib[bcrypt]** (password hashing; don't use passlib, which is unmaintained), slowapi (rate limit)
 - **Database:** **MongoDB** (local `mongodb://localhost:27017` or Atlas free tier)
 - **NLP:** **NLTK**, **HuggingFace Transformers** on **PyTorch CPU build**, sentence-transformers, spaCy `en_core_web_sm`, scikit-learn, **Pandas & NumPy**, `evaluate` + `rouge-score` + `bert-score`

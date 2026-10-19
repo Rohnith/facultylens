@@ -10,7 +10,7 @@ web
 
 ## Stack
 
-React 18 + Vite in plain JavaScript (JSX), React Router v6, Axios, Recharts, Tailwind CSS v4. Backend FastAPI + MongoDB. Confirmed by the user (2026-10-19).
+React 18 + Vite in plain JavaScript (JSX), React Router v7 (7.18+, switched from v6 at the user's request to clear security advisories), Axios, Recharts, Tailwind CSS v4. Backend FastAPI + MongoDB. Confirmed by the user (2026-10-19).
 
 ## Users
 
