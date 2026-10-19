@@ -219,6 +219,8 @@ def write_doc() -> None:
         "*Single p95*: 95th percentile over 16 one-comment calls. "
         "*RAM +MB*: process RSS increase after loading the model and one warm-up call.",
         f"- Budget (SPEC §6): at most {SLOW_LIMIT_MS} ms per comment in batches of 16.",
+        "- Caveat: the timing texts are single sentences of about 12 words. Real responses have "
+        "three answers and run longer, so Phase 4 re-measures on seeded data end to end.",
         "",
     ]
     for run in runs:

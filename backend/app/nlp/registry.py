@@ -226,6 +226,7 @@ class Seq2SeqModel:
                 num_beams=2,
                 no_repeat_ngram_size=3,
                 early_stopping=True,
+                forced_bos_token_id=self.tokenizer.bos_token_id,
             )
         return self.tokenizer.decode(ids[0], skip_special_tokens=True).strip()
 
