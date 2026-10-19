@@ -6,7 +6,7 @@ FacultyLens builds one page per faculty member. It joins an auto-generated profi
 
 Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-> **Status: Phase 0 (scaffold).** The API health checks, the model registry and the frontend shell work. Feature phases follow SPEC §14.
+> **Status: Phase 1 (auth & admin setup).** Sign-in for all four roles, users (single and bulk CSV), departments, course offerings with sections, and enrolment work. Feature phases follow SPEC §14.
 
 ## Prerequisites
 
@@ -54,6 +54,12 @@ Measure every model on this machine (writes `docs/MODEL_CHECK.md`):
 python -m app.nlp.registry --check
 ```
 
+Create the first IQAC admin (prints a temporary password once; change it at first sign-in):
+
+```bash
+python -m app.cli create-admin --email iqac@yourcollege.ac.in --name "IQAC Coordinator"
+```
+
 Run the API (docs at http://127.0.0.1:8000/docs):
 
 ```bash
@@ -74,7 +80,7 @@ pytest -m slow
 ruff check .
 ```
 
-The fast suite needs MongoDB for one live test (it uses a separate `facultylens_test` database and drops it afterwards). `-m slow` loads every real model.
+The fast suite needs MongoDB running: it uses a separate `facultylens_test` database and drops it afterwards. It includes a role matrix that calls every endpoint as each role and checks the 401/403 answers. `-m slow` loads every real model.
 
 ## Frontend setup
 
@@ -91,6 +97,12 @@ npm run dev
 ```
 
 Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. Run `npm run lint` and `npm run build` to check the code.
+
+## Signing in
+
+- Staff sign in with their college email; students with their roll number (`ROLL_NO_REGEX` in `.env`).
+- Accounts made by the admin (one at a time or by CSV on the Users page) get a temporary password, shown once with a CSV download. Everyone must replace it at first sign-in.
+- The refresh token is an httpOnly cookie on `/api/auth`; the access token lives only in memory.
 
 ## Repository layout
 

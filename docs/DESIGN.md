@@ -75,6 +75,31 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
 - `.skeleton`: a flat bar at the real size of the value it replaces, with no shimmer and no layout shift when data lands.
 - Tables: 12px grey sentence-case headers, 44px rows, 1px row rules, no zebra stripes and no header band. Below 768px a table becomes two-line rows (identity + status on line 1, detail on line 2). Tablet hides the least important columns.
 
+## Phase 1 additions
+
+- **Forms** (`components/forms.jsx`):
+  - The label sits above a 40px control (1px `--control` border, 6px radius, `--focus` ring); a hint or error goes underneath.
+  - An error replaces the hint, is linked with `aria-describedby` and announced with `role="alert"`.
+  - Validation happens inline as the user types (mismatch, too short). The submit button stays disabled until the form can succeed.
+  - `FormError` shows one sentence after a negative pill.
+- **Panels instead of modals.** Add, edit and bulk-add open as an inline `Panel` under the page title (`components/PageHeader.jsx`), never a modal. The only dialog is the phone menu sheet. Deactivation uses the browser's native `confirm()`.
+- **One-time secrets** (`CredentialsNotice`):
+  - The panel stays until the admin clicks "I've saved them".
+  - It offers "Download CSV" as the primary action, with the warning in `--warning` ink.
+  - Temporary passwords are monospace and `select-all`.
+- **Signed-out screens** (`StandaloneLayout`):
+  - The brand row, a 400px form column, and an aside of real product facts on desktop (stacked on phones), all on one centred 1184px column.
+  - The login aside explains anonymity, moderation, minimum responses and profile approval in plain words. It makes no numeric claims.
+- **Account row** at the sidebar foot: name, role (and roll number for students), "Change password" and "Sign out" as underlined text actions.
+- **Row actions** are ghost buttons at 12px. A destructive action uses `text-negative`.
+- **Status pills on users:** Active (positive), Temporary password (warning), Deactivated (neutral).
+- **Monospace** only for roll numbers, model IDs and temporary passwords. These are keys, which the app rules allow.
+- **Checks (Phase 1):**
+  - Taste `lint --app`: 0 FAIL.
+  - Login `inspect --app`: 0 FAIL, and 1 defended WARN (the empty area under the sign-in form is the screen's single rest).
+  - impeccable `detect`: no findings.
+  - Signed-in screens checked through Playwright at 1440, 768 and 390.
+
 ## States (every block)
 
 - **Loading:** final layout with skeleton bars.

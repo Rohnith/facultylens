@@ -172,9 +172,10 @@ Notes:
 ## 9. Data model (MongoDB collections)
 | Collection | Key fields | Indexes |
 |---|---|---|
-| `users` | `_id, role, name, email, roll_no?, department_id, password_hash, must_change_pw, gender? (faculty, admin-only)` | unique `email`, unique `roll_no` (sparse) |
+| `users` | `_id, role, name, email?, roll_no?, department_id, password_hash, must_change_pw, is_active, created_at, last_login_at?, gender? (faculty/HoD, admin-only)` | unique `email` (partial: where set; students may have none), unique `roll_no` (sparse), `role+department_id` |
 | `departments` | `_id, name, code` | unique `code` |
-| `courses` | `_id, code, name, department_id, semester, faculty_ids[], student_ids[]` | `code+semester` |
+| `courses` (course **offering**) | `_id, code, name, department_id, academic_year, semester, section, faculty_ids[], student_ids[]` | **unique** `code+academic_year+semester+section`; `faculty_ids`; `student_ids` |
+| `refresh_tokens` | `jti_hash (sha256), user_id, created_at, expires_at, revoked` | unique `jti_hash`; TTL on `expires_at` |
 | `faculty_profiles` | `user_id, qualifications[], experience[], interests[], publications[], achievements[], orcid?, s2_author_id?, pending_imports[]` | unique `user_id` |
 | `profile_versions` | `user_id, version, generated(json), edited(json), status(draft/approved), llm_model, created_at` | `user_id+version` |
 | `feedback_cycles` | `_id, name, academic_year, term, opens_at, closes_at, status` | — |
@@ -186,7 +187,9 @@ Notes:
 | `action_taken` | `cycle_id, faculty_id, course_id, issue, aspect, action, owner, timeline, status, evidence_ids[]` | `cycle_id` |
 | `labels` | `response_id, annotator_id, sentiment, aspects[]` | `response_id+annotator_id` |
 | `survey_responses` | `faculty_id, answers{}, comment` | — |
-| `audit_log` | `actor, action, target, at` | `at` |
+| `audit_log` | `actor, actor_role, action, target, details, at` | `at` |
+
+*Changed in Phase 1 (agreed with the user, 2026-10-20):* a course is an **offering** with a section, so a faculty member's feedback comes only from their own section's students; users are deactivated (`is_active=false`) instead of deleted; refresh tokens are opaque, stored hashed and rotated. Added endpoints: `POST /auth/logout`, `POST /users/{id}/reset-password`, `PATCH /departments/{id}`, `GET /courses/{id}`, `PATCH /courses/{id}`. `POST /auth/refresh` returns 204 when there is no session cookie.
 
 ---
 
