@@ -2,9 +2,11 @@
 """Synthetic demo data: `python -m app.seed [--reset] [--force]`.
 
 Everything created here carries `is_synthetic: true` and is excluded from evaluation (SPEC §8).
-Shape: 2 departments, 1 IQAC admin, 2 HoDs, 8 faculty (4 women, 4 men), 144 students in two
-sections per department, 10 odd-semester offerings for 2026-27, one open cycle, and roughly 300
-teaching responses plus curriculum responses, all from a fixed random seed.
+Shape: 2 departments, 1 IQAC admin, 2 HoDs, 9 faculty, 144 students in two sections per
+department, 11 odd-semester offerings for 2026-27, one open cycle, and roughly 330 teaching
+responses plus curriculum responses, all from a fixed random seed. Counting HoDs, CSE has three
+women and three men teaching (enough for the bias panel to compare groups) and ECE two women and
+three men (so it shows the "groups too small" state).
 
 The comments are hand-written sentence banks, not real student feedback. They deliberately
 include negation, sarcasm, a few abusive lines and a few personal details (a phone number, a roll
@@ -151,6 +153,16 @@ FACULTY = [
         ["practical", "knowledge"],
         ["Digital signal processing", "Embedded systems"],
     ),
+    (
+        "Mr. Naveen Kumar",
+        "male",
+        "CSE",
+        "faculty",
+        "Assistant Professor",
+        ["practical", "punctuality"],
+        ["clarity"],
+        ["Operating systems", "Distributed systems"],
+    ),
 ]
 
 # code, name, department, section, teacher name (all semester 5 of 2026-27)
@@ -165,6 +177,9 @@ OFFERINGS = [
     ("EC502", "Digital Signal Processing", "ECE", "A", "Dr. Deepa Menon"),
     ("EC502", "Digital Signal Processing", "ECE", "B", "Mr. Suresh Kumar"),
     ("EC503", "Microwave Engineering", "ECE", "A", "Dr. Venkat Rao"),
+    # Added in Phase 6 (last, so earlier offerings draw the same random numbers): with him
+    # CSE has three women and three men, enough for the bias panel to show its comparison.
+    ("CS504", "Operating Systems", "CSE", "A", "Mr. Naveen Kumar"),
 ]
 
 FIRST = [
