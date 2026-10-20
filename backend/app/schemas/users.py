@@ -25,6 +25,10 @@ def normalise_roll_no(value: str | None) -> str | None:
     if value is None:
         return None
     value = value.strip().upper()
+    # "2451 24 733 001" or "2451 - 24 - 733 - 001" means 2451-24-733-001, if that is the format.
+    hyphenated = re.sub(r"\s*-\s*|\s+", "-", value)
+    if hyphenated != value and _roll_re(get_settings().roll_no_regex).fullmatch(hyphenated):
+        return hyphenated
     return value or None
 
 

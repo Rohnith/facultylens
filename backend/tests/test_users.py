@@ -1,4 +1,13 @@
+from app.schemas.users import normalise_roll_no
 from tests.conftest import ROLL_NUMBERS
+
+
+def test_roll_numbers_typed_with_spaces_become_the_college_format():
+    assert normalise_roll_no(" 2451 24 751 041 ") == "2451-24-751-041"
+    assert normalise_roll_no("2451 - 24 - 751 - 041") == "2451-24-751-041"
+    assert normalise_roll_no("2451-24-751-041") == "2451-24-751-041"
+    assert normalise_roll_no("ravi kumar") == "RAVI KUMAR"  # left alone, rejected later
+    assert normalise_roll_no("   ") is None
 
 
 async def test_create_user_returns_working_one_time_password(client, world):
