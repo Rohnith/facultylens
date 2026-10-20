@@ -71,3 +71,20 @@ export function CalendarIcon() {
     </Icon>
   );
 }
+
+export function SparkIcon() {
+  return (
+    <Icon>
+      <path d="M2.5 13.5h11M4.5 11V8M8 11V4.5M11.5 11V6.5" />
+    </Icon>
+  );
+}
+
+export function ShieldIcon() {
+  return (
+    <Icon>
+      <path d="M8 1.75 2.75 3.75v4c0 3 2.25 5.25 5.25 6.5 3-1.25 5.25-3.5 5.25-6.5v-4L8 1.75Z" />
+      <path d="M5.75 8 7.25 9.5l3-3" />
+    </Icon>
+  );
+}

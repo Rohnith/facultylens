@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { MODERATION_CHANGED, analysisApi } from "../api/analysis";
 import { getHealth } from "../api/client";
 import { ROLE_LABELS, useAuth } from "../context/auth";
 import { useAsync } from "../hooks/useAsync";
@@ -10,6 +11,8 @@ import {
   ClipboardIcon,
   PeopleIcon,
   PersonIcon,
+  ShieldIcon,
+  SparkIcon,
 } from "./icons";
 import { Mark } from "./Mark";
 import { ThemeSwitch } from "./ThemeSwitch";
@@ -21,6 +24,8 @@ const NAV_BY_ROLE = {
     { to: "/admin/departments", label: "Departments", icon: BuildingIcon },
     { to: "/admin/courses", label: "Courses", icon: BookIcon },
     { to: "/admin/cycles", label: "Feedback cycles", icon: CalendarIcon },
+    { to: "/admin/analysis", label: "Analysis", icon: SparkIcon },
+    { to: "/admin/moderation", label: "Moderation", icon: ShieldIcon, badge: "moderation" },
     { to: "/admin/status", label: "System status", icon: PulseIcon },
   ],
   hod: [
@@ -65,10 +70,33 @@ function Brand({ institution }) {
   );
 }
 
-function NavItems({ items, onNavigate }) {
+/** Pending moderation items for the admin nav; refreshed after each decision and every minute. */
+function usePendingModeration(enabled) {
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    if (!enabled) return undefined;
+    let alive = true;
+    const load = () =>
+      analysisApi
+        .queue({ status: "pending", limit: 1 })
+        .then((q) => alive && setCount(q.pending))
+        .catch(() => {});
+    load();
+    const timer = setInterval(load, 60000);
+    window.addEventListener(MODERATION_CHANGED, load);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+      window.removeEventListener(MODERATION_CHANGED, load);
+    };
+  }, [enabled]);
+  return count;
+}
+
+function NavItems({ items, onNavigate, badges = {} }) {
   return (
     <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
-      {items.map(({ to, label, icon: Icon, end }) => (
+      {items.map(({ to, label, icon: Icon, end, badge }) => (
         <li key={to}>
           <NavLink
             to={to}
@@ -82,6 +110,12 @@ function NavItems({ items, onNavigate }) {
           >
             <Icon />
             {label}
+            {badge && badges[badge] > 0 && (
+              <span className="num ml-auto rounded-chip bg-surface px-1.5 text-small font-medium text-text">
+                {badges[badge]}
+                <span className="sr-only"> pending</span>
+              </span>
+            )}
           </NavLink>
         </li>
       ))}
@@ -132,6 +166,7 @@ export function AppShell() {
   const { user } = useAuth();
   const nav = NAV_BY_ROLE[user.role] ?? [];
   const health = useAsync(getHealth);
+  const badges = { moderation: usePendingModeration(user.role === "admin") };
   const institution = health.data?.institution ?? (health.error ? "Institution unavailable" : null);
   const sheetRef = useRef(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -162,7 +197,7 @@ export function AppShell() {
           <Brand institution={institution} />
         </div>
         <nav aria-label="Main">
-          <NavItems items={nav} />
+          <NavItems items={nav} badges={badges} />
         </nav>
         <div className="mt-auto flex flex-col gap-4 px-2.5">
           <Account />
@@ -221,7 +256,7 @@ export function AppShell() {
             </button>
           </div>
           <nav aria-label="Main" className="mt-6">
-            <NavItems items={nav} onNavigate={() => setSheetOpen(false)} />
+            <NavItems items={nav} badges={badges} onNavigate={() => setSheetOpen(false)} />
           </nav>
           <div className="mt-auto flex flex-col gap-4">
             <Account onNavigate={() => setSheetOpen(false)} />

@@ -6,7 +6,7 @@ FacultyLens builds one page per faculty member. It joins an auto-generated profi
 
 Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-> **Status: Phase 3 (feedback collection).** Sign-in for all four roles, admin setup, faculty profiles with ORCID / Semantic Scholar import, feedback cycles, and anonymous once-only student feedback work. The NLP analysis comes next. Feature phases follow SPEC §14.
+> **Status: Phase 4 (NLP pipeline).** Sign-in for all four roles, admin setup, faculty profiles with ORCID / Semantic Scholar import, feedback cycles and anonymous once-only student feedback all work. Text answers are now redacted, moderated and scored for sentiment, teaching aspects, emotion and sarcasm on the CPU, and admins work through a moderation queue. The unified faculty page comes next. Feature phases follow SPEC §14.
 
 ## Demo data
 
@@ -129,6 +129,17 @@ Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. R
 - Faculty open **My profile** and import from **ORCID** (paste the iD or orcid.org link) or **Semantic Scholar** (search your name, then pick the right author).
 - Everything imported waits for review. Nothing reaches the profile until the faculty member accepts it, and rejected items aren't suggested again.
 - Semantic Scholar's shared rate limit is low. If imports say "limiting requests", wait a minute, or put a free key in `S2_API_KEY` in `backend/.env`.
+
+## Feedback analysis
+
+- New submissions are analysed in the background as they arrive (`ANALYSIS_ON_SUBMIT`). To analyse a whole cycle, sign in as admin, open **Analysis**, pick the cycle and press **Analyse waiting responses**. The first batch loads the models (about 45 s); after that, each response takes about 0.3–0.5 s.
+- Results are cached per response and model version, so running again only scores new responses.
+- `python -m app.pipeline.bench` times a full cycle and writes `backend/ml/results/pipeline_check.json`. Run it on a scratch copy (`MONGODB_DB=facultylens_bench`), because it writes analyses.
+- Answers the abuse check hides wait in **Moderation**. Faculty never see them until an admin shows, edits or keeps them hidden. Names, phone numbers and roll numbers are replaced with placeholders before any model or person sees the text.
+- Measured on the seeded cycle (`docs/MODEL_CHECK.md`):
+  - 553 responses in 213.8 s from a cold start on a Ryzen 5 5600H with 4 threads; peak RAM 2.8 GB.
+  - Every seeded phone number and roll number was redacted, and all 8 seeded abusive answers were hidden. The abuse check also hid 11 compliments containing the word "stupid" (precision 0.42).
+  - The sarcasm flag caught all 22 seeded sarcastic answers, along with 15 sincere ones (precision 0.59).
 
 ## Repository layout
 

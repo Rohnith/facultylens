@@ -5,8 +5,10 @@ import { useAuth } from "./context/auth";
 import { CourseDetailPage } from "./pages/admin/CourseDetailPage";
 import { CoursesPage } from "./pages/admin/CoursesPage";
 import { CycleDetailPage } from "./pages/admin/CycleDetailPage";
+import { AnalysisPage } from "./pages/admin/AnalysisPage";
 import { CyclesPage } from "./pages/admin/CyclesPage";
 import { DepartmentsPage } from "./pages/admin/DepartmentsPage";
+import { ModerationPage } from "./pages/admin/ModerationPage";
 import { UsersPage } from "./pages/admin/UsersPage";
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -56,6 +58,8 @@ export default function App() {
             <Route path="faculty/:facultyId/profile" element={<ProfileEditorPage />} />
             <Route path="cycles" element={<CyclesPage />} />
             <Route path="cycles/:cycleId" element={<CycleDetailPage />} />
+            <Route path="analysis" element={<AnalysisPage />} />
+            <Route path="moderation" element={<ModerationPage />} />
             <Route path="status" element={<StatusPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />

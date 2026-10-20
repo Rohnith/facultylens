@@ -202,6 +202,19 @@ Notes:
 - **Comments before Phase 4:** `GET /feedback/faculty/{id}` returns no comment text until the Phase 4 pipeline has moderated and redacted it (`comments_status: "awaiting_analysis"`). Rating averages appear only from `MIN_RESPONSES_FOR_DISPLAY` responses.
 - **Seed:** `python -m app.seed` creates synthetic demo data with every document marked `is_synthetic`.
 
+*Changed in Phase 4 (2026-10-20):*
+- **Analysis runs:**
+  - Analysis runs in one worker thread per API process, with its own synchronous PyMongo client, instead of FastAPI background tasks. CPU-bound model calls would otherwise block the event loop.
+  - Each submission is queued for analysis (`ANALYSIS_ON_SUBMIT=true`); admins run a whole cycle to catch up.
+  - Jobs left running when the server stops are marked `interrupted` on start-up; re-running is safe because results are cached per `response_id + model_version`.
+- **Added endpoints:** `GET /analysis/summary?cycle=` and `GET /analysis/jobs`.
+- **Moderation queue:** items carry the flagged sentence offsets and that sentence's sentiment. The admin sees redacted text only, never the raw answer.
+- **Scoring:**
+  - **Toxicity** is the max of the 7 harm labels of `unitary/unbiased-toxic-roberta`; the identity-mention labels are ignored.
+  - **Teaching aspects:** a sentence gets at most 2. The second must match the lexicon or be within 0.12 similarity of the first.
+- **Sarcasm:** `SARC_FLAG` defaults to **0.95** (was 0.70). The tweet-trained irony model scores sincere praise near 0.98; see `docs/MODEL_CHECK.md`.
+- **Known limitation:** the toxicity model hides compliments that contain an insulting word ("…without making us feel stupid"). These stay hidden until an admin approves them, and the queue marks them as possible false alarms.
+
 ---
 
 ## 10. API (all under `/api`; JSON; JWT bearer)

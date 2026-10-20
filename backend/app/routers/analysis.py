@@ -159,7 +159,12 @@ async def moderation_queue(
                 "field": e["field"],
                 "text": field["redacted"],  # PII already removed; never the raw answer
                 "flagged": [
-                    {"start": s["start"], "end": s["end"], "score": s["toxicity"]}
+                    {
+                        "start": s["start"],
+                        "end": s["end"],
+                        "score": s["toxicity"],
+                        "sentiment": s.get("sentiment"),
+                    }
                     for s in field["sentences"]
                     if s["toxicity"] >= 0.4
                 ],

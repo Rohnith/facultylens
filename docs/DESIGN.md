@@ -141,6 +141,25 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - It shows a grey dash when nothing is eligible, and is used for response rates everywhere.
 - **Cycle status:** pills read Draft (neutral), Open (positive), Closed (neutral). Publishing explains what it will create before the button, and why offerings are skipped.
 
+## Phase 4 additions
+
+- **Analysis runner** (`pages/admin/AnalysisPage.jsx`):
+  - The screen's question is "how much of this cycle is analysed, and what did it flag?".
+  - A cycle select, then one divided card with three figures (Responses, Analysed, Waiting) at `text-lead`. It stays three across even on a phone.
+  - The one primary button, "Analyse waiting responses", is disabled when nothing waits or a run is active.
+  - While a run is active, a progress card shows a `RateBar` in `--chart-main`, elapsed time and ms per response, polling every 2 s. The coverage figures and the jobs-table row follow the live job.
+  - After a run, a findings list (hidden, review, PII redacted, possibly sarcastic) with right-aligned tabular counts and a "Review flagged answers →" link.
+  - Recent runs as a table; Time and Per response hide below 1024px.
+  - Job pills: Queued/Running (neutral), Done (positive), Failed (negative, with the error under the run name), Interrupted (warning).
+- **Moderation queue** (`pages/admin/ModerationPage.jsx`):
+  - One card with underline tabs ("Waiting for a decision 18", "Decided") and a kind filter.
+  - Each item shows a kind pill (Hidden negative, Needs review warning), the abuse score in tabular figures, and the harm label in words. A meta line follows: course · teacher · which answer.
+  - The redacted text has the flagged sentence marked in place: a `<mark>` in the negative pill's tint and ink, with its score in the title.
+  - When no flagged sentence reads as negative, a muted note says it may be a false alarm (see MODEL_CHECK.md).
+  - Actions: "Show to faculty" (secondary), "Keep hidden"/"Hide" and "Edit and show" (ghost). Edit opens an inline textarea labelled with what faculty will see. There is no primary button in a list of decisions.
+  - Decided items show the decision pill, time and edited text.
+- **Nav count:** "Moderation 18" is a small surface chip on the nav row. It appears only when items are pending, refreshes after every decision (a window event) and each minute, and is read as "18 pending".
+
 ## States (every block)
 
 - **Loading:** final layout with skeleton bars.
