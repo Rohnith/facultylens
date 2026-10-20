@@ -66,6 +66,14 @@
     {
       "key": "queueId",
       "value": ""
+    },
+    {
+      "key": "profileVersion",
+      "value": "1"
+    },
+    {
+      "key": "evidenceIds",
+      "value": ""
     }
   ],
   "item": [
@@ -1726,6 +1734,296 @@
               ]
             },
             "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /analysis/summaries",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/summaries?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "summaries"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Rebuilds every teaching-form summary in the cycle (202, a 'summaries' job). Summaries are otherwise rebuilt automatically when a form's aggregate changes.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 202\", () => pm.response.to.have.status(202));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unified page & generated profile",
+      "item": [
+        {
+          "name": "POST /faculty/:id/profile/generate",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile",
+                "generate"
+              ]
+            },
+            "description": "Creates a new draft from the accepted profile facts (Groq if configured, checked against the facts; otherwise a template). Owner or admin; 10/minute.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"profileVersion\", pm.response.json().version);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/profile/versions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile",
+                "versions"
+              ]
+            },
+            "description": "All drafts and approved versions, newest first. Owner, admin, and the department's HoD.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /faculty/:id/profile/versions/:v",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile/versions/{{profileVersion}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile",
+                "versions",
+                "{{profileVersion}}"
+              ]
+            },
+            "description": "Edits a draft (409 once approved). Owner or admin.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"headline\": \"Associate Professor, Computer Science and Engineering\",\n  \"bio_short\": \"Teaches compilers and works on program analysis.\",\n  \"bio_long\": \"Teaches compilers and works on program analysis and register allocation.\",\n  \"research_areas\": [\n    \"Compilers\",\n    \"Program analysis\"\n  ],\n  \"key_achievements\": [],\n  \"teaching_highlights\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/profile/versions/:v/approve",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile/versions/{{profileVersion}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile",
+                "versions",
+                "{{profileVersion}}",
+                "approve"
+              ]
+            },
+            "description": "Only the faculty member can approve; the previous approved version becomes superseded.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile"
+              ]
+            },
+            "description": "The approved profile, readable by all staff (status 'none' until one is approved). Teaching highlights carry no evidence ids here.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/overview",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/overview?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "overview"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                },
+                {
+                  "key": "course",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "The unified page in one call. Everyone on staff gets the profile; the owner, their HoD and admins also get cycles, offerings and the selected offering's insights, summary and sarcastic answer ids (status: available | awaiting_analysis | below_minimum).",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"evidenceIds\", (pm.response.json().selected?.summary?.strengths?.[0]?.evidence_ids || []).join(','));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/evidence",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/evidence?ids={{evidenceIds}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "evidence"
+              ],
+              "query": [
+                {
+                  "key": "ids",
+                  "value": "{{evidenceIds}}"
+                }
+              ]
+            },
+            "description": "Redacted, visible answers for up to 40 evidence ids, with the supporting sentence's offsets to highlight. Ids from other teachers, hidden answers or below-minimum forms are left out.",
             "header": []
           },
           "event": [
