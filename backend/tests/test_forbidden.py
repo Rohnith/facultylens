@@ -4,8 +4,12 @@ Anonymous -> 401. A role outside the allowed set -> 403. An allowed role is neve
 
 import pytest
 
+from app.services import orcid as orcid_service
+from app.services import semantic_scholar as s2_service
+
 ROLES = ["anon", "admin", "hod", "faculty", "student"]
 ANY = {"admin", "hod", "faculty", "student"}
+OWNER = {"admin", "faculty"}  # the profile owner (world faculty) and IQAC admin
 
 # (method, path, allowed roles, json body). {course} / {user} are filled from the fixture.
 ENDPOINTS = [
@@ -41,6 +45,15 @@ ENDPOINTS = [
     ("PATCH", "/api/courses/{course}", {"admin"}, {"name": "Compiler Design Lab"}),
     ("POST", "/api/courses/{course}/enrol", {"admin"}, {"add_roll_numbers": []}),
     ("GET", "/api/health/models", ANY | {"anon"}, None),
+    # Profiles: {user} is the CSE faculty member; the world's HoD is in the same department.
+    ("GET", "/api/faculty/{user}/profile-data", {"admin", "hod", "faculty"}, None),
+    ("PUT", "/api/faculty/{user}/profile-data", OWNER, {"designation": "Professor"}),
+    ("POST", "/api/faculty/{user}/import/orcid", OWNER, {"orcid": "0000-0002-1825-0097"}),
+    ("GET", "/api/faculty/{user}/semantic-scholar/search?q=Rao", OWNER, None),
+    ("POST", "/api/faculty/{user}/import/semantic-scholar", OWNER, {"author": "42"}),
+    ("POST", "/api/faculty/{user}/imports/nope/accept", OWNER, None),
+    ("POST", "/api/faculty/{user}/imports/nope/reject", OWNER, None),
+    ("POST", "/api/faculty/{user}/imports/bulk", OWNER, {"accept": [], "reject": []}),
 ]
 
 CASES = [
@@ -48,6 +61,19 @@ CASES = [
     for method, path, allowed, body in ENDPOINTS
     for role in ROLES
 ]
+
+
+@pytest.fixture(autouse=True)
+def _no_network(monkeypatch):
+    async def nothing(*_args):
+        return {"publication": [], "experience": [], "qualification": [], "interest": []}
+
+    async def no_papers(*_args):
+        return []
+
+    monkeypatch.setattr(orcid_service, "fetch_orcid", nothing)
+    monkeypatch.setattr(s2_service, "fetch_papers", no_papers)
+    monkeypatch.setattr(s2_service, "search_authors", no_papers)
 
 
 def _fill(value, ids):

@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from app import db
 from app.config import get_settings
 from app.limiter import limiter
-from app.routers import auth, courses, departments, health, users
+from app.routers import auth, courses, departments, health, profiles, users
 
 log = logging.getLogger("facultylens")
 
@@ -38,7 +38,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    for module in (health, auth, users, departments, courses):
+    for module in (health, auth, users, departments, courses, profiles):
         app.include_router(module.router, prefix="/api")
     return app
 
