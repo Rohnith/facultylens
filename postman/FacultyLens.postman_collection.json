@@ -1786,6 +1786,192 @@
       ]
     },
     {
+      "name": "analytics",
+      "item": [
+        {
+          "name": "GET /analytics/faculty/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/faculty/{{facultyId}}?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "faculty",
+                "{{facultyId}}"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "A teacher's offerings in the cycle side by side (status, net score, rating, top strength and gap, sarcasm rate) plus all of them combined. The teacher, their HoD and admins.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/department/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/department/{{deptId}}?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "department",
+                "{{deptId}}"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Department overview: one row per teacher (never their gender), department aspects and totals. That department's HoD and admins. Without ?cycle the newest cycle with teaching forms is used.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/bias",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/bias?department={{deptId}}&cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "bias"
+              ],
+              "query": [
+                {
+                  "key": "department",
+                  "value": "{{deptId}}"
+                },
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Bias & sarcasm panel for one department, groups only: gendered-language rates per 1,000 answers, rating gap per aspect with a 95% cluster-bootstrap CI over teachers, emotion mix, sarcasm rate. status 'too_small' (sizes only) unless each group has BIAS_MIN_GROUP_FACULTY teachers and BIAS_MIN_GROUP_ANSWERS answers.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/sarcasm (department)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/sarcasm?department={{deptId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "sarcasm"
+              ],
+              "query": [
+                {
+                  "key": "department",
+                  "value": "{{deptId}}"
+                }
+              ]
+            },
+            "description": "Possibly-sarcastic rate per teacher in the department (HoD, admin).",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/sarcasm (faculty)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/sarcasm?faculty={{facultyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "sarcasm"
+              ],
+              "query": [
+                {
+                  "key": "faculty",
+                  "value": "{{facultyId}}"
+                }
+              ]
+            },
+            "description": "One teacher's possibly-sarcastic answer ids, for GET /faculty/:id/evidence.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "unified page & generated profile",
       "item": [
         {
