@@ -56,10 +56,31 @@ def facts():
     return profile_gen.build_facts(USER, DEPT, PROFILE, HIGHLIGHTS)
 
 
-def test_keywords_come_from_titles_and_interests(facts):
+def test_few_publications_give_interests_only(facts):
+    assert profile_gen.keywords(facts) == ["Compiler optimisation", "Program analysis"]
+
+
+def test_keywords_skip_generic_words_and_stitched_phrases():
+    titles = [
+        "Register allocation for loop nests",
+        "An empirical evaluation of register allocation methods",
+        "Loop tiling for cache locality",
+        "Programming languages for resource-constrained systems",
+    ]
+    facts = profile_gen.build_facts(
+        USER,
+        DEPT,
+        {
+            "interests": ["Compilers"],
+            "publications": [{"id": f"p{i}", "title": t} for i, t in enumerate(titles)],
+        },
+        [],
+    )
     words = profile_gen.keywords(facts)
-    assert any("loop" in w for w in words) and len(words) <= 8
-    assert not any(w.isdigit() for w in words)
+    assert words[0] == "Compilers" and "register allocation" in words and len(words) <= 8
+    banned = {"evaluation", "methods", "empirical", "systems"}
+    assert not any(set(w.split()) & banned for w in words)
+    assert "languages resource" not in words and not any(w.isdigit() for w in words)
 
 
 def test_template_is_factual(facts):

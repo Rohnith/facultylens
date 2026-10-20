@@ -296,6 +296,7 @@ export function ProfileReviewPage() {
             <Field label="Short bio" hint={`${words(form.bio_short)} words · aim for about 60`}>
               {(a) => (
                 <TextArea
+                  className="[field-sizing:content]"
                   {...a}
                   value={form.bio_short}
                   maxLength={900}
@@ -308,7 +309,7 @@ export function ProfileReviewPage() {
               {(a) => (
                 <TextArea
                   {...a}
-                  className="min-h-48"
+                  className="min-h-48 [field-sizing:content]"
                   value={form.bio_long}
                   maxLength={2200}
                   readOnly={!editable}
@@ -339,6 +340,7 @@ export function ProfileReviewPage() {
             <Field label="Key achievements" hint="One per line.">
               {(a) => (
                 <TextArea
+                  className="min-h-16 [field-sizing:content]"
                   {...a}
                   value={form.key_achievements}
                   readOnly={!editable}

@@ -27,6 +27,7 @@ from app.auth.security import hash_password
 from app.config import get_settings
 from app.feedback_spec import ASPECT_KEYS, CURRICULUM_KEYS, questions
 from app.services.anonymity import student_form_hash
+from app.services.profile_items import new_id
 from app.utils import now
 
 RNG_SEED = 2026
@@ -360,6 +361,96 @@ def _rating(rng: random.Random, mu: float) -> int:
     return max(1, min(5, round(rng.gauss(mu, 0.75))))
 
 
+DEMO_INSTITUTION = "Demo Institute of Technology"
+UNIVERSITIES = ["JNTU Hyderabad", "Osmania University", "NIT Warangal", "Andhra University"]
+TITLE_PATTERNS = [
+    "A comparative study of {topic} techniques",
+    "{topic} for resource-constrained systems",
+    "Teaching {topic} through hands-on laboratory work",
+    "An empirical evaluation of {topic} methods",
+]
+
+
+def _demo_facts(name: str, designation: str, interests: list[str]) -> dict[str, list]:
+    """A few synthetic profile facts so generated profiles have something to say.
+
+    A separate RNG per teacher keeps the feedback responses identical to earlier seeds.
+    Venues and awards carry "(demo)" so nothing here can pass for a real record.
+    """
+    rng = random.Random(f"facts:{name}")
+    doctor = name.startswith("Dr.")
+    phd_year = rng.randint(2008, 2018)
+    quals = [
+        {
+            "id": new_id(),
+            "source": "manual",
+            "degree": "M.Tech",
+            "specialisation": interests[0],
+            "institution": rng.choice(UNIVERSITIES),
+            "year": phd_year - rng.randint(4, 6),
+        }
+    ]
+    if doctor:
+        quals.insert(
+            0,
+            {
+                "id": new_id(),
+                "source": "manual",
+                "degree": "PhD",
+                "specialisation": interests[0],
+                "institution": rng.choice(UNIVERSITIES),
+                "year": phd_year,
+            },
+        )
+    joined = phd_year + rng.randint(1, 4) if doctor else rng.randint(2014, 2020)
+    experience = [
+        {
+            "id": new_id(),
+            "source": "manual",
+            "role": designation,
+            "institution": DEMO_INSTITUTION,
+            "from_year": joined,
+            "to_year": None,
+        }
+    ]
+    pubs = []
+    for i in range(rng.randint(2, 4)):
+        topic = interests[i % len(interests)]
+        pubs.append(
+            {
+                "id": new_id(),
+                "source": "manual",
+                "title": rng.choice(TITLE_PATTERNS).format(topic=topic.lower()).capitalize(),
+                "venue": rng.choice(
+                    [
+                        "Journal of Engineering Education (demo)",
+                        "National Computing Conference (demo)",
+                    ]
+                ),
+                "year": rng.randint(joined, 2026),
+                "type": "journal" if i % 2 == 0 else "conference",
+                "authors": [name],
+            }
+        )
+    achievements = []
+    if rng.random() < 0.6:
+        achievements.append(
+            {
+                "id": new_id(),
+                "source": "manual",
+                "kind": "award",
+                "title": "Best Teacher Award (demo)",
+                "year": rng.randint(joined + 1, 2026),
+            }
+        )
+    return {
+        "qualifications": quals,
+        "experience": experience,
+        "publications": pubs,
+        "achievements": achievements,
+    }
+
+
 def _profile(strong: list[str], weak: list[str]) -> dict[str, float]:
     return {a: 4.4 if a in strong else 2.3 if a in weak else 3.6 for a in ASPECT_KEYS}
 
@@ -468,10 +559,7 @@ async def seed(database, force: bool = False) -> dict[str, Any]:
                 "user_id": doc["_id"],
                 "designation": designation,
                 "interests": interests,
-                "qualifications": [],
-                "experience": [],
-                "publications": [],
-                "achievements": [],
+                **_demo_facts(name, designation, interests),
                 "pending_imports": [],
                 "rejected_keys": [],
                 **common,

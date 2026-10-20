@@ -160,6 +160,39 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - Decided items show the decision pill, time and edited text.
 - **Nav count:** "Moderation 18" is a small surface chip on the nav row. It appears only when items are pending, refreshes after every decision (a window event) and each minute, and is read as "18 pending".
 
+## Phase 5 additions
+
+- **Unified faculty page** (`pages/faculty/*`, `/me` and `/faculty/:id`):
+  - Two columns: the profile (360px, sticky on desktop) and the feedback insights. They stack on tablets and phones, profile first.
+  - The name is the page's one serif title.
+  - Staff outside the department get the profile and one sentence saying feedback is private.
+- **Profile column:**
+  - headline and department meta;
+  - the short bio with a "Read the full bio" toggle;
+  - research areas as neutral pills;
+  - recent publications (title linked to its DOI or URL, venue · year in tabular figures, TL;DR muted);
+  - achievements with the year right-aligned;
+  - teaching highlights.
+  - Sections are separated by a 1px rule, not cards.
+- **Insights order** (each block answers one question):
+  1. Cycle and course pickers with the response `RateBar`.
+  2. Net sentiment, the screen's one `text-kpi` figure, signed to 2 decimals, beside the sentiment split as a labelled 100% bar (negative, neutral, positive with 2px gaps and percentages underneath).
+  3. "What students said": the overall sentence, then Strengths and Areas to improve as two cards. Each item has an aspect pill, the text, "Next step:" for improvements, and an underlined "Show the evidence (n)" text button. An automatic digest sits in a `--raised` well, labelled as automatic. A muted line says how the text was written.
+  4. Teaching aspects as one table: aspect + mentions, a diverging comment bar (criticism left of a 1px centre line, praise right, neutral split across it, 2px gaps, 3px outer radius), the mean rating ("4.2 / 5") and a ratings-vs-comments pill (Agree positive, Mixed neutral, Disagree warning, Too few neutral). The pill's title gives Spearman ρ and n. On phones the bar moves under the aspect name.
+  5. Emotion mix (Recharts horizontal bars, the top emotion in `--chart-main` and the rest in `--chart-muted`, values labelled at the bar ends, an `sr-only` table) beside a caveats card: possibly sarcastic count with "Read them", and the hidden-by-moderation count.
+- **Evidence drawer** (`components/EvidenceDrawer.jsx`):
+  - A native modal `<dialog>` pinned to the right edge (max 520px, full height, 1px left border).
+  - It enters 16px from the right over `--dur-sheet` and closes on Esc, Close or a backdrop click; focus returns to the opener.
+  - Each answer shows which question it answered, then the redacted text with the supporting sentence as a `<mark>` in a 22% tint of the item's sentiment colour. Text stays in ink, never the sentiment colour.
+  - The answers are introduced by a sentence explaining they are moderated and redacted.
+- **Generated profile review** (`/profile/review`):
+  - The draft's fields on the left, and on the right a rail of saved facts with "cited" pills for the facts this version references.
+  - The status pill (Draft warning, Approved positive, Superseded neutral), version, date and how it was written.
+  - "Generate new draft" (secondary) and "Approve and publish" (the one primary, owner only; an admin gets "Save edits").
+  - Bios auto-grow (`field-sizing: content`), with live word counts against the 60 / 150 targets.
+  - Rejected AI claims are listed in a `--raised` note when the template was used instead.
+- **Code splitting:** the unified page and Recharts load as their own chunk (`React.lazy`), so other screens don't download the chart library.
+
 ## States (every block)
 
 - **Loading:** final layout with skeleton bars.

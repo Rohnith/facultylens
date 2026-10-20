@@ -215,6 +215,17 @@ Notes:
 - **Sarcasm:** `SARC_FLAG` defaults to **0.95** (was 0.70). The tweet-trained irony model scores sincere praise near 0.98; see `docs/MODEL_CHECK.md`.
 - **Known limitation:** the toxicity model hides compliments that contain an insulting word ("…without making us feel stupid"). These stay hidden until an admin approves them, and the queue marks them as possible false alarms.
 
+*Changed in Phase 5 (agreed with the user, 2026-10-20):*
+- **When summaries run:** after every analysis run and moderation decision, for teaching forms at or above `MIN_RESPONSES_FOR_DISPLAY`. They are stored in a `summaries` collection (unique per form) and rebuilt only when a fingerprint of the form's aggregate changes. The fingerprint also includes whether an LLM is configured, so adding a Groq key upgrades template summaries on the next run. `POST /analysis/summaries?cycle=` (admin) forces a rebuild.
+- **No-LLM summary:** strengths and improvements are chosen from the aspect counts (an aspect needs at least 2 mentions) and cite their evidence ids, so they are grounded by construction. Next steps come from a fixed table (`SUGGESTED_ACTIONS` in `feedback_spec.py`). distilbart writes only an optional "digest" of the strongest evidence, labelled as automatic on the page, and the overall sentence is templated from the sentiment split.
+- **Profile generation:** the claim check verifies numbers, venue- or award-like phrases and achievement titles against the facts. Research areas must appear in the facts, and highlights must cite real evidence ids.
+  - TF-IDF keywords are used only when there are at least 3 publications. Phrases containing a stopword or a generic research word are dropped.
+  - Drafts store the rejected claims when the template was used instead.
+  - The approved profile (`GET /faculty/{id}/profile`) is readable by all staff, without evidence ids.
+- **Added endpoint:** `GET /faculty/{id}/evidence?ids=` resolves evidence ids to redacted, visible answers with highlight offsets.
+- **Unified page (§11.4) forms:** the net sentiment "gauge" and the sentiment "donut" are one headline figure plus a labelled 100% bar. The aspect "radar" and the polarity bars are one table: a diverging comment bar per aspect, with the mean rating and a ratings-vs-comments badge on the same row. Ordered-scale shares read better as diverging bars (dataviz guidance), and a table keeps the 8 aspects comparable on one baseline.
+- **Demo seed:** each teacher also gets a few synthetic profile facts (qualifications, one current role, 2–4 publications, sometimes an award). Venues and awards are marked "(demo)". A separate RNG leaves the seeded responses unchanged.
+
 ---
 
 ## 10. API (all under `/api`; JSON; JWT bearer)

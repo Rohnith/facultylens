@@ -68,29 +68,75 @@ def fact_ids(facts: dict[str, Any]) -> set[str]:
 # --------------------------------------------------------------------------- keywords
 
 _NOT_A_TOPIC = re.compile(r"^\d+$|^.{1,2}$")
+# Words that describe how research was done, not what it is about.
+GENERIC = {
+    "analysis",
+    "approach",
+    "approaches",
+    "based",
+    "case",
+    "comparative",
+    "data",
+    "design",
+    "efficient",
+    "empirical",
+    "evaluation",
+    "framework",
+    "improved",
+    "method",
+    "methods",
+    "model",
+    "models",
+    "new",
+    "novel",
+    "paper",
+    "performance",
+    "proposed",
+    "review",
+    "study",
+    "survey",
+    "system",
+    "systems",
+    "technique",
+    "techniques",
+    "towards",
+    "using",
+    "work",
+}
+MIN_DOCS_FOR_KEYWORDS = 3
 
 
 def keywords(facts: dict[str, Any], top: int = 8) -> list[str]:
-    """TF-IDF over publication titles + TL;DRs, plus interest tags (classic NLP, not a model)."""
+    """TF-IDF over publication titles + TL;DRs (classic NLP, not a model).
+
+    N-grams are built on the raw words and any phrase containing a stopword or a generic
+    research word is dropped, so no phrase is stitched together across a removed word.
+    With fewer than three documents TF-IDF has nothing to rank, so only the interests are used.
+    """
     docs = [" ".join(filter(None, [p.get("title"), p.get("tldr")])) for p in facts["publications"]]
     tags = [i["tag"] for i in facts["interests"]]
     docs = [d for d in docs if d.strip()]
-    if not docs:
+    if len(docs) < MIN_DOCS_FOR_KEYWORDS:
         return tags[:top]
-    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS, TfidfVectorizer
 
-    vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), sublinear_tf=True)
+    banned = ENGLISH_STOP_WORDS | GENERIC
+    vectorizer = TfidfVectorizer(ngram_range=(1, 3), sublinear_tf=True)
     try:
-        matrix = vectorizer.fit_transform(docs + tags)
-    except ValueError:  # every word was a stopword
+        matrix = vectorizer.fit_transform(docs)
+    except ValueError:
         return tags[:top]
     scores = matrix.sum(axis=0).A1
     terms = vectorizer.get_feature_names_out()
-    ranked = [terms[i] for i in scores.argsort()[::-1] if not _NOT_A_TOPIC.match(terms[i])]
-    out: list[str] = []
+    ranked = [
+        terms[i]
+        for i in scores.argsort()[::-1]
+        if not _NOT_A_TOPIC.match(terms[i]) and not set(terms[i].split()) & banned
+    ]
+    out = list(tags[:top])
     for term in ranked:
         # Prefer "machine learning" over also listing "machine" and "learning".
-        if any(term in kept or kept in term for kept in out):
+        if any(term in kept.lower() or kept.lower() in term for kept in out):
             continue
         out.append(term)
         if len(out) == top:
