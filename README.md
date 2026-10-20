@@ -164,7 +164,7 @@ Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. R
   - the emotion mix;
   - the possibly-sarcastic rate.
 - **When it hides itself:** unless each group has at least `BIAS_MIN_GROUP_FACULTY` teachers (3) and `BIAS_MIN_GROUP_ANSWERS` answers (30), it shows only the group sizes. In the demo data, CSE (3 women, 3 men) shows the comparison and ECE (2 women, 3 men) does not.
-- The seed's gendered words are drawn independently of the teacher's gender, so the honest result on demo data is "no clear difference".
+- On the demo data every interval includes zero ("no clear difference"), even though some point gaps look large. With 3 teachers per group, individual teachers dominate; see `docs/MODEL_CHECK.md`. The API answers in under 35 ms at p95.
 
 ## Repository layout
 

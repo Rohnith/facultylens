@@ -387,17 +387,19 @@ export function Footer({ insights, sarcasticCount, onSarcasm }) {
             </ResponsiveContainer>
           </div>
         )}
-        <table className="sr-only">
-          <caption>Emotion mix</caption>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.key}>
-                <th scope="row">{r.label}</th>
-                <td>{pct(r.share)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="sr-only">
+          <table>
+            <caption>Emotion mix</caption>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.key}>
+                  <th scope="row">{r.label}</th>
+                  <td>{pct(r.share)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
       <section aria-label="Caveats" className="card flex flex-col gap-3 p-[var(--card-pad)]">
         <div className="flex flex-col gap-0.5">

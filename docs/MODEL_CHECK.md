@@ -72,6 +72,26 @@ Measured on 2026-10-20 inside the running API, with no `GROQ_API_KEY`, on the se
 
 The strengths and improvements in a no-LLM summary come from counts, so they carry no model error. They are only as good as the aspect detection and ABSA beneath them; Phase 8 measures that. The distilbart digest is extractive in practice on this data: it stitches whole student sentences together.
 
+## Analytics latency and the bias panel on the seed (Phase 6)
+
+Measured on 2026-10-20 against the running API, on the seeded cycle after analysis (614 responses), with 20 calls each and no caching. The SPEC's target is a p95 under 500 ms.
+
+| Endpoint | median | p95 |
+|---|---:|---:|
+| `GET /analytics/department/{CSE}` | 12.7 ms | 15.5 ms |
+| `GET /analytics/bias?department=CSE` (full panel) | 29.4 ms | 31.7 ms |
+| `GET /analytics/bias?department=ECE` (too small) | 22.0 ms | 23.3 ms |
+| `GET /analytics/sarcasm?department=CSE` | 21.2 ms | 22.3 ms |
+| `GET /analytics/faculty/{id}` | 7.6 ms | 8.7 ms |
+| `GET /faculty/{id}/overview` | 11.1 ms | 12.1 ms |
+
+**Bias panel on the seed (CSE, 3 women and 3 men teaching):**
+- All 8 aspect rating gaps have 95% intervals that include 0 (for example clarity +1.02, could be −0.54 to +2.59), and so do both gendered-language gaps.
+- The seed draws gendered words independently of gender, but each seeded teacher has hand-set strong and weak aspects. With 3 teachers per group, those individual differences produce sizeable point gaps.
+- The first method, a cluster bootstrap over teachers, called three of them "clear". With 3 teachers per group it has only 10 distinct resamples, so its intervals were too narrow. It was replaced by a Welch t-interval over teacher averages.
+
+**ECE (2 women, 3 men):** too small. The API returns group sizes only.
+
 ## Moderation on the seeded cycle
 
 Measured 2026-10-20 from an analysis run in the app (553 responses, `TOX_HIDE=0.70`): the toxicity model hid **19** answers. All **8** seeded abusive answers are among them (recall 1.0), but the other **11** are one seeded compliment, "Answers questions without making us feel stupid." (score 0.99), so precision is 0.42. The model reacts to the word, not the meaning. That sentence's own sentiment is neutral while the real insults score negative, so the moderation queue now tells the admin when a flagged sentence does not read as negative ("may be a false alarm"). Answers stay hidden until a person decides; showing possible abuse to a teacher automatically is the worse failure.

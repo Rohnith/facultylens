@@ -84,7 +84,7 @@ export function InsightsPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row">
           {user.role === "admin" && (
-            <label className="flex flex-col gap-1.5 sm:w-64">
+            <label className="flex flex-col gap-1.5 sm:w-96">
               <span className="text-small text-muted">Department</span>
               <Select
                 value={department ?? ""}
@@ -99,14 +99,10 @@ export function InsightsPage() {
               </Select>
             </label>
           )}
-          {data?.cycles?.length > 0 && (
-            <label className="flex flex-col gap-1.5 sm:w-56">
+          {data?.cycles?.length > 1 && (
+            <label className="flex flex-col gap-1.5 sm:w-64">
               <span className="text-small text-muted">Cycle</span>
-              <Select
-                value={data.cycle?.id ?? ""}
-                onChange={(e) => set({ cycle: e.target.value })}
-                disabled={data.cycles.length < 2}
-              >
+              <Select value={data.cycle?.id ?? ""} onChange={(e) => set({ cycle: e.target.value })}>
                 {data.cycles.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -115,6 +111,15 @@ export function InsightsPage() {
                 ))}
               </Select>
             </label>
+          )}
+          {data?.cycles?.length === 1 && (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-small text-muted">Cycle</span>
+              <span className="text-body font-medium">
+                {data.cycle.name}
+                {data.cycle.status === "open" ? " (open)" : ""}
+              </span>
+            </div>
           )}
         </div>
         <div role="tablist" aria-label="View" className="flex gap-5 border-b border-border">

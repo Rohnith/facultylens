@@ -38,7 +38,7 @@ function Picker({ label, value, options, onChange, className = "" }) {
 function Pickers({ data, selected, onPick }) {
   const cycle = data.cycles.find((c) => c.id === selected.cycle.id) ?? data.cycles[0];
   return (
-    <div className="card flex flex-col gap-4 p-[var(--card-pad)] md:flex-row md:items-start md:gap-6">
+    <div className="card flex flex-col gap-4 p-[var(--card-pad)] md:flex-row md:flex-wrap md:items-start md:gap-x-6">
       <Picker
         label="Cycle"
         className="md:w-56"
@@ -48,12 +48,12 @@ function Pickers({ data, selected, onPick }) {
       />
       <Picker
         label="Course"
-        className="flex-1"
+        className="flex-1 md:min-w-[300px]"
         value={selected.course.id}
         options={cycle.offerings.map((o) => [o.id, `${o.code} · ${o.name} · Section ${o.section}`])}
         onChange={(id) => onPick({ cycle: cycle.id, course: id })}
       />
-      <div className="min-w-0 md:w-64">
+      <div className="min-w-0 md:w-64 md:flex-auto">
         <RateBar value={selected.responses} total={selected.eligible} />
       </div>
     </div>

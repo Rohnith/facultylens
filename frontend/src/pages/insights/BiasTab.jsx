@@ -134,25 +134,27 @@ function Language({ panel }) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <table className="sr-only">
-        <caption>Answers per 1,000 using ability and warmth words, by group</caption>
-        <thead>
-          <tr>
-            <th scope="col">List</th>
-            <th scope="col">Women</th>
-            <th scope="col">Men</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.label}>
-              <th scope="row">{r.label}</th>
-              <td>{r.female}</td>
-              <td>{r.male}</td>
+      <div className="sr-only">
+        <table>
+          <caption>Answers per 1,000 using ability and warmth words, by group</caption>
+          <thead>
+            <tr>
+              <th scope="col">List</th>
+              <th scope="col">Women</th>
+              <th scope="col">Men</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.label}>
+                <th scope="row">{r.label}</th>
+                <td>{r.female}</td>
+                <td>{r.male}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <p className="num m-0 mt-2 text-small text-muted">
         Based on {panel.language.female.answers} answers about women and{" "}
         {panel.language.male.answers} about men.
