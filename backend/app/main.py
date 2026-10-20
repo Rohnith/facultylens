@@ -15,6 +15,7 @@ from app.limiter import limiter
 from app.pipeline import jobs
 from app.routers import (
     analysis,
+    analytics,
     auth,
     courses,
     cycles,
@@ -71,6 +72,7 @@ def create_app() -> FastAPI:
         forms,
         feedback,
         analysis,
+        analytics,
     ):
         app.include_router(module.router, prefix="/api")
     return app
