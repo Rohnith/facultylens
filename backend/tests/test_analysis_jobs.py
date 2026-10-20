@@ -5,8 +5,8 @@ import pytest
 from app import db as app_db
 from app.config import get_settings
 from app.feedback_spec import ASPECT_KEYS
-from app.nlp import analyze, registry
-from app.pipeline import jobs
+from app.nlp import analyze, registry, summarize
+from app.pipeline import jobs, summaries
 from app.utils import now
 from tests.conftest import ROLL_NUMBERS, login, make_user
 from tests.test_feedback_collection import open_cycle, student_forms
@@ -78,6 +78,7 @@ def fake_analyze_batch(items):
 @pytest.fixture
 def analysed_world(world, monkeypatch):
     monkeypatch.setattr(analyze, "analyze_batch", fake_analyze_batch)
+    monkeypatch.setattr(summarize, "digest", lambda pool: None)  # no distilbart in unit tests
     queued = []
     monkeypatch.setattr(jobs, "enqueue", queued.append)
     world["queued"] = queued
@@ -226,3 +227,48 @@ async def test_second_student_auto_job_scores_only_new_response(client, analysed
     assert jobs.run_job(job2)["total"] == 1  # the first is cached
     assert await world["db"].analyses.count_documents({}) == 2
     assert form_id
+
+
+async def test_summaries_follow_the_aggregate(client, analysed_world, monkeypatch):
+    from bson import ObjectId
+
+    world = analysed_world
+    h = world["headers"]
+    cycle = await open_cycle(client, world)
+    form_id = await submit_teaching(
+        client,
+        world,
+        h["student"],
+        {"liked": "Clear. Call 98480 12345.", "other": "This teacher is useless."},
+    )
+    sync_db = app_db.get_sync_db()
+
+    # Below the minimum (default 5): no summary is kept.
+    job = (await client.post(f"/api/analysis/run?cycle={cycle['id']}", headers=h["admin"])).json()
+    jobs.run_job(ObjectId(job["id"]))
+    assert sync_db.summaries.count_documents({}) == 0
+
+    monkeypatch.setenv("MIN_RESPONSES_FOR_DISPLAY", "1")
+    get_settings.cache_clear()
+    form = sync_db.forms.find_one({"_id": ObjectId(form_id)})
+    version = registry.model_version()
+    assert summaries.refresh_form(sync_db, form, version) == "built"
+    first = sync_db.summaries.find_one({"form_id": form["_id"]})
+    assert first["engine"] == "fallback" and first["overall_summary"].startswith("1 student")
+    assert "useless" not in str(first)  # hidden text never reaches a summary
+    assert summaries.refresh_form(sync_db, form, version) == "kept"
+
+    # A moderation decision changes the aggregate, so the summary is rebuilt.
+    entry = (await client.get("/api/moderation/queue", headers=h["admin"])).json()["items"][0]
+    r = await client.post(
+        f"/api/moderation/{entry['id']}/decision", headers=h["admin"], json={"action": "approve"}
+    )
+    assert r.status_code == 200
+    second = sync_db.summaries.find_one({"form_id": form["_id"]})
+    assert second["fingerprint"] != first["fingerprint"]
+
+    # Forced regeneration through the API reuses the job machinery.
+    regen = await client.post(f"/api/analysis/summaries?cycle={cycle['id']}", headers=h["admin"])
+    assert regen.status_code == 202 and regen.json()["kind"] == "summaries"
+    done = jobs.run_job(ObjectId(regen.json()["id"]))
+    assert done["status"] == "done" and done["counts"]["summaries_built"] == 1

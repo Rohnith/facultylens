@@ -82,6 +82,7 @@ ENDPOINTS = [
     # Analysis and moderation: admin only.
     ("GET", "/api/analysis/summary?cycle={cycle}", {"admin"}, None),
     ("POST", "/api/analysis/run?cycle={cycle}", {"admin"}, None),
+    ("POST", "/api/analysis/summaries?cycle={cycle}", {"admin"}, None),
     ("GET", "/api/analysis/status/000000000000000000000000", {"admin"}, None),
     ("GET", "/api/analysis/jobs", {"admin"}, None),
     ("GET", "/api/moderation/queue", {"admin"}, None),

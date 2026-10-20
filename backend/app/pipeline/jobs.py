@@ -22,6 +22,7 @@ from pymongo.errors import BulkWriteError
 from app import db
 from app.config import get_settings
 from app.nlp import registry
+from app.pipeline import summaries
 from app.pipeline.aggregate import recompute_form
 from app.utils import now
 
@@ -122,6 +123,8 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
         {"$set": {"status": "running", "started_at": now(), "model_version": version}},
     )
     try:
+        if job["kind"] == "summaries":
+            return _run_summaries(sync_db, job, version, started)
         if job["kind"] == "cycle":
             form_ids = [
                 f["_id"] for f in sync_db.forms.find({"cycle_id": job["cycle_id"]}, {"_id": 1})
@@ -181,16 +184,20 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
 
         if job["kind"] == "cycle":
             touched_forms |= set(form_ids)
-        for form in sync_db.forms.find({"_id": {"$in": list(touched_forms)}}):
+        forms = list(sync_db.forms.find({"_id": {"$in": list(touched_forms)}}))
+        for form in forms:
             recompute_form(sync_db, form, version)
+        analysis_seconds = time.perf_counter() - started
+        summary_counts = summaries.refresh_forms(sync_db, forms, version)
 
         elapsed = round(time.perf_counter() - started, 2)
         final = {
             "status": "done",
             "finished_at": now(),
             "seconds": elapsed,
-            "per_response_ms": round(1000 * elapsed / total, 1) if total else None,
-            "counts": counts,
+            "per_response_ms": round(1000 * analysis_seconds / total, 1) if total else None,
+            "summary_seconds": round(time.perf_counter() - started - analysis_seconds, 2),
+            "counts": {**counts, "summaries_built": summary_counts.get("built", 0)},
         }
         sync_db.analysis_jobs.update_one({"_id": job_id}, {"$set": final})
         return {**job, **final, "total": total}
@@ -207,6 +214,31 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
             },
         )
         return {**job, "status": "failed"}
+
+
+def _run_summaries(sync_db, job: dict[str, Any], version: str, started: float) -> dict[str, Any]:
+    """Rebuild every teaching-form summary in a cycle, even if its fingerprint is unchanged."""
+    forms = list(sync_db.forms.find({"cycle_id": job["cycle_id"], "type": "teaching"}))
+    sync_db.analysis_jobs.update_one(
+        {"_id": job["_id"]}, {"$set": {"total": len(forms), "done": 0}}
+    )
+    built = 0
+    for i, form in enumerate(forms, start=1):
+        try:
+            built += summaries.refresh_form(sync_db, form, version, force=True) == "built"
+        except Exception:
+            log.exception("summary for form %s failed", form["_id"])
+        sync_db.analysis_jobs.update_one({"_id": job["_id"]}, {"$set": {"done": i}})
+    elapsed = round(time.perf_counter() - started, 2)
+    final = {
+        "status": "done",
+        "finished_at": now(),
+        "seconds": elapsed,
+        "per_response_ms": None,
+        "counts": {"summaries_built": built},
+    }
+    sync_db.analysis_jobs.update_one({"_id": job["_id"]}, {"$set": final})
+    return {**job, **final, "total": len(forms)}
 
 
 def _loop() -> None:

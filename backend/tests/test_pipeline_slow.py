@@ -46,3 +46,22 @@ def test_pipeline_end_to_end_on_real_models():
     assert fields["r4"]["sentiment"]["label"] == "positive"
     assert fields["r4"]["moderation_status"] == "visible"
     assert all(not s["aspects"] for s in fields["r5"]["sentences"])  # no aspects on syllabus
+
+
+def test_fallback_digest_on_real_summariser():
+    from app.nlp import summarize
+
+    pool = [
+        {"id": f"a{i}:liked:0", "text": t, "polarity": p, "uncertain": False, "aspect": "clarity"}
+        for i, (t, p) in enumerate(
+            [
+                ("Explains every concept clearly with board work.", "positive"),
+                ("Gives real-world examples from industry.", "positive"),
+                ("Always answers our doubts after class.", "positive"),
+                ("The pace is too fast to follow.", "negative"),
+                ("The syllabus was rushed in the last week.", "negative"),
+            ]
+        )
+    ]
+    text = summarize.digest(pool)
+    assert text and 20 < len(text) < 800

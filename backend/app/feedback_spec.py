@@ -76,6 +76,18 @@ MAX_TEXT: Final = 2000
 ASPECT_KEYS: Final = [a[0] for a in TEACHING_ASPECTS]
 ASPECT_LABELS: Final = {a[0]: a[1] for a in TEACHING_ASPECTS}
 ASPECT_LEXICON: Final = {a[0]: a[3] for a in TEACHING_ASPECTS}
+
+# Templated next steps for the no-LLM summary (and the NAAC action-taken draft later).
+SUGGESTED_ACTIONS: Final = {
+    "knowledge": "Link each topic to the core concepts and share further reading for depth.",
+    "clarity": "Break explanations into smaller steps and recap the key point before moving on.",
+    "punctuality": "Start on time and announce any rescheduled class in advance.",
+    "interaction": "Set aside a few minutes each class, or an office hour, for doubts.",
+    "practical": "Add one real-world example or short demonstration per topic.",
+    "assessment": "Share the marking scheme and return tests with written feedback.",
+    "behaviour": "Keep the tone encouraging and invite questions without judgement.",
+    "pace": "Check understanding before moving on and share a weekly coverage plan.",
+}
 CURRICULUM_KEYS: Final = [c[0] for c in CURRICULUM_ITEMS]
 
 

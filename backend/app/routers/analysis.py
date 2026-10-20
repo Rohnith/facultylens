@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from app import db
 from app.auth.deps import AdminUser, Db
 from app.nlp import registry
-from app.pipeline import jobs
+from app.pipeline import jobs, summaries
 from app.pipeline.aggregate import recompute_form
 from app.services.audit import record
 from app.utils import now, oid, to_jsonable
@@ -224,6 +224,39 @@ async def decide(entry_id: str, body: DecisionIn, database: Db, admin: AdminUser
     )
     form = await database.forms.find_one({"_id": entry["form_id"]})
     if form:
-        await asyncio.to_thread(recompute_form, db.get_sync_db(), form, registry.model_version())
+        await asyncio.to_thread(_refresh, form)
     await record(database, admin, "moderation.decision", entry_id, {"action": body.action})
     return {"status": "decided", "action": body.action}
+
+
+def _refresh(form: dict[str, Any]) -> None:
+    """After a decision: the aggregate changes, so its summary may too (worker-style, sync)."""
+    sync_db, version = db.get_sync_db(), registry.model_version()
+    recompute_form(sync_db, form, version)
+    summaries.refresh_forms(sync_db, [form], version)
+
+
+@router.post("/analysis/summaries", status_code=status.HTTP_202_ACCEPTED)
+async def regenerate_summaries(database: Db, admin: AdminUser, cycle: str) -> dict:
+    """Rebuild every teaching summary in a cycle (e.g. after adding a Groq key)."""
+    cycle_id = oid(cycle, "Cycle")
+    if not await database.feedback_cycles.find_one({"_id": cycle_id}):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Cycle not found")
+    active = await database.analysis_jobs.find_one(
+        {"cycle_id": cycle_id, "status": {"$in": ["queued", "running"]}}
+    )
+    if active:
+        return _job_out(active)
+    doc = {
+        "kind": "summaries",
+        "cycle_id": cycle_id,
+        "status": "queued",
+        "total": None,
+        "done": 0,
+        "requested_by": admin["_id"],
+        "created_at": now(),
+    }
+    doc["_id"] = (await database.analysis_jobs.insert_one(doc)).inserted_id
+    jobs.enqueue(doc["_id"])
+    await record(database, admin, "analysis.summaries", cycle)
+    return _job_out(doc)
