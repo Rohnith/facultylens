@@ -3,7 +3,14 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { getHealth } from "../api/client";
 import { ROLE_LABELS, useAuth } from "../context/auth";
 import { useAsync } from "../hooks/useAsync";
-import { BookIcon, BuildingIcon, ClipboardIcon, PeopleIcon, PersonIcon } from "./icons";
+import {
+  BookIcon,
+  BuildingIcon,
+  CalendarIcon,
+  ClipboardIcon,
+  PeopleIcon,
+  PersonIcon,
+} from "./icons";
 import { Mark } from "./Mark";
 import { ThemeSwitch } from "./ThemeSwitch";
 
@@ -13,6 +20,7 @@ const NAV_BY_ROLE = {
     { to: "/admin/users", label: "Users", icon: PeopleIcon },
     { to: "/admin/departments", label: "Departments", icon: BuildingIcon },
     { to: "/admin/courses", label: "Courses", icon: BookIcon },
+    { to: "/admin/cycles", label: "Feedback cycles", icon: CalendarIcon },
     { to: "/admin/status", label: "System status", icon: PulseIcon },
   ],
   hod: [
