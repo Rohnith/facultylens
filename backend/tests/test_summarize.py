@@ -39,6 +39,7 @@ def stats():
     aspects["knowledge"] = aspect(pos=12, neg=1, likert=4.1, start=2000)
     aspects["pace"] = aspect(pos=1, neg=9, likert=2.6, start=3000)
     aspects["practical"] = aspect(pos=1, neg=1, likert=3.0, start=4000)  # too few to call
+    aspects["assessment"] = aspect(pos=5, neg=3, likert=2.5, start=5000)  # low rating
     return {
         "responses": 40,
         "analysed": 40,
@@ -68,7 +69,9 @@ def test_fallback_ranks_strengths_and_improvements(stats):
     out = summarize.summarise(stats)
     assert out["engine"] == "fallback"
     assert [s["aspect"] for s in out["strengths"]] == ["clarity", "knowledge"]
-    assert [i["aspect"] for i in out["improvements"]] == ["pace", "clarity"]
+    # clarity is criticised twice but praised far more: a strength, never also a gap;
+    # assessment is praised more than criticised but rated below 3, so it is a gap.
+    assert [i["aspect"] for i in out["improvements"]] == ["pace", "assessment"]
     pace = out["improvements"][0]
     assert "9 negative mentions" in pace["text"] and "2.6 out of 5" in pace["text"]
     assert pace["suggested_action"] and pace["evidence_ids"] == [

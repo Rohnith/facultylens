@@ -9,40 +9,50 @@ import { useAuth } from "../../context/auth";
 import { Aspects, Footer, Overall, Summary } from "./Insights";
 import { ProfileColumn } from "./ProfileColumn";
 
+/** A select when there is a choice to make; plain text when there isn't. */
+function Picker({ label, value, options, onChange, className = "" }) {
+  return (
+    <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
+      {options.length > 1 ? (
+        <label className="flex flex-col gap-1.5">
+          <span className="text-small text-muted">{label}</span>
+          <Select value={value} onChange={(e) => onChange(e.target.value)}>
+            {options.map(([id, text]) => (
+              <option key={id} value={id}>
+                {text}
+              </option>
+            ))}
+          </Select>
+        </label>
+      ) : (
+        <>
+          <span className="text-small text-muted">{label}</span>
+          <span className="text-body font-medium">{options[0]?.[1]}</span>
+        </>
+      )}
+    </div>
+  );
+}
+
 function Pickers({ data, selected, onPick }) {
   const cycle = data.cycles.find((c) => c.id === selected.cycle.id) ?? data.cycles[0];
   return (
-    <div className="card flex flex-col gap-4 p-[var(--card-pad)] md:flex-row md:items-end">
-      <label className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <span className="text-small text-muted">Cycle</span>
-        <Select
-          value={cycle.id}
-          onChange={(e) => onPick({ cycle: e.target.value })}
-          disabled={data.cycles.length < 2}
-        >
-          {data.cycles.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-              {c.status === "open" ? " (open)" : ""}
-            </option>
-          ))}
-        </Select>
-      </label>
-      <label className="flex min-w-0 flex-[1.4] flex-col gap-1.5">
-        <span className="text-small text-muted">Course</span>
-        <Select
-          value={selected.course.id}
-          onChange={(e) => onPick({ cycle: cycle.id, course: e.target.value })}
-          disabled={cycle.offerings.length < 2}
-        >
-          {cycle.offerings.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.code} · {o.name} · Section {o.section}
-            </option>
-          ))}
-        </Select>
-      </label>
-      <div className="min-w-0 flex-1">
+    <div className="card flex flex-col gap-4 p-[var(--card-pad)] md:flex-row md:items-start md:gap-6">
+      <Picker
+        label="Cycle"
+        className="md:w-56"
+        value={cycle.id}
+        options={data.cycles.map((c) => [c.id, `${c.name}${c.status === "open" ? " (open)" : ""}`])}
+        onChange={(id) => onPick({ cycle: id })}
+      />
+      <Picker
+        label="Course"
+        className="flex-1"
+        value={selected.course.id}
+        options={cycle.offerings.map((o) => [o.id, `${o.code} · ${o.name} · Section ${o.section}`])}
+        onChange={(id) => onPick({ cycle: cycle.id, course: id })}
+      />
+      <div className="min-w-0 md:w-64">
         <RateBar value={selected.responses} total={selected.eligible} />
       </div>
     </div>
@@ -178,7 +188,12 @@ export function FacultyPage() {
       {data && (
         <div className="grid items-start gap-[var(--gap)] lg:grid-cols-[360px_minmax(0,1fr)]">
           <div className="lg:sticky lg:top-6">
-            <ProfileColumn profile={data.profile} isOwner={data.is_owner} reviewLink={reviewLink} />
+            <ProfileColumn
+              profile={data.profile}
+              isOwner={data.is_owner}
+              reviewLink={reviewLink}
+              showHighlights={!data.feedback_access}
+            />
           </div>
           {data.feedback_access ? (
             <Feedback

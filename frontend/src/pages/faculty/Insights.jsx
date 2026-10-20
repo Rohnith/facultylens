@@ -177,7 +177,7 @@ export function Aspects({ insights }) {
                 title="Do the 1–5 ratings and the tone of the comments point the same way? (Spearman correlation)"
                 className="no-underline"
               >
-                Ratings vs comments
+                Agreement
               </abbr>
             </th>
           </tr>
@@ -203,7 +203,7 @@ export function Aspects({ insights }) {
                     <span className="text-small text-faint">No comments on this</span>
                   )}
                 </td>
-                <td className="num px-3 text-right align-middle">
+                <td className="num px-3 text-right align-middle whitespace-nowrap">
                   {a.likert_mean == null ? (
                     <span className="text-faint">–</span>
                   ) : (

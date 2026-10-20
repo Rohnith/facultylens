@@ -20,7 +20,7 @@ function Section({ title, children }) {
 }
 
 /** Left column: the approved profile, or plain facts until one is approved. */
-export function ProfileColumn({ profile, isOwner, reviewLink }) {
+export function ProfileColumn({ profile, isOwner, reviewLink, showHighlights = true }) {
   const [long, setLong] = useState(false);
   const fields = profile.fields;
   const meta = [profile.designation, profile.department?.name].filter(Boolean).join(" · ");
@@ -130,7 +130,7 @@ export function ProfileColumn({ profile, isOwner, reviewLink }) {
         </Section>
       )}
 
-      {fields?.teaching_highlights?.length > 0 && (
+      {showHighlights && fields?.teaching_highlights?.length > 0 && (
         <Section title="Teaching highlights">
           <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-body">
             {fields.teaching_highlights.map((h) => (

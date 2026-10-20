@@ -207,7 +207,9 @@ function JobsTable({ jobs, cycleNames }) {
                       <JobStatus status={j.status} />
                     </td>
                     <td className="num px-[var(--card-pad)] text-right max-md:p-0 max-md:text-small lg:px-3">
-                      {j.total == null ? "–" : `${n(j.done)} of ${n(j.total)}`}
+                      {j.total == null
+                        ? "–"
+                        : `${n(j.done)} of ${n(j.total)}${j.kind === "summaries" ? " courses" : ""}`}
                     </td>
                     <td className="num px-3 text-right max-lg:hidden">
                       {formatSeconds(j.seconds)}

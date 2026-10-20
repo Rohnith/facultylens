@@ -9,6 +9,7 @@ so it is grounded by construction; distilbart only writes the optional digest of
 
 import json
 import logging
+import re
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -21,6 +22,7 @@ log = logging.getLogger("facultylens.summaries")
 MAX_EVIDENCE = 40
 MAX_ITEMS = 4
 MIN_MENTIONS = 2  # an aspect needs at least this many mentions to be called a strength or gap
+LOW_RATING = 3.0  # below this mean rating, repeated criticism is a gap even if praise is commoner
 
 
 # --------------------------------------------------------------------------- LLM output schema
@@ -119,7 +121,8 @@ def fallback_items(stats: dict[str, Any]) -> tuple[list[dict], list[dict]]:
     rows = [r for r in _aspect_rows(stats) if r["mentions"] >= MIN_MENTIONS]
     strengths = []
     for r in sorted(rows, key=lambda r: (-r["positive"], -(r["rating_out_of_5"] or 0))):
-        if r["positive"] < MIN_MENTIONS or r["positive"] <= r["negative"]:
+        low = r["rating_out_of_5"] is not None and r["rating_out_of_5"] < LOW_RATING
+        if r["positive"] < MIN_MENTIONS or r["positive"] <= r["negative"] or low:
             continue
         ids = _ids(stats, r["aspect"], "positive")
         if not ids:
@@ -132,10 +135,17 @@ def fallback_items(stats: dict[str, Any]) -> tuple[list[dict], list[dict]]:
                 "evidence_ids": ids,
             }
         )
+    praised = {s["aspect"] for s in strengths[:MAX_ITEMS]}
     improvements = []
     for r in sorted(rows, key=lambda r: (-r["negative"], r["rating_out_of_5"] or 5)):
-        if r["negative"] < MIN_MENTIONS:
+        # A gap needs repeated criticism that at least matches the praise (or a low rating),
+        # and an aspect is never listed as both a strength and a gap.
+        low = r["rating_out_of_5"] is not None and r["rating_out_of_5"] < LOW_RATING
+        if r["negative"] < MIN_MENTIONS or r["aspect"] in praised:
             continue
+        if r["negative"] < r["positive"] and not low:
+            continue
+
         ids = _ids(stats, r["aspect"], "negative")
         if not ids:
             continue
@@ -173,7 +183,8 @@ def digest(pool: list[dict[str, Any]]) -> str | None:
     try:
         from app.nlp import registry
 
-        return registry.get("summarizer").summarize(" ".join(texts[:14]), max_new_tokens=90)
+        text = registry.get("summarizer").summarize(" ".join(texts[:14]), max_new_tokens=90)
+        return re.sub(r"\s+([.,;:!?])", r"\1", text)  # the tokenizer leaves "word ." spacing
     except Exception:  # the digest is optional; never fail the summary for it
         log.exception("summariser failed")
         return None
