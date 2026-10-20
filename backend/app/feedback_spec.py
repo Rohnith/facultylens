@@ -114,3 +114,18 @@ def likert_keys(form_type: str) -> list[str]:
 
 def text_keys(form_type: str) -> list[str]:
     return [k for k, _ in (TEACHING_TEXTS if form_type == "teaching" else CURRICULUM_TEXTS)]
+
+# Gendered-language lexicons for the bias panel (SPEC §11.7). "Ability" words are used more
+# for men and "warmth" words more for women in published studies of student evaluations; the
+# panel counts answers that use them, by the teacher's recorded gender, at department level.
+ABILITY_WORDS: Final = ["brilliant", "genius", "smart", "intelligent", "gifted", "expert"]
+WARMTH_WORDS: Final = [
+    "helpful",
+    "caring",
+    "kind",
+    "patient",
+    "supportive",
+    "organised",
+    "organized",
+    "friendly",
+]

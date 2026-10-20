@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     aspect_sim: float = 0.35
     sarc_flag: float = 0.95
 
+    # ---- Bias & sarcasm panel (SPEC §11.7) ----
+    bias_min_group_faculty: int = Field(default=3, ge=2)
+    bias_min_group_answers: int = Field(default=30, ge=1)
+
     # ---- LLM ----
     groq_api_key: str = ""
     groq_model: str = "openai/gpt-oss-120b"

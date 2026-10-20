@@ -116,49 +116,67 @@ def _ids(stats: dict[str, Any], key: str, polarity: str) -> list[str]:
     return [e["id"] for e in evidence.get(polarity, [])]
 
 
+def choose_aspects(
+    stats: dict[str, Any], need_evidence: bool = True
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Which aspects count as strengths and which as gaps, best first (one rule everywhere).
+
+    An aspect needs MIN_MENTIONS mentions. A strength is praised more than criticised and not
+    rated below LOW_RATING. A gap is criticised at least as often as praised (or rated below
+    LOW_RATING) and is never also a strength. With need_evidence, an aspect without evidence
+    sentences of that polarity is skipped (a summary must be able to cite something).
+    """
+    rows = [r for r in _aspect_rows(stats) if r["mentions"] >= MIN_MENTIONS]
+
+    def has(r, polarity):
+        return not need_evidence or bool(_ids(stats, r["aspect"], polarity))
+
+    def low(r):
+        return r["rating_out_of_5"] is not None and r["rating_out_of_5"] < LOW_RATING
+
+    strengths = [
+        r
+        for r in sorted(rows, key=lambda r: (-r["positive"], -(r["rating_out_of_5"] or 0)))
+        if r["positive"] >= MIN_MENTIONS
+        and r["positive"] > r["negative"]
+        and not low(r)
+        and has(r, "positive")
+    ][:MAX_ITEMS]
+    praised = {r["aspect"] for r in strengths}
+    gaps = [
+        r
+        for r in sorted(rows, key=lambda r: (-r["negative"], r["rating_out_of_5"] or 5))
+        if r["negative"] >= MIN_MENTIONS
+        and r["aspect"] not in praised
+        and (r["negative"] >= r["positive"] or low(r))
+        and has(r, "negative")
+    ][:MAX_ITEMS]
+    return strengths, gaps
+
+
 def fallback_items(stats: dict[str, Any]) -> tuple[list[dict], list[dict]]:
     """Strengths and improvements chosen from the aspect counts, each with its evidence ids."""
-    rows = [r for r in _aspect_rows(stats) if r["mentions"] >= MIN_MENTIONS]
-    strengths = []
-    for r in sorted(rows, key=lambda r: (-r["positive"], -(r["rating_out_of_5"] or 0))):
-        low = r["rating_out_of_5"] is not None and r["rating_out_of_5"] < LOW_RATING
-        if r["positive"] < MIN_MENTIONS or r["positive"] <= r["negative"] or low:
-            continue
-        ids = _ids(stats, r["aspect"], "positive")
-        if not ids:
-            continue
-        strengths.append(
-            {
-                "text": f"Students most often praise {r['label'].lower()}: "
-                f"{_plural(r['positive'], 'positive mention')}{_rating(r['rating_out_of_5'])}.",
-                "aspect": r["aspect"],
-                "evidence_ids": ids,
-            }
-        )
-    praised = {s["aspect"] for s in strengths[:MAX_ITEMS]}
-    improvements = []
-    for r in sorted(rows, key=lambda r: (-r["negative"], r["rating_out_of_5"] or 5)):
-        # A gap needs repeated criticism that at least matches the praise (or a low rating),
-        # and an aspect is never listed as both a strength and a gap.
-        low = r["rating_out_of_5"] is not None and r["rating_out_of_5"] < LOW_RATING
-        if r["negative"] < MIN_MENTIONS or r["aspect"] in praised:
-            continue
-        if r["negative"] < r["positive"] and not low:
-            continue
-
-        ids = _ids(stats, r["aspect"], "negative")
-        if not ids:
-            continue
-        improvements.append(
-            {
-                "text": f"{r['label']} draws the most criticism: "
-                f"{_plural(r['negative'], 'negative mention')}{_rating(r['rating_out_of_5'])}.",
-                "aspect": r["aspect"],
-                "evidence_ids": ids,
-                "suggested_action": SUGGESTED_ACTIONS[r["aspect"]],
-            }
-        )
-    return strengths[:MAX_ITEMS], improvements[:MAX_ITEMS]
+    chosen_strengths, chosen_gaps = choose_aspects(stats)
+    strengths = [
+        {
+            "text": f"Students most often praise {r['label'].lower()}: "
+            f"{_plural(r['positive'], 'positive mention')}{_rating(r['rating_out_of_5'])}.",
+            "aspect": r["aspect"],
+            "evidence_ids": _ids(stats, r["aspect"], "positive"),
+        }
+        for r in chosen_strengths
+    ]
+    improvements = [
+        {
+            "text": f"{r['label']} draws the most criticism: "
+            f"{_plural(r['negative'], 'negative mention')}{_rating(r['rating_out_of_5'])}.",
+            "aspect": r["aspect"],
+            "evidence_ids": _ids(stats, r["aspect"], "negative"),
+            "suggested_action": SUGGESTED_ACTIONS[r["aspect"]],
+        }
+        for r in chosen_gaps
+    ]
+    return strengths, improvements
 
 
 def overall_sentence(stats: dict[str, Any]) -> str:
