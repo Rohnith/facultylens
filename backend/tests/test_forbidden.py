@@ -75,6 +75,9 @@ ENDPOINTS = [
     ("PUT", "/api/faculty/{user}/profile/versions/1", OWNER, PROFILE_FIELDS),
     ("POST", "/api/faculty/{user}/profile/versions/1/approve", {"faculty"}, None),
     ("GET", "/api/faculty/{user}/profile", {"admin", "hod", "faculty"}, None),
+    # Unified page: any staff member gets the profile; feedback evidence is owner, HoD, admin.
+    ("GET", "/api/faculty/{user}/overview", {"admin", "hod", "faculty"}, None),
+    ("GET", "/api/faculty/{user}/evidence?ids=x", {"admin", "hod", "faculty"}, None),
     # Feedback collection: {cycle} is open with a teaching form {form} for the CSE offering.
     ("GET", "/api/cycles", STAFF, None),
     ("POST", "/api/cycles", {"admin"}, CYCLE),
