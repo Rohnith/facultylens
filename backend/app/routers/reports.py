@@ -68,7 +68,7 @@ async def draft_actions(cycle: str, db: Db, admin: AdminUser) -> dict:
     minimum = get_settings().min_responses_for_display
     fresh = await asyncio.to_thread(atr.draft, departments, forms, minimum)
     existing = await db.action_taken.find({"cycle_id": doc["_id"]}).to_list()
-    inserts, replaces, kept = atr.merge(existing, fresh)
+    inserts, replaces, removes, kept = atr.merge(existing, fresh)
     stamp = now()
 
     def stored(row: dict[str, Any]) -> dict[str, Any]:
@@ -84,8 +84,11 @@ async def draft_actions(cycle: str, db: Db, admin: AdminUser) -> dict:
         await db.action_taken.insert_many([{**stored(r), "created_at": stamp} for r in inserts])
     for row_id, row in replaces:
         await db.action_taken.update_one({"_id": row_id}, {"$set": stored(row)})
-    await record(db, admin, "naac.draft", cycle, {"added": len(inserts), "replaced": len(replaces)})
-    return {"added": len(inserts), "replaced": len(replaces), "kept": kept, "issues": len(fresh)}
+    if removes:
+        await db.action_taken.delete_many({"_id": {"$in": removes}})
+    counts = {"added": len(inserts), "replaced": len(replaces), "removed": len(removes)}
+    await record(db, admin, "naac.draft", cycle, counts)
+    return {**counts, "kept": kept, "issues": len(fresh)}
 
 
 @router.get("/{cycle}/actions")

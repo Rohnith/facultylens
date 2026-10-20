@@ -26,6 +26,7 @@ from app.nlp.summarize import choose_aspects
 log = logging.getLogger("facultylens.atr")
 
 MAX_EVIDENCE = 12
+MIN_COURSES = 2  # an issue must come up in this many of a department's courses
 LOW_CURRICULUM_RATING = 3.0
 DEFAULT_TIMELINE = "Before the next feedback cycle"
 
@@ -60,7 +61,11 @@ def teaching_issues(dept: dict[str, Any], forms: list[dict[str, Any]], minimum: 
             row["evidence"] += [e["id"] for e in negative]
             row["examples"] += [e["text"] for e in negative]
     rows = []
+    # One course would point at one teacher in a published, department-level report.
+    min_courses = MIN_COURSES if len(usable) >= MIN_COURSES else 1
     for key, r in sorted(found.items(), key=lambda kv: (-kv[1]["courses"], -kv[1]["mentions"])):
+        if r["courses"] < min_courses:
+            continue
         label = ASPECT_LABELS[key]
         rows.append(
             {
@@ -218,16 +223,27 @@ def draft(
 def merge(existing: list[dict[str, Any]], fresh: list[dict[str, Any]]):
     """Re-drafting: replace untouched drafts, add new issues, keep edited or approved rows.
 
-    Returns (to_insert, to_replace [(id, row)], kept_count).
+    An untouched draft whose issue no longer comes out of the data is removed; anything a
+    person edited, approved or added by hand is never touched.
+    Returns (to_insert, to_replace [(id, row)], to_remove [ids], kept_count).
     """
+
+    def untouched(row: dict[str, Any]) -> bool:
+        return (
+            row.get("status") == "draft" and not row.get("edited") and row.get("source") != "manual"
+        )
+
     by_key = {(e["department_id"], e["kind"], e["key"]): e for e in existing}
+    fresh_keys = {(r["department_id"], r["kind"], r["key"]) for r in fresh}
     inserts, replaces, kept = [], [], 0
     for row in fresh:
         old = by_key.get((row["department_id"], row["kind"], row["key"]))
         if old is None:
             inserts.append(row)
-        elif old.get("status") == "draft" and not old.get("edited"):
+        elif untouched(old):
             replaces.append((old["_id"], row))
         else:
             kept += 1
-    return inserts, replaces, kept
+    removes = [e["_id"] for key, e in by_key.items() if key not in fresh_keys and untouched(e)]
+    kept += sum(1 for key, e in by_key.items() if key not in fresh_keys and not untouched(e))
+    return inserts, replaces, removes, kept

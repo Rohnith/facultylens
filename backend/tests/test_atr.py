@@ -133,8 +133,37 @@ def test_merge_keeps_edited_and_approved_rows():
             "key": "assessment",
             "status": "approved",
         },
+        {
+            "_id": 4,
+            "department_id": "d1",
+            "kind": "teaching",
+            "key": "behaviour",
+            "status": "draft",
+        },
+        {
+            "_id": 5,
+            "department_id": "d1",
+            "kind": "other",
+            "key": "manual:x",
+            "status": "draft",
+            "source": "manual",
+        },
+        {
+            "_id": 6,
+            "department_id": "d1",
+            "kind": "teaching",
+            "key": "knowledge",
+            "status": "approved",
+        },
     ]
-    inserts, replaces, kept = atr.merge(existing, fresh)
+    inserts, replaces, removes, kept = atr.merge(existing, fresh)
     assert [r["key"] for r in inserts] == ["practical"]
     assert [(i, r["key"]) for i, r in replaces] == [(1, "pace")]
-    assert kept == 2
+    assert removes == [4]  # an untouched draft the data no longer supports
+    assert kept == 4  # edited, approved, manual, and the approved row no longer in the data
+
+
+def test_an_issue_from_one_course_is_not_a_department_row():
+    forms = [teaching("a"), teaching("b", pace=(5, 1)), teaching("c", pace=(5, 1))]
+    assert atr.teaching_issues(CSE, forms, minimum=5) == []  # 1 of 3 would single out a teacher
+    assert [r["key"] for r in atr.teaching_issues(CSE, [teaching("a")], minimum=5)] == ["pace"]

@@ -6,7 +6,7 @@ FacultyLens builds one page per faculty member. It joins an auto-generated profi
 
 Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-> **Status: Phase 6 (analytics and the bias panel).** Sign-in for all four roles, admin setup, faculty profiles with ORCID / Semantic Scholar import, anonymous once-only feedback, the CPU NLP pipeline with moderation, grounded summaries, generated profiles and the unified faculty page all work. HoDs and the IQAC team now have department insights and a bias & sarcasm panel that hides itself when groups are too small. The NAAC report comes next. Feature phases follow SPEC §14.
+> **Status: Phase 7 (NAAC report).** Sign-in for all four roles, admin setup, faculty profiles with imports, anonymous feedback, the CPU NLP pipeline with moderation, grounded summaries, generated profiles, the unified faculty page, department insights and the bias & sarcasm panel all work. The IQAC team can now draft, approve and export the NAAC Criterion 1.4 Feedback Analysis and Action Taken Report as PDF and Word. The evaluation module comes next. Feature phases follow SPEC §14.
 
 ## Demo data
 
@@ -165,6 +165,14 @@ Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. R
   - the possibly-sarcastic rate.
 - **When it hides itself:** unless each group has at least `BIAS_MIN_GROUP_FACULTY` teachers (3) and `BIAS_MIN_GROUP_ANSWERS` answers (30), it shows only the group sizes. In the demo data, CSE (3 women, 3 men) shows the comparison and ECE (2 women, 3 men) does not.
 - On the demo data every interval includes zero ("no clear difference"), even though some point gaps look large. With 3 teachers per group, individual teachers dominate; see `docs/MODEL_CHECK.md`. The API answers in under 35 ms at p95.
+
+## NAAC report (Criterion 1.4)
+
+1. As admin, open **NAAC report**, pick the cycle and press **Draft action items**. Each row is an issue for a whole department, such as "Pace & syllabus coverage was raised in 4 of 6 CSE courses", or a low-rated curriculum item. The suggested action comes from Groq if a key is set, otherwise from a fixed table.
+2. Edit each action so the department will really do it, then approve it. HoDs can do the same for their department under **Department insights → Action taken**. Re-drafting never overwrites a row someone edited or approved.
+3. **Preview PDF / Word** works at any time and is marked "DRAFT – not for submission" on every page. **Download PDF / Word** unlocks when every action is approved.
+
+The report has these sections: the cover, feedback collection by department and course, methodology in plain words (including the models used), teaching analysis with charts and anonymised, redacted sample comments, curriculum feedback (1.4.1), the Action Taken Report, and the statement for the website (1.4.2) with signature lines. It is built for publication, so it reports departments and never names or scores an individual teacher.
 
 ## Repository layout
 

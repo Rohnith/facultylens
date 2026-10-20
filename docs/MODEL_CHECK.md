@@ -114,3 +114,18 @@ What the pipeline flagged: hidden 19, review 0, pii 16, sarcastic 37 (answers; P
 Budget: 300 responses in under 10 minutes on a 4-core CPU (SPEC §13).
 
 Sarcasm flag (`SARC_FLAG=0.95`) against the seed's own sarcastic lines: 37 answers flagged, 22 of the 22 seeded sarcastic answers among them (precision 0.59, recall 1.0). The irony model is trained on tweets and scores short sincere praise almost as high as sarcasm (0.97-0.99 against 0.98-0.99), so no threshold separates them; at the earlier 0.70 it flagged 181 answers for 22 seeded ones (precision 0.12). Flags are shown as *possibly* sarcastic and only halve an answer's weight; Phase 8 measures this on hand-labelled comments.
+
+## NAAC report export (Phase 7)
+
+Measured on 2026-10-20 against the running API on the seeded cycle (614 responses, 12 approved actions), with no LLM key.
+
+| Export | Size | Time |
+|---|---:|---:|
+| PDF, 9 pages (3 chart images) | 235 KB | 1.8 s |
+| DOCX | 242 KB | 0.7 s |
+
+Both files were read back (pypdf, python-docx) and searched for the seed's raw student data:
+- every raw phone number (6) and roll number (6) that appears in student answers;
+- every teacher's full name (11) and surname.
+
+None appeared. Draft previews carry the "DRAFT – not for submission" mark on every page; the final files carry none.

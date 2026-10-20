@@ -239,6 +239,24 @@ Notes:
 - **Department overview:** a teacher's top strength and area to improve use the same rule as the summaries (`summarize.choose_aspects`), applied to their combined offerings.
 - **Demo seed:** one more CSE teacher (Mr. Naveen Kumar, CS504 Operating Systems). CSE then has 3 women and 3 men and shows the comparison; ECE (2 women, 3 men) shows the "too small" state. He is added last, so earlier responses are identical.
 
+*Changed in Phase 7 (agreed with the user, 2026-10-20):*
+- **ATR level:** Action Taken rows are **department × aspect** (and department × curriculum item, plus a "syllabus comments" row when most comments are critical), not teacher × course. The report is published on the college website, so it never names or scores an individual teacher. Teacher-level detail stays inside the app.
+- **`action_taken` collection:** `cycle_id, department_id, kind (teaching | curriculum | other), key, label, issue, evidence_count, evidence_ids, action, responsible, timeline, status (draft | approved), source, edited`. It is unique on cycle + department + kind + key.
+  - Re-drafting replaces only untouched drafts. It never overwrites an edited or approved row.
+  - An edit reopens an approved row.
+- **Export gate:** `GET /reports/naac/{cycle}.pdf|.docx` returns 409 until every row is approved. `?draft=true` gives a preview at any time, marked "DRAFT – not for submission" on every page. Exports are admin-only and audited.
+- **Added endpoints:**
+  - `POST /reports/naac/{cycle}/actions` (manual row);
+  - `PUT /reports/naac/{cycle}/actions/{id}` (edit or approve; replaces the single `PUT …/actions`);
+  - `DELETE …/actions/{id}` (admin);
+  - `GET …/actions/{id}/evidence` (the redacted sentences behind a row, for the admin or the department's HoD);
+  - `GET …/status` (readiness).
+- **Report sections** follow §12, with the methodology in plain words and the models listed by ID.
+  - Charts are rendered with matplotlib.
+  - The PDF (fpdf2, with DejaVu Sans from matplotlib for Unicode) and the DOCX (python-docx) are drawn from one list of content blocks, so they say the same thing.
+- **HoD approval** happens in a third tab, "Action taken", on Department insights.
+- **Dev dependency:** `pypdf` (in `requirements-dev.txt`), used only by tests that read the exported PDF back.
+
 ---
 
 ## 10. API (all under `/api`; JSON; JWT bearer)

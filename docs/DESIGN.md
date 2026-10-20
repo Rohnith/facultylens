@@ -217,6 +217,23 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - **Method:** a "How these numbers are made" disclosure.
 - **My page:** "Across your courses" (only with two or more offerings in a cycle). Each course name selects that course below; an "All courses" line closes the table.
 
+## Phase 7 additions
+
+- **NAAC report builder** (`/admin/reports`): the cycle picker, then "Draft action items" (secondary; its title says edited and approved rows are never overwritten). Below that are two columns:
+  - **Left:** the Action Taken rows grouped by department in cards. Each card header shows "n of m approved" and a ghost "Add an action".
+  - **Right (sticky):** "Ready to export?" as a checklist with small round marks (✓ in the positive tint when done; screen-reader text says "Done"/"Not yet"), then the Export card.
+- **Export card:**
+  - "Download PDF" (the one primary) and "Word (.docx)" (secondary) unlock only when the report is ready. The reason sits under them in muted text ("3 actions still need approval").
+  - Draft previews are always-on underlined text buttons below a rule, so a preview never competes with the final export.
+  - Files download as blobs with the session token; a status line names the file.
+- **Action Taken row** (`components/ActionTable.jsx`, shared with the HoD tab):
+  - **Pills:** a status pill (Needs approval warning, Approved positive) and a neutral "Teaching · Pace & syllabus coverage" pill. Then the evidence count, and who drafted it (template or AI model, and whether it was edited).
+  - **Body:** the issue as body text, then Action / Responsible / Timeline as a small definition list (three columns on desktop).
+  - **Row actions:** small buttons. Approve (secondary) or Reopen (ghost), Edit, "Show the comments" (opens the evidence drawer with the row's own loader), and Delete for manual rows (admin only, after a native confirm).
+  - **Editing** happens in place on a `--raised` panel built from `Field` controls, with "Save and approve", "Save as draft" and Cancel.
+- **HoD "Action taken" tab** on Department insights: one paragraph saying what the rows are for and how many still need approval, then the same table for their department.
+- **The printed report** keeps the app's restraint: DejaVu Sans, black ink, the sentiment trio and the single chart blue in the charts, light grey table headings, and the draft mark at 10% opacity across each page.
+
 ## States (every block)
 
 - **Loading:** final layout with skeleton bars.

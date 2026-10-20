@@ -179,7 +179,7 @@ export function ReportsPage() {
     try {
       const r = await reportsApi.draft(cycleId);
       setNotice(
-        `${r.added} new, ${r.replaced} refreshed, ${r.kept} kept as you left them (edited or approved).`,
+        `${r.added} new, ${r.replaced} refreshed, ${r.removed} no longer supported by the feedback and removed, ${r.kept} kept as you left them (edited, approved or added by hand).`,
       );
       refresh();
     } catch (err) {
@@ -211,15 +211,12 @@ export function ReportsPage() {
       </PageHeader>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <label className="flex flex-col gap-1.5 md:w-72">
-          <span className="text-small text-muted">Cycle</span>
-          {cycles.data ? (
-            <Select
-              value={cycleId ?? ""}
-              onChange={(e) => setPicked(e.target.value)}
-              disabled={list.length < 2}
-            >
-              {list.length === 0 && <option value="">No published cycles</option>}
+        {!cycles.data ? (
+          <span className="skeleton h-10 w-full md:w-72" />
+        ) : list.length > 1 ? (
+          <label className="flex flex-col gap-1.5 md:w-72">
+            <span className="text-small text-muted">Cycle</span>
+            <Select value={cycleId ?? ""} onChange={(e) => setPicked(e.target.value)}>
               {list.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -227,10 +224,17 @@ export function ReportsPage() {
                 </option>
               ))}
             </Select>
-          ) : (
-            <span className="skeleton h-10 w-full" />
-          )}
-        </label>
+          </label>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            <span className="text-small text-muted">Cycle</span>
+            <span className="text-body font-medium">
+              {list[0]
+                ? `${list[0].name}${list[0].status === "open" ? " (open)" : ""}`
+                : "No published cycles yet"}
+            </span>
+          </div>
+        )}
         <button
           type="button"
           className="btn btn-secondary"
@@ -281,7 +285,7 @@ export function ReportsPage() {
               onAdd={s.actions > 0 ? setAdding : undefined}
             />
           </div>
-          <aside className="flex flex-col gap-[var(--gap)] lg:sticky lg:top-6">
+          <aside className="flex flex-col gap-[var(--gap)] max-lg:order-first lg:sticky lg:top-6">
             <section aria-labelledby="ready-h" className="card p-[var(--card-pad)]">
               <h2 id="ready-h" className="m-0 mb-3 text-section font-medium">
                 Ready to export?

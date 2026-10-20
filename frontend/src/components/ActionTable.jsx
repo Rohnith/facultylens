@@ -156,7 +156,7 @@ function Row({ row, cycleId, canDelete, onChanged, onEvidence }) {
       ) : (
         <>
           <p className="m-0 max-w-[80ch] text-body">{row.issue}</p>
-          <dl className="m-0 grid gap-x-6 gap-y-1 text-body md:grid-cols-[minmax(0,1fr)_auto_auto]">
+          <dl className="m-0 grid gap-x-6 gap-y-1 text-body md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
             <div className="flex flex-col">
               <dt className="text-small text-muted">Action</dt>
               <dd className="m-0">{row.action}</dd>

@@ -99,7 +99,9 @@ def blocks(data: dict[str, Any]) -> list[Block]:
     # 2 ----------------------------------------------------------------------------------
     teach = "; ".join(f"{label}" for label, _ in data["questionnaire"]["teaching"])
     curr = "; ".join(f"{label}" for label, _ in data["questionnaire"]["curriculum"])
-    engines = ", ".join(f"{n} by {e}" for e, n in data["summary_engines"].items()) or "not yet"
+    engines = (
+        " and ".join(f"{e} ({n})" for e, n in data["summary_engines"].items()) or "nothing yet"
+    )
     th = data["thresholds"]
     out += [
         ("pagebreak",),
@@ -131,7 +133,7 @@ def blocks(data: dict[str, Any]) -> list[Block]:
             "to the teaching aspects it mentions with the tone for each, and checked for emotion "
             "and possible sarcasm; praise that reads as sarcastic counts half. Net sentiment is "
             "the share of positive answers minus the share of negative answers (from -1 to +1). "
-            f"Course summaries were written {engines}, citing the comments that support each point. "
+            f"Course summaries were written by {engines}, each citing the comments that support it. "
             "All processing runs on the college's own computer; only summaries, when an AI model "
             "is configured, are written by an external service from already-redacted text.",
         ),
@@ -219,25 +221,34 @@ def blocks(data: dict[str, Any]) -> list[Block]:
             f"Head of Department or the IQAC coordinator ({approved} of {len(data['actions'])} "
             "approved).",
         ),
-        (
-            "table",
-            ["Department", "Issue", "Evidence", "Action", "Responsible", "Timeline", "Status"],
-            [
-                [
-                    a["department"],
-                    f"{a['topic']}: {a['issue']}",
-                    a["evidence_count"],
-                    a["action"],
-                    a["responsible"],
-                    a["timeline"],
-                    a["status"].title(),
-                ]
-                for a in data["actions"]
-            ]
-            or [["–", "No actions recorded yet.", "", "", "", "", ""]],
-            [24, 46, 15, 46, 24, 18, 17],
-        ),
     ]
+    if not data["actions"]:
+        out.append(("p", "No actions recorded yet."))
+    for dept in dict.fromkeys(a["department"] for a in data["actions"]):
+        rows = [a for a in data["actions"] if a["department"] == dept]
+        out += [
+            ("h2", dept),
+            (
+                "table",
+                ["Issue", "Count", "Action", "Responsible", "Timeline", "Status"],
+                [
+                    [
+                        a["issue"]
+                        if a["topic"].lower() in a["issue"].lower()
+                        else f"{a['topic']}: {a['issue']}",
+                        f"{a['evidence_count']} ratings"
+                        if a["kind"] == "curriculum" and a["topic"] != "Syllabus comments"
+                        else (a["evidence_count"] or "–"),
+                        a["action"],
+                        a["responsible"],
+                        a["timeline"],
+                        a["status"].title(),
+                    ]
+                    for a in rows
+                ],
+                [54, 21, 52, 30, 24, 21],
+            ),
+        ]
     # 6 ----------------------------------------------------------------------------------
     out += [
         ("h1", "6. Statement for publication (1.4.2)"),
@@ -307,10 +318,10 @@ def render_pdf(data: dict[str, Any], charts: dict[str, bytes], draft: bool) -> b
         elif kind == "title":
             pdf.ln(40)
             pdf.set_font("DejaVu", "B", 22)
-            pdf.multi_cell(width, 11, block[1])
+            pdf.multi_cell(width, 11, block[1], new_x="LMARGIN", new_y="NEXT")
         elif kind == "subtitle":
             pdf.set_font("DejaVu", "", 16)
-            pdf.multi_cell(width, 9, block[1])
+            pdf.multi_cell(width, 9, block[1], new_x="LMARGIN", new_y="NEXT")
             pdf.ln(2)
         elif kind == "kv":
             pdf.ln(8)
@@ -318,26 +329,28 @@ def render_pdf(data: dict[str, Any], charts: dict[str, bytes], draft: bool) -> b
                 pdf.set_font("DejaVu", "B", 10)
                 pdf.cell(55, 7, k)
                 pdf.set_font("DejaVu", "", 10)
-                pdf.multi_cell(width - 55, 7, str(v))
+                pdf.multi_cell(width - 55, 7, str(v), new_x="LMARGIN", new_y="NEXT")
         elif kind in ("h1", "h2", "h3"):
             size = {"h1": 15, "h2": 12, "h3": 10.5}[kind]
+            if pdf.get_y() > pdf.h - 40:  # never leave a heading alone at the foot of a page
+                pdf.add_page()
             pdf.ln(4 if kind != "h1" else 2)
             pdf.set_font("DejaVu", "B", size)
-            pdf.multi_cell(width, size * 0.55, block[1])
+            pdf.multi_cell(width, size * 0.55, block[1], new_x="LMARGIN", new_y="NEXT")
             pdf.ln(1.5)
         elif kind == "p":
             pdf.set_font("DejaVu", "", 10)
-            pdf.multi_cell(width, 5.2, block[1])
+            pdf.multi_cell(width, 5.2, block[1], new_x="LMARGIN", new_y="NEXT")
             pdf.ln(2.5)
         elif kind == "bullet":
             pdf.set_font("DejaVu", "", 10)
-            pdf.multi_cell(width, 5.2, f"• {block[1]}")
+            pdf.multi_cell(width, 5.2, f"• {block[1]}", new_x="LMARGIN", new_y="NEXT")
             pdf.ln(1)
         elif kind == "quote":
             pdf.set_font("DejaVu", "I", 9.5)
             pdf.set_x(pdf.l_margin + 6)
             pdf.set_text_color(70, 75, 82)
-            pdf.multi_cell(width - 6, 5, f"“{block[1]}”")
+            pdf.multi_cell(width - 6, 5, f"“{block[1]}”", new_x="LMARGIN", new_y="NEXT")
             pdf.set_text_color(14, 15, 17)
             pdf.ln(1)
         elif kind == "image":
@@ -345,7 +358,7 @@ def render_pdf(data: dict[str, Any], charts: dict[str, bytes], draft: bool) -> b
                 pdf.image(io.BytesIO(charts[block[1]]), w=width)
                 pdf.set_font("DejaVu", "", 8.5)
                 pdf.set_text_color(90, 96, 104)
-                pdf.multi_cell(width, 4.5, block[2])
+                pdf.multi_cell(width, 4.5, block[2], new_x="LMARGIN", new_y="NEXT")
                 pdf.set_text_color(14, 15, 17)
                 pdf.ln(3)
         elif kind == "table":
