@@ -130,3 +130,13 @@ WARMTH_WORDS: Final = [
     "organized",
     "friendly",
 ]
+
+# Templated next steps for curriculum issues in the NAAC Action Taken Report (no-LLM path).
+CURRICULUM_ACTIONS: Final = {
+    "syllabus_relevance": "Review the syllabus with the Board of Studies and add current topics.",
+    "outcomes_clarity": "State the course outcomes in the first class and map each unit to them.",
+    "lab_adequacy": "Add lab hours or experiments and check equipment before the semester.",
+    "reference_material": "Update the reference list and add recent editions to the library.",
+    "comments": "Discuss the recurring syllabus comments in the next Board of Studies meeting.",
+}
+CURRICULUM_LABELS: Final = {c[0]: c[1] for c in CURRICULUM_ITEMS}

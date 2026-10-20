@@ -16,7 +16,7 @@ from app.nlp import registry
 from app.pipeline import analytics
 from app.pipeline.aggregate import effective_field
 from app.routers.overview import _sees_feedback, _target
-from app.services.forms_data import course_brief, cycle_brief, response_counts
+from app.services.forms_data import cycle_brief, form_rows
 from app.utils import oid, to_jsonable
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -49,36 +49,6 @@ def _pick_cycle(cycles: list[dict[str, Any]], cycle: str | None) -> dict[str, An
             raise HTTPException(status.HTTP_404_NOT_FOUND, "No teaching forms in that cycle")
         return chosen
     return cycles[0] if cycles else None
-
-
-async def _form_data(db: Db, forms: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Forms with what the analytics need: counts, course, stored aggregate and summary."""
-    if not forms:
-        return []
-    ids = [f["_id"] for f in forms]
-    counts = await response_counts(db, ids)
-    courses = {
-        c["_id"]: c
-        async for c in db.courses.find({"_id": {"$in": list({f["course_id"] for f in forms})}})
-    }
-    aggregates = {
-        a["form_id"]: a["stats"]
-        async for a in db.aggregates.find(
-            {"form_id": {"$in": ids}, "model_version": registry.model_version()},
-            {"form_id": 1, "stats": 1},
-        )
-    }
-    return [
-        {
-            "form_id": f["_id"],
-            "faculty_id": f.get("faculty_id"),
-            "course": course_brief(courses[f["course_id"]]),
-            "responses": counts.get(f["_id"], 0),
-            "eligible": len(courses[f["course_id"]].get("student_ids", [])),
-            "stats": aggregates.get(f["_id"]),
-        }
-        for f in forms
-    ]
 
 
 async def _department_forms(db: Db, dept_id, cycle_id) -> list[dict[str, Any]]:
@@ -124,7 +94,7 @@ async def _department_scope(db: Db, user: User, department: str, cycle: str | No
     cycles = await _cycles_for(db, {"course_id": {"$in": course_ids}})
     chosen = _pick_cycle(cycles, cycle)
     forms = (
-        await _form_data(db, await _department_forms(db, dept["_id"], chosen["_id"]))
+        await form_rows(db, await _department_forms(db, dept["_id"], chosen["_id"]))
         if chosen
         else []
     )
@@ -163,7 +133,7 @@ async def faculty_analytics(
         "combined": None,
     }
     if chosen:
-        forms = await _form_data(
+        forms = await form_rows(
             db,
             await db.forms.find(
                 {"faculty_id": target["_id"], "cycle_id": chosen["_id"], "type": "teaching"}
@@ -242,7 +212,7 @@ async def sarcasm(
         if not _sees_feedback(user, target):
             raise HTTPException(status.HTTP_403_FORBIDDEN, "You can't see this feedback.")
         chosen = _pick_cycle(await _cycles_for(db, {"faculty_id": target["_id"]}), cycle)
-        forms = await _form_data(
+        forms = await form_rows(
             db,
             await db.forms.find(
                 {"faculty_id": target["_id"], "cycle_id": chosen["_id"], "type": "teaching"}
