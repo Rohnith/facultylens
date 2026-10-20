@@ -42,6 +42,9 @@
   --sent-positive: #2a78d6;
   --sent-neutral: #8a8a8a;
   --sent-negative: #e34948;
+  /* Two compared groups (bias panel): categorical slots 1 and 2, validated with the dataviz script. */
+  --group-1: #2a78d6;
+  --group-2: #eb6834;
 
   /* Status (pale pill with dark ink of the same hue; text colours pass 4.5:1). */
   --positive: #247b50;
@@ -107,6 +110,8 @@
     --sent-positive: #3987e5;
     --sent-neutral: #a3a3a3;
     --sent-negative: #e66767;
+    --group-1: #3987e5;
+    --group-2: #d95926;
     --positive: #3fc07a;
     --negative: #e5566f;
     --warning: #f0b45a;
@@ -145,6 +150,8 @@
   --sent-positive: #3987e5;
   --sent-neutral: #a3a3a3;
   --sent-negative: #e66767;
+  --group-1: #3987e5;
+  --group-2: #d95926;
   --positive: #3fc07a;
   --negative: #e5566f;
   --warning: #f0b45a;

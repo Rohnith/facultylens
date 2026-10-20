@@ -21,6 +21,9 @@ import { FeedbackFormPage } from "./pages/student/FeedbackFormPage";
 import { MyFormsPage } from "./pages/student/MyFormsPage";
 
 // The unified page carries Recharts; load it (and the chart library) only when opened.
+const InsightsPage = lazy(() =>
+  import("./pages/insights/InsightsPage").then((m) => ({ default: m.InsightsPage })),
+);
 const FacultyPage = lazy(() =>
   import("./pages/faculty/FacultyPage").then((m) => ({ default: m.FacultyPage })),
 );
@@ -71,6 +74,16 @@ export default function App() {
               element={
                 <Suspense fallback={null}>
                   <FacultyPage />
+                </Suspense>
+              }
+            />
+          </Route>
+          <Route element={<RequireRole roles={["admin", "hod"]} />}>
+            <Route
+              path="insights"
+              element={
+                <Suspense fallback={null}>
+                  <InsightsPage />
                 </Suspense>
               }
             />

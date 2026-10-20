@@ -136,7 +136,7 @@ function DivergingBar({ polarity, scale, label }) {
 }
 
 /** Every aspect in one table: what students wrote, how they rated it, and whether the two agree. */
-export function Aspects({ insights }) {
+export function Aspects({ insights, showAgreement = true, title = "Teaching aspects" }) {
   const rows = Object.entries(insights.aspects ?? {});
   // Half-width of the bar = the largest one-sided total (neutral is split across the centre).
   const scale = Math.max(
@@ -152,7 +152,7 @@ export function Aspects({ insights }) {
     <section aria-labelledby="aspects-h" className="card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule px-[var(--card-pad)] py-3">
         <h2 id="aspects-h" className="m-0 text-section font-medium">
-          Teaching aspects
+          {title}
         </h2>
         <Legend />
       </div>
@@ -169,22 +169,27 @@ export function Aspects({ insights }) {
                 <span>praise →</span>
               </span>
             </th>
-            <th scope="col" className="h-10 px-3 text-right font-medium">
+            <th
+              scope="col"
+              className={`h-10 text-right font-medium ${showAgreement ? "px-3" : "pr-[var(--card-pad)] pl-3 max-md:pr-4"}`}
+            >
               Rating
             </th>
-            <th scope="col" className="h-10 px-[var(--card-pad)] font-medium max-md:px-4">
-              <abbr
-                title="Do the 1–5 ratings and the tone of the comments point the same way? (Spearman correlation)"
-                className="no-underline"
-              >
-                Agreement
-              </abbr>
-            </th>
+            {showAgreement && (
+              <th scope="col" className="h-10 px-[var(--card-pad)] font-medium max-md:px-4">
+                <abbr
+                  title="Do the 1–5 ratings and the tone of the comments point the same way? (Spearman correlation)"
+                  className="no-underline"
+                >
+                  Agreement
+                </abbr>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
           {rows.map(([key, a]) => {
-            const [cls, text] = AGREEMENT[a.agreement.label] ?? AGREEMENT.too_few;
+            const [cls, text] = AGREEMENT[a.agreement?.label] ?? AGREEMENT.too_few;
             return (
               <tr key={key} className="border-t border-rule">
                 <td className="py-2.5 pl-[var(--card-pad)] max-md:pl-4">
@@ -203,7 +208,9 @@ export function Aspects({ insights }) {
                     <span className="text-small text-faint">No comments on this</span>
                   )}
                 </td>
-                <td className="num px-3 text-right align-middle whitespace-nowrap">
+                <td
+                  className={`num text-right align-middle whitespace-nowrap ${showAgreement ? "px-3" : "pr-[var(--card-pad)] pl-3 max-md:pr-4"}`}
+                >
                   {a.likert_mean == null ? (
                     <span className="text-faint">–</span>
                   ) : (
@@ -213,18 +220,20 @@ export function Aspects({ insights }) {
                     </>
                   )}
                 </td>
-                <td className="pr-[var(--card-pad)] pl-3 max-md:pr-4">
-                  <span
-                    className={`pill ${cls}`}
-                    title={
-                      a.agreement.rho == null
-                        ? `Needs at least 5 students who both rated and commented (have ${a.agreement.n}).`
-                        : `Spearman ρ = ${a.agreement.rho.toFixed(2)} over ${a.agreement.n} students.`
-                    }
-                  >
-                    {text}
-                  </span>
-                </td>
+                {showAgreement && (
+                  <td className="pr-[var(--card-pad)] pl-3 max-md:pr-4">
+                    <span
+                      className={`pill ${cls}`}
+                      title={
+                        a.agreement.rho == null
+                          ? `Needs at least 5 students who both rated and commented (have ${a.agreement.n}).`
+                          : `Spearman ρ = ${a.agreement.rho.toFixed(2)} over ${a.agreement.n} students.`
+                      }
+                    >
+                      {text}
+                    </span>
+                  </td>
+                )}
               </tr>
             );
           })}

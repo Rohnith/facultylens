@@ -97,3 +97,12 @@ export function LensIcon() {
     </Icon>
   );
 }
+
+export function ChartIcon() {
+  return (
+    <Icon>
+      <rect x="2.25" y="2.25" width="11.5" height="11.5" rx="1.5" />
+      <path d="M5 11V8.5M8 11V5M11 11V7" />
+    </Icon>
+  );
+}
