@@ -122,6 +122,25 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - `beforeunload` warns on unsaved edits.
 - **Two-column page:** `minmax(0,1fr) 360px`. The right rail (import, courses taught) comes first in the DOM, so on phones it sits above the long sections.
 
+## Phase 3 additions
+
+- **Rating control** (`components/LikertScale.jsx`):
+  - Five equal segments, each showing its number *and* word (Poor, Fair, Good, Very good, Excellent), so colour never carries the meaning.
+  - Native radios share one name inside a labelled `role="radiogroup"`: arrow keys change the value and Tab moves to the next question.
+  - The selected segment is the near-black primary; segments are at least 48px tall for thumbs.
+  - On desktop the question sits left and the scale right; on phones the scale goes underneath.
+- **Missing answers:**
+  - A missing rating shows only a quiet "Choose a rating." note in `--negative` under its question. There are no red borders on every row.
+  - A single `role="alert"` summary above Submit lists the missing questions as links that focus them.
+  - The live progress counter ("6 of 8 rated") is in the card header.
+- **Anonymity copy:** every student screen says plainly how answers are stored ("without your name or roll number; a one-way code only stops a second submission"). Never "100% anonymous" or other claims.
+- **One primary per list:** in a list of forms only the first pending row gets the primary button; the rest are secondary.
+- **Rate bar** (`components/RateBar.jsx`):
+  - A part-of-whole bar at its true ratio in `--chart-main`, 6px tall on an `--active` track.
+  - The label reads "212 of 288 responses" on the left and the percentage on the right.
+  - It shows a grey dash when nothing is eligible, and is used for response rates everywhere.
+- **Cycle status:** pills read Draft (neutral), Open (positive), Closed (neutral). Publishing explains what it will create before the button, and why offerings are skipped.
+
 ## States (every block)
 
 - **Loading:** final layout with skeleton bars.

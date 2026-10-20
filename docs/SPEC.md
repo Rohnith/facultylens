@@ -193,6 +193,15 @@ Notes:
 
 *Changed in Phase 2 (2026-10-20):* imports never write straight into the profile: each item waits in `pending_imports` until the owner accepts or rejects it, and a dedup key (DOI, else normalised title + year; role + institution; degree + institution; tag) stops re-imports from suggesting anything already accepted, pending or rejected. A Semantic Scholar paper that duplicates a pending ORCID work fills in its citations and TL;DR instead. Added endpoints: `GET /faculty/{id}/semantic-scholar/search` (author candidates, because names collide), `POST /faculty/{id}/imports/{item}/reject`, `POST /faculty/{id}/imports/bulk`. Semantic Scholar's author-papers endpoint rejects `tldr`, so TL;DRs come from `POST /paper/batch` and are best-effort without `S2_API_KEY`.
 
+*Changed in Phase 3 (agreed with the user, 2026-10-20):*
+- **Anonymity code:** the one-response-per-form code is `HMAC-SHA256(STUDENT_HASH_SALT, "<student_id>:<form_id>")` instead of `sha256(student_id + SALT)`. It differs on every form, so one student's responses can't be linked to each other.
+- **Responses** store `type, likert, texts, submitted_on, is_synthetic` and the code. There is no student id, IP or user agent. `submitted_on` is a date with no time.
+- **Forms:** `forms.faculty_id` is null for curriculum forms, and `forms` has a unique `cycle_id+course_id+faculty_id+type` index.
+- **Cycle terms:** a cycle has a `term` (odd/even). Publishing creates forms for that academic year's offerings whose semester parity matches.
+- **Added endpoints:** `GET /cycles/{id}`, `GET /cycles/{id}/preview`, `GET /cycles/{id}/forms`. `GET /cycles` is readable by faculty and HoDs (counts for admin only).
+- **Comments before Phase 4:** `GET /feedback/faculty/{id}` returns no comment text until the Phase 4 pipeline has moderated and redacted it (`comments_status: "awaiting_analysis"`). Rating averages appear only from `MIN_RESPONSES_FOR_DISPLAY` responses.
+- **Seed:** `python -m app.seed` creates synthetic demo data with every document marked `is_synthetic`.
+
 ---
 
 ## 10. API (all under `/api`; JSON; JWT bearer)

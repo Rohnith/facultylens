@@ -6,7 +6,25 @@ FacultyLens builds one page per faculty member. It joins an auto-generated profi
 
 Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-> **Status: Phase 2 (faculty profiles).** Sign-in for all four roles, admin setup, and faculty profile data with ORCID and Semantic Scholar import and review work. Feature phases follow SPEC §14.
+> **Status: Phase 3 (feedback collection).** Sign-in for all four roles, admin setup, faculty profiles with ORCID / Semantic Scholar import, feedback cycles, and anonymous once-only student feedback work. The NLP analysis comes next. Feature phases follow SPEC §14.
+
+## Demo data
+
+```bash
+python -m app.seed
+```
+
+This fills an empty database with **synthetic** demo data:
+- 2 departments, 10 teaching staff, 144 students and 10 course offerings;
+- an open "2026-27 Odd Sem" cycle with about 290 teaching and 260 syllabus responses.
+
+Every document is marked `is_synthetic` and is excluded from evaluation. All demo accounts use the password in `DEMO_PASSWORD` (`backend/.env.example`). Sign in as:
+- admin: `iqac@demo.facultylens.in`
+- HoD: `padma.rao@demo.facultylens.in`
+- faculty: `kavitha.reddy@demo.facultylens.in`
+- student: any roll number from `23A91A0501`.
+
+`python -m app.seed --reset` removes only the synthetic data. The seed refuses to run on a database that already has real users.
 
 ## Prerequisites
 
