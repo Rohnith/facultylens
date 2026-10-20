@@ -135,6 +135,7 @@ async def test_run_cycle_job_caches_queues_and_aggregates(client, analysed_world
     assert queue["pending"] == 1
     item = queue["items"][0]
     assert item["kind"] == "hidden" and item["text"] == "This teacher is useless."
+    assert item["flagged"] == [{"start": 0, "end": 24, "score": 0.95, "sentiment": "positive"}]
     jobs_list = (await client.get("/api/analysis/jobs", headers=h["admin"])).json()
     assert len(jobs_list) == 2 and "response_ids" not in jobs_list[0]
 
