@@ -1829,14 +1829,14 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/analytics/department/{{deptId}}?cycle={{cycleId}}",
+              "raw": "{{baseUrl}}/analytics/department/{{departmentId}}?cycle={{cycleId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "analytics",
                 "department",
-                "{{deptId}}"
+                "{{departmentId}}"
               ],
               "query": [
                 {
@@ -1865,7 +1865,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/analytics/bias?department={{deptId}}&cycle={{cycleId}}",
+              "raw": "{{baseUrl}}/analytics/bias?department={{departmentId}}&cycle={{cycleId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1876,7 +1876,7 @@
               "query": [
                 {
                   "key": "department",
-                  "value": "{{deptId}}"
+                  "value": "{{departmentId}}"
                 },
                 {
                   "key": "cycle",
@@ -1904,7 +1904,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/analytics/sarcasm?department={{deptId}}",
+              "raw": "{{baseUrl}}/analytics/sarcasm?department={{departmentId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1915,7 +1915,7 @@
               "query": [
                 {
                   "key": "department",
-                  "value": "{{deptId}}"
+                  "value": "{{departmentId}}"
                 }
               ]
             },
