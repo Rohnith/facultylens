@@ -6,7 +6,7 @@ FacultyLens builds one page per faculty member. It joins an auto-generated profi
 
 Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-> **Status: Phase 1 (auth & admin setup).** Sign-in for all four roles, users (single and bulk CSV), departments, course offerings with sections, and enrolment work. Feature phases follow SPEC §14.
+> **Status: Phase 2 (faculty profiles).** Sign-in for all four roles, admin setup, and faculty profile data with ORCID and Semantic Scholar import and review work. Feature phases follow SPEC §14.
 
 ## Prerequisites
 
@@ -80,6 +80,8 @@ pytest -m slow
 ruff check .
 ```
 
+`pytest -m network` imports two real public ORCID records (ORCID's test record 0000-0002-1825-0097 and Yoshua Bengio, 0000-0002-9322-3515); it needs internet.
+
 The fast suite needs MongoDB running: it uses a separate `facultylens_test` database and drops it afterwards. It includes a role matrix that calls every endpoint as each role and checks the 401/403 answers. `-m slow` loads every real model.
 
 ## Frontend setup
@@ -103,6 +105,12 @@ Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. R
 - Staff sign in with their college email; students with their roll number (`ROLL_NO_REGEX` in `.env`).
 - Accounts made by the admin (one at a time or by CSV on the Users page) get a temporary password, shown once with a CSV download. Everyone must replace it at first sign-in.
 - The refresh token is an httpOnly cookie on `/api/auth`; the access token lives only in memory.
+
+## Profile imports
+
+- Faculty open **My profile** and import from **ORCID** (paste the iD or orcid.org link) or **Semantic Scholar** (search your name, then pick the right author).
+- Everything imported waits for review. Nothing reaches the profile until the faculty member accepts it, and rejected items aren't suggested again.
+- Semantic Scholar's shared rate limit is low. If imports say "limiting requests", wait a minute, or put a free key in `S2_API_KEY` in `backend/.env`.
 
 ## Repository layout
 

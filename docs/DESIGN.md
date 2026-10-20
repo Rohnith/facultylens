@@ -100,6 +100,28 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - impeccable `detect`: no findings.
   - Signed-in screens checked through Playwright at 1440, 768 and 390.
 
+## Phase 2 additions
+
+- **Review queue** (`pages/profile/ReviewPanel.jsx`):
+  - A card above the page body whenever imports are pending. Its heading is the count ("35 imported items wait for your review").
+  - Underline tabs per kind, with counts.
+  - Group actions on the right: "Reject all N" as ghost, "Accept all N" as secondary.
+  - Each row shows the title, a grey meta line, a provenance pill, and Reject / Accept.
+  - The list scrolls inside the card past 520px.
+  - Decisions save immediately and merge into the form without touching unsaved edits.
+- **Provenance pill** (`SourceTag`): a neutral pill saying "ORCID" or "Semantic Scholar". It is never coloured: it shows where a fact came from, not a status. Manual items show nothing.
+- **Row editor** (`RowListEditor`):
+  - On desktop, one muted header row with aligned 36px inputs per item.
+  - The actions column (pill + Remove) is 168px.
+  - Phones stack each item with its own small labels. Every input has an aria-label naming its row ("Year (qualification 2)").
+- **Tag input:** chips are neutral pills with a 20px remove button. Enter or comma adds a tag; Backspace on an empty input removes the last.
+- **Long lists** (publications) are a readable list rather than an input grid. Edit expands an inline form on a `--raised` panel, and a filter box appears past 8 items.
+- **Save model:**
+  - A single "Save changes" primary in the title row, enabled only when the form differs from the last save.
+  - The status line beside it reads "Unsaved changes", "Saving…" or "All changes saved".
+  - `beforeunload` warns on unsaved edits.
+- **Two-column page:** `minmax(0,1fr) 360px`. The right rail (import, courses taught) comes first in the DOM, so on phones it sits above the long sections.
+
 ## States (every block)
 
 - **Loading:** final layout with skeleton bars.

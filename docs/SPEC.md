@@ -176,7 +176,7 @@ Notes:
 | `departments` | `_id, name, code` | unique `code` |
 | `courses` (course **offering**) | `_id, code, name, department_id, academic_year, semester, section, faculty_ids[], student_ids[]` | **unique** `code+academic_year+semester+section`; `faculty_ids`; `student_ids` |
 | `refresh_tokens` | `jti_hash (sha256), user_id, created_at, expires_at, revoked` | unique `jti_hash`; TTL on `expires_at` |
-| `faculty_profiles` | `user_id, qualifications[], experience[], interests[], publications[], achievements[], orcid?, s2_author_id?, pending_imports[]` | unique `user_id` |
+| `faculty_profiles` | `user_id, designation, photo_url, interests[], qualifications[], experience[], publications[], achievements[]` (every item has an `id` and a `source`: manual/orcid/s2), `orcid?, s2_author_id?, pending_imports[{id, kind, source, data, key}], rejected_keys[], import_log{orcid, s2}, updated_at` | unique `user_id` |
 | `profile_versions` | `user_id, version, generated(json), edited(json), status(draft/approved), llm_model, created_at` | `user_id+version` |
 | `feedback_cycles` | `_id, name, academic_year, term, opens_at, closes_at, status` | — |
 | `forms` | `_id, cycle_id, course_id, faculty_id, type(teaching/curriculum), questions[]` | `cycle_id+course_id+faculty_id` |
@@ -190,6 +190,8 @@ Notes:
 | `audit_log` | `actor, actor_role, action, target, details, at` | `at` |
 
 *Changed in Phase 1 (agreed with the user, 2026-10-20):* a course is an **offering** with a section, so a faculty member's feedback comes only from their own section's students; users are deactivated (`is_active=false`) instead of deleted; refresh tokens are opaque, stored hashed and rotated. Added endpoints: `POST /auth/logout`, `POST /users/{id}/reset-password`, `PATCH /departments/{id}`, `GET /courses/{id}`, `PATCH /courses/{id}`. `POST /auth/refresh` returns 204 when there is no session cookie.
+
+*Changed in Phase 2 (2026-10-20):* imports never write straight into the profile: each item waits in `pending_imports` until the owner accepts or rejects it, and a dedup key (DOI, else normalised title + year; role + institution; degree + institution; tag) stops re-imports from suggesting anything already accepted, pending or rejected. A Semantic Scholar paper that duplicates a pending ORCID work fills in its citations and TL;DR instead. Added endpoints: `GET /faculty/{id}/semantic-scholar/search` (author candidates, because names collide), `POST /faculty/{id}/imports/{item}/reject`, `POST /faculty/{id}/imports/bulk`. Semantic Scholar's author-papers endpoint rejects `tldr`, so TL;DRs come from `POST /paper/batch` and are best-effort without `S2_API_KEY`.
 
 ---
 
