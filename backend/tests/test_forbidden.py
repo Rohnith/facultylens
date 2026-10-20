@@ -24,6 +24,8 @@ CYCLE = {
     "closes_at": "2027-02-01T00:00:00Z",
 }  # the profile owner (world faculty) and IQAC admin
 
+PROFILE_FIELDS = {"headline": "H", "bio_short": "S", "bio_long": "L"}
+
 # (method, path, allowed roles, json body). {course} / {user} are filled from the fixture.
 ENDPOINTS = [
     ("GET", "/api/auth/me", ANY, None),
@@ -67,6 +69,12 @@ ENDPOINTS = [
     ("POST", "/api/faculty/{user}/imports/nope/accept", OWNER, None),
     ("POST", "/api/faculty/{user}/imports/nope/reject", OWNER, None),
     ("POST", "/api/faculty/{user}/imports/bulk", OWNER, {"accept": [], "reject": []}),
+    # Generated profiles: the owner or admin drafts; only the owner approves; staff read it.
+    ("POST", "/api/faculty/{user}/profile/generate", OWNER, None),
+    ("GET", "/api/faculty/{user}/profile/versions", {"admin", "hod", "faculty"}, None),
+    ("PUT", "/api/faculty/{user}/profile/versions/1", OWNER, PROFILE_FIELDS),
+    ("POST", "/api/faculty/{user}/profile/versions/1/approve", {"faculty"}, None),
+    ("GET", "/api/faculty/{user}/profile", {"admin", "hod", "faculty"}, None),
     # Feedback collection: {cycle} is open with a teaching form {form} for the CSE offering.
     ("GET", "/api/cycles", STAFF, None),
     ("POST", "/api/cycles", {"admin"}, CYCLE),

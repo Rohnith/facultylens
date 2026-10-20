@@ -22,6 +22,7 @@ from app.routers import (
     feedback,
     forms,
     health,
+    profile_versions,
     profiles,
     users,
 )
@@ -63,6 +64,7 @@ def create_app() -> FastAPI:
         departments,
         courses,
         profiles,
+        profile_versions,
         cycles,
         forms,
         feedback,
