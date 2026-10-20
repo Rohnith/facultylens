@@ -7,7 +7,7 @@ from fastapi import APIRouter, Response, status
 
 from app import db
 from app.config import get_settings
-from app.nlp import registry
+from app.nlp import llm, registry
 
 router = APIRouter(prefix="/health", tags=["health"])
 
@@ -41,5 +41,6 @@ async def models() -> dict:
         "process_rss_mb": round(proc.memory_info().rss / 2**20, 1),
         "system_available_mb": round(psutil.virtual_memory().available / 2**20, 1),
         "loaded_count": sum(r["loaded"] for r in rows),
+        "llm": llm.llm_status(),
         "models": rows,
     }
