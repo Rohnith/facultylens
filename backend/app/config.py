@@ -27,7 +27,8 @@ class Settings(BaseSettings):
     jwt_refresh_days: int = 7
     student_hash_salt: str = Field(default="change-me", min_length=8)
     roll_no_regex: str = r"\b\d{2}[A-Z0-9]{2,4}\d{1,2}[A-Z]\d{2}[0-9A-Z]\d\b"
-    min_responses_for_display: int = 5
+    min_responses_for_display: int = Field(default=5, ge=1)
+    demo_password: str = Field(default="facultylens-demo", min_length=8)
 
     # ---- Auth ----
     login_rate_limit: str = "5/minute"

@@ -2,14 +2,26 @@
 
 Anonymous -> 401. A role outside the allowed set -> 403. An allowed role is never 401/403."""
 
+from datetime import timedelta
+
 import pytest
 
+from app.feedback_spec import questions
 from app.services import orcid as orcid_service
 from app.services import semantic_scholar as s2_service
+from app.utils import now
 
 ROLES = ["anon", "admin", "hod", "faculty", "student"]
 ANY = {"admin", "hod", "faculty", "student"}
-OWNER = {"admin", "faculty"}  # the profile owner (world faculty) and IQAC admin
+OWNER = {"admin", "faculty"}
+STAFF = {"admin", "hod", "faculty"}
+CYCLE = {
+    "name": "2026-27 Even Sem",
+    "academic_year": "2026-27",
+    "term": "even",
+    "opens_at": "2027-01-01T00:00:00Z",
+    "closes_at": "2027-02-01T00:00:00Z",
+}  # the profile owner (world faculty) and IQAC admin
 
 # (method, path, allowed roles, json body). {course} / {user} are filled from the fixture.
 ENDPOINTS = [
@@ -54,6 +66,18 @@ ENDPOINTS = [
     ("POST", "/api/faculty/{user}/imports/nope/accept", OWNER, None),
     ("POST", "/api/faculty/{user}/imports/nope/reject", OWNER, None),
     ("POST", "/api/faculty/{user}/imports/bulk", OWNER, {"accept": [], "reject": []}),
+    # Feedback collection: {cycle} is open with a teaching form {form} for the CSE offering.
+    ("GET", "/api/cycles", STAFF, None),
+    ("POST", "/api/cycles", {"admin"}, CYCLE),
+    ("GET", "/api/cycles/{cycle}", STAFF, None),
+    ("GET", "/api/cycles/{cycle}/preview", {"admin"}, None),
+    ("POST", "/api/cycles/{cycle}/publish", {"admin"}, None),
+    ("POST", "/api/cycles/{cycle}/close", {"admin"}, None),
+    ("GET", "/api/cycles/{cycle}/forms", {"admin", "hod"}, None),
+    ("GET", "/api/forms/my", {"student"}, None),
+    ("GET", "/api/forms/{form}", ANY, None),
+    ("POST", "/api/forms/{form}/responses", {"student"}, {"likert": {}, "texts": {}}),
+    ("GET", "/api/feedback/faculty/{user}", STAFF, None),
 ]
 
 CASES = [
@@ -88,10 +112,32 @@ def _fill(value, ids):
 
 @pytest.mark.parametrize(("method", "path", "allowed", "body", "role"), CASES)
 async def test_role_matrix(client, world, method, path, allowed, body, role):
+    db = world["db"]
+    cycle = await db.feedback_cycles.insert_one(
+        {
+            "name": "2026-27 Odd Sem",
+            "academic_year": "2026-27",
+            "term": "odd",
+            "opens_at": now() - timedelta(days=1),
+            "closes_at": now() + timedelta(days=9),
+            "status": "open",
+        }
+    )
+    form = await db.forms.insert_one(
+        {
+            "cycle_id": cycle.inserted_id,
+            "course_id": world["course_id"],
+            "faculty_id": world["faculty"]["_id"],
+            "type": "teaching",
+            "questions": questions("teaching"),
+        }
+    )
     ids = {
         "course": str(world["course_id"]),
         "user": str(world["faculty"]["_id"]),
         "dept": str(world["cse"]),
+        "cycle": str(cycle.inserted_id),
+        "form": str(form.inserted_id),
     }
     r = await client.request(
         method, _fill(path, ids), json=_fill(body, ids), headers=world["headers"][role]

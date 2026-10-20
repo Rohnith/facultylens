@@ -47,12 +47,21 @@ INDEXES: dict[str, list[IndexModel]] = {
             [("user_id", ASCENDING), ("version", ASCENDING)], unique=True, name="user_version"
         )
     ],
+    # One teaching form per offering x teacher and one curriculum form per offering, per cycle.
     "forms": [
         IndexModel(
-            [("cycle_id", ASCENDING), ("course_id", ASCENDING), ("faculty_id", ASCENDING)],
-            name="cycle_course_faculty",
-        )
+            [
+                ("cycle_id", ASCENDING),
+                ("course_id", ASCENDING),
+                ("faculty_id", ASCENDING),
+                ("type", ASCENDING),
+            ],
+            unique=True,
+            name="form_unique",
+        ),
+        IndexModel([("faculty_id", ASCENDING), ("cycle_id", ASCENDING)], name="faculty_cycle"),
     ],
+    "feedback_cycles": [IndexModel([("status", ASCENDING)], name="status")],
     "responses": [
         IndexModel(
             [("form_id", ASCENDING), ("student_hash", ASCENDING)],
@@ -91,6 +100,7 @@ INDEXES: dict[str, list[IndexModel]] = {
 OBSOLETE_INDEXES: dict[str, list[str]] = {
     "users": ["email_unique"],
     "courses": ["code_semester"],
+    "forms": ["cycle_course_faculty"],
 }
 
 
