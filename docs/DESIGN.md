@@ -193,6 +193,30 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - Rejected AI claims are listed in a `--raised` note when the template was used instead.
 - **Code splitting:** the unified page and Recharts load as their own chunk (`React.lazy`), so other screens don't download the chart library.
 
+## Phase 6 additions
+
+- **Department insights** (`/insights`, `pages/insights/*`, lazy-loaded):
+  - HoDs see their own department and the title is its name; admins get a department picker.
+  - The cycle picker and tabs (Overview, Bias & sarcasm) are kept in the URL (`?department&cycle&tab`), so a view can be reloaded or shared.
+  - The tabs are underlined, matching the moderation queue.
+- **Overview:**
+  - A divided stat strip: response `RateBar`, net sentiment as the screen's one `text-kpi`, and hidden by moderation.
+  - A sortable teacher table: header buttons with `aria-sort` and a small ▲/▼; empty values always sort last. Columns: name linked to `/faculty/:id`, responses, net sentiment, rating, top strength / area to improve as neutral pills, and possibly sarcastic.
+    - A teacher below the minimum gets one muted line instead of numbers.
+    - The table scrolls sideways inside its card under 880px.
+    - It has no gender column.
+  - Then the department aspects (the shared `Aspects` table without the agreement column).
+- **Bias & sarcasm panel:**
+  - **Caveat:** always first, a `--raised` note with a 1px border in ink ("Read with care. …"). It never uses alarm colour, and it stays visible in every state.
+  - **Too small:** one card with the group sizes and why nothing is shown. There are no zeros and no empty charts.
+  - **Two group hues** (`--group-1` blue, `--group-2` orange; categorical slots 1–2, checked with the dataviz validator in both modes; fixed order women, men). Every group mark also carries a text label or a legend with the teacher counts.
+  - **Gendered language:** Recharts grouped horizontal bars with direct value labels, an `sr-only` table and a disclosure for the word lists.
+  - **Rating gap:** a dot-and-whisker per aspect on a zero-centred track (1px centre line, 2px interval, 10px dot with a surface ring). It uses `--chart-main` when the interval excludes 0 and `--chart-muted` with "no clear difference" when it doesn't. The numbers are always written out ("−0.08 (could be −0.61 to +0.40)").
+  - **Emotion mix:** paired thin bars per emotion on one scale, with percentages.
+  - **Sarcasm:** a rate per group, plus a per-teacher list (not grouped by gender).
+  - **Method:** a "How these numbers are made" disclosure.
+- **My page:** "Across your courses" (only with two or more offerings in a cycle). Each course name selects that course below; an "All courses" line closes the table.
+
 ## States (every block)
 
 - **Loading:** final layout with skeleton bars.

@@ -157,6 +157,20 @@ function Language({ panel }) {
         Based on {panel.language.female.answers} answers about women and{" "}
         {panel.language.male.answers} about men.
       </p>
+      <ul className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-small">
+        {Object.entries(panel.language.gap_per_1000 ?? {}).map(([name, g]) => (
+          <li key={name} className="num">
+            <span className="font-medium">{name === "ability" ? "Ability" : "Warmth"} words,</span>{" "}
+            women minus men: {g.gap > 0 ? "+" : ""}
+            {g.gap} per 1,000 (could be {g.low} to {g.high}) ·{" "}
+            {g.clear ? (
+              <span className="font-medium">clear difference</span>
+            ) : (
+              <span className="text-muted">no clear difference</span>
+            )}
+          </li>
+        ))}
+      </ul>
       <details className="mt-2 text-small text-muted">
         <summary className="w-fit cursor-pointer">The word lists</summary>
         <p className="m-0 mt-1">
@@ -179,7 +193,7 @@ function RatingGaps({ panel }) {
     <Card
       id="gap-h"
       title="Ratings: women minus men, by aspect"
-      note="The dot is the difference in mean 1–5 rating; the line is a 95% interval from resampling teachers. A line that crosses the centre means no clear difference."
+      note="The dot is the difference in mean 1–5 rating; the line is a 95% interval in which each teacher counts once. A line that crosses the centre means no clear difference."
     >
       <div className="mb-1 grid grid-cols-[minmax(0,180px)_minmax(0,1fr)] gap-3 text-small text-muted max-md:grid-cols-1">
         <span />
@@ -376,9 +390,10 @@ export function BiasTab({ panel, sarcasm }) {
                   ` ${panel.excluded_teachers} teacher(s) without a recorded gender are left out.`}
               </p>
               <p className="m-0">
-                The rating intervals come from a cluster bootstrap: the teachers in each group are
-                resampled 2,000 times, because ratings of one teacher are not independent of each
-                other. With few teachers per group the intervals are wide on purpose.
+                The rating intervals treat each teacher as one data point (their average rating),
+                because many ratings of one teacher are not independent of each other. With only a
+                few teachers per group the intervals are wide on purpose: a difference between a
+                handful of people says more about those people than about a pattern.
               </p>
             </div>
           </details>

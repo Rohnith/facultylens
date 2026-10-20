@@ -6,7 +6,7 @@ FacultyLens builds one page per faculty member. It joins an auto-generated profi
 
 Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-> **Status: Phase 5 (summaries, profiles and the unified page).** Sign-in for all four roles, admin setup, faculty profiles with ORCID / Semantic Scholar import, feedback cycles, anonymous once-only feedback, and the CPU NLP pipeline with moderation all work. Each teacher now has one page joining a generated, owner-approved profile with grounded feedback insights and the evidence behind them. Everything runs without an LLM key. Analytics dashboards and the bias panel come next. Feature phases follow SPEC §14.
+> **Status: Phase 6 (analytics and the bias panel).** Sign-in for all four roles, admin setup, faculty profiles with ORCID / Semantic Scholar import, anonymous once-only feedback, the CPU NLP pipeline with moderation, grounded summaries, generated profiles and the unified faculty page all work. HoDs and the IQAC team now have department insights and a bias & sarcasm panel that hides itself when groups are too small. The NAAC report comes next. Feature phases follow SPEC §14.
 
 ## Demo data
 
@@ -15,8 +15,8 @@ python -m app.seed
 ```
 
 This fills an empty database with **synthetic** demo data:
-- 2 departments, 10 teaching staff, 144 students and 10 course offerings;
-- an open "2026-27 Odd Sem" cycle with about 290 teaching and 260 syllabus responses.
+- 2 departments, 11 teaching staff, 144 students and 11 course offerings;
+- an open "2026-27 Odd Sem" cycle with 326 teaching and 288 syllabus responses.
 
 Every document is marked `is_synthetic` and is excluded from evaluation. All demo accounts use the password in `DEMO_PASSWORD` (`backend/.env.example`). Sign in as:
 - admin: `iqac@demo.facultylens.in`
@@ -154,6 +154,17 @@ Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. R
   - Without a key, a built-in summary is made from the same statistics, plus an automatic digest by distilbart.
   - Adding a key later upgrades them on the next run, or press **Regenerate** via `POST /analysis/summaries`.
 - **Generated profile** (My profile → Generated profile): a draft written only from the saved facts, with each claim checked against them. Without a key, or if a claim fails the check twice, a plain template is used. The faculty member edits it and approves it; only approved versions are shown to colleagues.
+
+## Department insights and the bias & sarcasm panel
+
+- **Department insights** (HoDs: their own department; IQAC admin: any department) show every teacher in a cycle in one sortable table: responses, net sentiment, rating, top strength and area to improve. Each name opens that teacher's page. Below it are the teaching aspects across the department.
+- **The bias & sarcasm panel** looks for patterns in the feedback itself, by the gender the IQAC office recorded for each teacher, never shown next to a name. It shows:
+  - how often comments use "ability" words (brilliant, genius…) and "warmth" words (helpful, caring…);
+  - the rating gap per aspect, with a 95% interval in which each teacher counts once;
+  - the emotion mix;
+  - the possibly-sarcastic rate.
+- **When it hides itself:** unless each group has at least `BIAS_MIN_GROUP_FACULTY` teachers (3) and `BIAS_MIN_GROUP_ANSWERS` answers (30), it shows only the group sizes. In the demo data, CSE (3 women, 3 men) shows the comparison and ECE (2 women, 3 men) does not.
+- The seed's gendered words are drawn independently of the teacher's gender, so the honest result on demo data is "no clear difference".
 
 ## Repository layout
 

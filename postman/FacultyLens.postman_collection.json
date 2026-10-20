@@ -1884,7 +1884,7 @@
                 }
               ]
             },
-            "description": "Bias & sarcasm panel for one department, groups only: gendered-language rates per 1,000 answers, rating gap per aspect with a 95% cluster-bootstrap CI over teachers, emotion mix, sarcasm rate. status 'too_small' (sizes only) unless each group has BIAS_MIN_GROUP_FACULTY teachers and BIAS_MIN_GROUP_ANSWERS answers.",
+            "description": "Bias & sarcasm panel for one department, groups only: gendered-language rates per 1,000 answers, rating gap per aspect with a 95% Welch interval over teacher averages, emotion mix, sarcasm rate. status 'too_small' (sizes only) unless each group has BIAS_MIN_GROUP_FACULTY teachers and BIAS_MIN_GROUP_ANSWERS answers.",
             "header": []
           },
           "event": [

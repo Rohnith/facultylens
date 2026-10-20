@@ -14,8 +14,6 @@ from app.feedback_spec import ABILITY_WORDS, ASPECT_KEYS, ASPECT_LABELS, WARMTH_
 from app.nlp.summarize import choose_aspects
 
 GROUPS = ("female", "male")
-BOOTSTRAP_REPS = 2000
-BOOTSTRAP_SEED = 20261020
 
 CAVEAT = (
     "This panel looks for possible bias in students' evaluations, not in the teachers. "
@@ -231,36 +229,36 @@ def lexicon_rates(texts: list[str]) -> dict[str, Any]:
     }
 
 
-def cluster_bootstrap_gap(
-    group_a: list[list[float]],
-    group_b: list[list[float]],
-    reps: int = BOOTSTRAP_REPS,
-    seed: int = BOOTSTRAP_SEED,
-) -> dict[str, Any] | None:
-    """Mean of A minus mean of B with a 95% CI that resamples teachers, not responses.
+def teacher_gap(group_a: list[list[float]], group_b: list[list[float]]) -> dict[str, Any] | None:
+    """Mean of A's teacher averages minus B's, with a 95% Welch t-interval over teachers.
 
-    Each inner list is one teacher's ratings. Ratings from one teacher are not independent, so
-    the teacher is the unit that gets resampled; the interval is wide with few teachers.
+    Each inner list is one teacher's ratings. Ratings of one teacher are not independent, so
+    each teacher counts once (their average), and the small-sample t value keeps the interval
+    honest when a group has only a few teachers. (A bootstrap over 3 teachers has only 10
+    distinct resamples and gives intervals that are too narrow; it was tried and dropped.)
     """
-    a = [np.asarray(x, dtype=float) for x in group_a if len(x)]
-    b = [np.asarray(x, dtype=float) for x in group_b if len(x)]
+    a = np.array([np.mean(x) for x in group_a if len(x)], dtype=float)
+    b = np.array([np.mean(x) for x in group_b if len(x)], dtype=float)
     if len(a) < 2 or len(b) < 2:
         return None
-    gap = float(np.concatenate(a).mean() - np.concatenate(b).mean())
-    rng = np.random.default_rng(seed)
-    sums_a, counts_a = np.array([x.sum() for x in a]), np.array([len(x) for x in a])
-    sums_b, counts_b = np.array([x.sum() for x in b]), np.array([len(x) for x in b])
-    ia = rng.integers(0, len(a), size=(reps, len(a)))
-    ib = rng.integers(0, len(b), size=(reps, len(b)))
-    boot = sums_a[ia].sum(1) / counts_a[ia].sum(1) - sums_b[ib].sum(1) / counts_b[ib].sum(1)
-    low, high = np.percentile(boot, [2.5, 97.5])
+    from scipy import stats
+
+    gap = float(a.mean() - b.mean())
+    va, vb = a.var(ddof=1) / len(a), b.var(ddof=1) / len(b)
+    se = float(np.sqrt(va + vb))
+    if se == 0:
+        low = high = gap
+    else:
+        df = (va + vb) ** 2 / (va**2 / (len(a) - 1) + vb**2 / (len(b) - 1))
+        half = float(stats.t.ppf(0.975, df)) * se
+        low, high = gap - half, gap + half
     return {
         "gap": round(gap, 3),
-        "low": round(float(low), 3),
-        "high": round(float(high), 3),
+        "low": round(low, 3),
+        "high": round(high, 3),
         "clear": bool(low > 0 or high < 0),
         "teachers": [len(a), len(b)],
-        "ratings": [int(counts_a.sum()), int(counts_b.sum())],
+        "ratings": [int(sum(len(x) for x in group_a)), int(sum(len(x) for x in group_b))],
     }
 
 
@@ -291,12 +289,26 @@ def bias_panel(
     if any(sizes[g]["teachers"] < min_faculty or sizes[g]["answers"] < min_answers for g in GROUPS):
         return {**base, "status": "too_small"}
 
-    language = {
+    language: dict[str, Any] = {
         g: lexicon_rates([a["text"] for t in grouped[g] for a in t["answers"]]) for g in GROUPS
     }
+    # The same teacher-level interval for the word rates: each teacher's own rate counts once.
+    language["gap_per_1000"] = {}
+    for name, pattern in (("ability", ABILITY_RE), ("warmth", WARMTH_RE)):
+        result = teacher_gap(
+            *[
+                [[float(bool(pattern.search(a["text"]))) for a in t["answers"]] for t in grouped[g]]
+                for g in GROUPS
+            ]
+        )
+        if result:
+            language["gap_per_1000"][name] = {
+                **result,
+                **{k: round(1000 * result[k], 1) for k in ("gap", "low", "high")},
+            }
     gaps = {}
     for key in ASPECT_KEYS:
-        result = cluster_bootstrap_gap(
+        result = teacher_gap(
             [t["ratings"].get(key, []) for t in grouped["female"]],
             [t["ratings"].get(key, []) for t in grouped["male"]],
         )

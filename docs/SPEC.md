@@ -226,6 +226,19 @@ Notes:
 - **Unified page (§11.4) forms:** the net sentiment "gauge" and the sentiment "donut" are one headline figure plus a labelled 100% bar. The aspect "radar" and the polarity bars are one table: a diverging comment bar per aspect, with the mean rating and a ratings-vs-comments badge on the same row. Ordered-scale shares read better as diverging bars (dataviz guidance), and a table keeps the 8 aspects comparable on one baseline.
 - **Demo seed:** each teacher also gets a few synthetic profile facts (qualifications, one current role, 2–4 publications, sometimes an award). Venues and awards are marked "(demo)". A separate RNG leaves the seeded responses unchanged.
 
+*Changed in Phase 6 (agreed with the user, 2026-10-20):*
+- **Bias panel scope:** the bias & sarcasm panel is computed for one department at a time. The IQAC admin picks any department; comparisons are never pooled across departments, because subjects differ. This is how the roles table's "institution-wide" reads for admins.
+- **Thresholds:** `BIAS_MIN_GROUP_FACULTY` (default 3) and `BIAS_MIN_GROUP_ANSWERS` (default 30) per group. Below either, the API returns group sizes only.
+  - Only teachers with "female" or "male" recorded form groups. Others are left out and counted.
+  - The panel never returns names. The department table never returns gender.
+- **Rating gap ("Likert gap with confidence intervals"):** women's mean minus men's per aspect, with a 95% **Welch t-interval over teacher averages** (each teacher counts once). Ratings of one teacher are not independent, so treating responses as the unit would give falsely narrow intervals. A cluster bootstrap was tried first and dropped: with 3 teachers per group it has only 10 distinct resamples, and on the seed it called three aspects "clear" that were really individual teachers' differences.
+- **Gendered language:** answers per 1,000 that use at least one ability word or one warmth word (word-boundary match on moderated, redacted text). The lists are in `feedback_spec.py` and shown on the page.
+- **Added parameters and behaviour:**
+  - `GET /analytics/sarcasm` takes either `department=` (rates per teacher; HoD or admin) or `faculty=` (answer ids for the evidence drawer).
+  - Analytics endpoints default to the newest cycle with teaching forms when `cycle=` is omitted.
+- **Department overview:** a teacher's top strength and area to improve use the same rule as the summaries (`summarize.choose_aspects`), applied to their combined offerings.
+- **Demo seed:** one more CSE teacher (Mr. Naveen Kumar, CS504 Operating Systems). CSE then has 3 women and 3 men and shows the comparison; ECE (2 women, 3 men) shows the "too small" state. He is added last, so earlier responses are identical.
+
 ---
 
 ## 10. API (all under `/api`; JSON; JWT bearer)

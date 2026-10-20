@@ -81,16 +81,22 @@ def test_lexicon_rates_use_word_boundaries():
     assert r["ability_per_1000"] == 400.0
 
 
-def test_cluster_bootstrap_is_deterministic_and_finds_a_real_gap():
+def test_teacher_gap_counts_teachers_not_responses():
     rng = np.random.default_rng(1)
     a = [list(rng.normal(4.2, 0.4, 40).clip(1, 5)) for _ in range(6)]
     b = [list(rng.normal(3.2, 0.4, 40).clip(1, 5)) for _ in range(6)]
-    first = analytics.cluster_bootstrap_gap(a, b)
-    assert first == analytics.cluster_bootstrap_gap(a, b)  # fixed seed
-    assert first["clear"] and first["low"] > 0.5 and first["teachers"] == [6, 6]
-    same = analytics.cluster_bootstrap_gap(a[:3], a[3:])
+    real = analytics.teacher_gap(a, b)
+    assert real["clear"] and real["low"] > 0.5 and real["teachers"] == [6, 6]
+    assert real["ratings"] == [240, 240]
+    same = analytics.teacher_gap(a[:3], a[3:])
     assert same["low"] < 0 < same["high"] and not same["clear"]
-    assert analytics.cluster_bootstrap_gap(a[:1], b) is None
+    assert analytics.teacher_gap(a[:1], b) is None
+    # Three teachers per group whose averages happen to differ by 0.6 with real spread
+    # between teachers: hundreds of ratings each must not make that look "clear".
+    spread_a = [[3.4] * 100, [4.6] * 100, [4.0] * 100]
+    spread_b = [[3.0] * 100, [4.0] * 100, [3.2] * 100]
+    small = analytics.teacher_gap(spread_a, spread_b)
+    assert round(small["gap"], 2) == 0.6 and not small["clear"]
 
 
 def _teacher(gender, n_answers=20, rating=4.0, text="Helpful teacher."):
@@ -117,6 +123,8 @@ def test_bias_panel_reports_groups_only():
     assert out["status"] == "available"
     assert out["language"]["male"]["ability_per_1000"] == 1000.0
     assert out["language"]["female"]["warmth_per_1000"] == 1000.0
+    warmth = out["language"]["gap_per_1000"]["warmth"]
+    assert warmth["gap"] == 1000.0 and warmth["teachers"] == [3, 3]
     assert out["rating_gaps"]["clarity"]["gap"] == 1.0
     assert out["sarcasm"]["female"]["rate"] == 0.0
     assert "name" not in str(out)
