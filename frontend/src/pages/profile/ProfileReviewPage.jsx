@@ -358,7 +358,7 @@ export function ProfileReviewPage() {
               ) : (
                 <ul className="m-0 flex list-none flex-col gap-2 p-0">
                   {form.teaching_highlights.map((h, i) => (
-                    <li key={h.text} className="flex items-start justify-between gap-3 text-body">
+                    <li key={h.text} className="flex items-center justify-between gap-3 text-body">
                       <span>{h.text}</span>
                       {editable && (
                         <button

@@ -14,6 +14,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.feedback_spec import ASPECT_LABELS
 from app.nlp import llm
 
 # --------------------------------------------------------------------------- facts
@@ -223,7 +224,9 @@ def template(facts: dict[str, Any], topics: list[str]) -> dict[str, Any]:
 
     highlights = facts["teaching_highlights"][:3]
     if highlights:
-        long_.append("From student feedback: " + " ".join(h["text"] for h in highlights))
+        praised = [ASPECT_LABELS.get(h.get("aspect"), "").lower() for h in highlights]
+        if any(praised):
+            long_.append(f"In course feedback, students most often praise {_join(praised)}.")
 
     sources.update(
         {

@@ -6,7 +6,7 @@ FacultyLens builds one page per faculty member. It joins an auto-generated profi
 
 Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-> **Status: Phase 4 (NLP pipeline).** Sign-in for all four roles, admin setup, faculty profiles with ORCID / Semantic Scholar import, feedback cycles and anonymous once-only student feedback all work. Text answers are now redacted, moderated and scored for sentiment, teaching aspects, emotion and sarcasm on the CPU, and admins work through a moderation queue. The unified faculty page comes next. Feature phases follow SPEC §14.
+> **Status: Phase 5 (summaries, profiles and the unified page).** Sign-in for all four roles, admin setup, faculty profiles with ORCID / Semantic Scholar import, feedback cycles, anonymous once-only feedback, and the CPU NLP pipeline with moderation all work. Each teacher now has one page joining a generated, owner-approved profile with grounded feedback insights and the evidence behind them. Everything runs without an LLM key. Analytics dashboards and the bias panel come next. Feature phases follow SPEC §14.
 
 ## Demo data
 
@@ -140,6 +140,20 @@ Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. R
   - 553 responses in 213.8 s from a cold start on a Ryzen 5 5600H with 4 threads; peak RAM 2.8 GB.
   - Every seeded phone number and roll number was redacted, and all 8 seeded abusive answers were hidden. The abuse check also hid 11 compliments containing the word "stupid" (precision 0.42).
   - The sarcasm flag caught all 22 seeded sarcastic answers, along with 15 sincere ones (precision 0.59).
+
+## Summaries, generated profiles and the unified page
+
+- **My page** (faculty and HoDs) puts the approved profile beside the feedback for one course at a time:
+  - net sentiment and its split;
+  - grounded strengths and areas to improve, where "Show the evidence" opens the redacted student answers with the supporting sentence marked;
+  - every teaching aspect with its rating and whether ratings and comments agree;
+  - the emotion mix, and the sarcasm and moderation counts.
+- **Who sees what:** colleagues outside the department see only the approved profile. Feedback appears once a course has `MIN_RESPONSES_FOR_DISPLAY` responses.
+- **Summaries** are written after each analysis run, and only when a course's data changed.
+  - With `GROQ_API_KEY` set, Groq writes them. Every point must cite real evidence ids, or it is dropped.
+  - Without a key, a built-in summary is made from the same statistics, plus an automatic digest by distilbart.
+  - Adding a key later upgrades them on the next run, or press **Regenerate** via `POST /analysis/summaries`.
+- **Generated profile** (My profile → Generated profile): a draft written only from the saved facts, with each claim checked against them. Without a key, or if a claim fails the check twice, a plain template is used. The faculty member edits it and approves it; only approved versions are shown to colleagues.
 
 ## Repository layout
 

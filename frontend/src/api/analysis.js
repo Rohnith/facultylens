@@ -5,6 +5,8 @@ export const analysisApi = {
   run: (cycle) => api.post("/analysis/run", null, { params: { cycle } }).then((r) => r.data),
   status: (job) => api.get(`/analysis/status/${job}`).then((r) => r.data),
   jobs: (limit = 20) => api.get("/analysis/jobs", { params: { limit } }).then((r) => r.data),
+  summaries: (cycle) =>
+    api.post("/analysis/summaries", null, { params: { cycle } }).then((r) => r.data),
   queue: (params) => api.get("/moderation/queue", { params }).then((r) => r.data),
   decide: (id, body) => api.post(`/moderation/${id}/decision`, body).then((r) => r.data),
 };

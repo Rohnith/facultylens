@@ -66,11 +66,13 @@ function Progress({ job, now }) {
         <h2 className="m-0 text-section font-medium" aria-live="polite">
           {job.status === "queued"
             ? "Waiting for the analysis worker"
-            : job.total == null
-              ? "Finding responses to analyse"
-              : job.done === 0
-                ? "Starting: the first batch loads the models"
-                : "Analysing responses"}
+            : job.kind === "summaries"
+              ? "Writing summaries"
+              : job.total == null
+                ? "Finding responses to analyse"
+                : job.done === 0
+                  ? "Starting: the first batch loads the models"
+                  : "Analysing responses"}
         </h2>
         <JobStatus status={job.status} />
       </div>
@@ -192,6 +194,8 @@ function JobsTable({ jobs, cycleNames }) {
                     <td className="px-3 max-md:p-0">
                       {j.kind === "cycle" ? (
                         (cycleNames[j.cycle_id] ?? "Cycle")
+                      ) : j.kind === "summaries" ? (
+                        `Summaries · ${cycleNames[j.cycle_id] ?? "Cycle"}`
                       ) : (
                         <span className="text-muted">New submissions</span>
                       )}
@@ -288,11 +292,14 @@ export function AnalysisPage() {
     };
   }, [activeId, refresh]);
 
-  async function run() {
+  async function run(kind = "analysis") {
     setStarting(true);
     setError(null);
     try {
-      const job = await analysisApi.run(cycleId);
+      const job =
+        kind === "summaries"
+          ? await analysisApi.summaries(cycleId)
+          : await analysisApi.run(cycleId);
       setActive(job);
       setNow(Date.now());
       setJobs(await analysisApi.jobs(20));
@@ -314,14 +321,25 @@ export function AnalysisPage() {
       <PageHeader
         title="Analysis"
         actions={
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={!cycleId || running || starting || nothingToDo || !summary}
-            onClick={run}
-          >
-            {running ? "Running…" : starting ? "Starting…" : "Analyse waiting responses"}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={!cycleId || running || starting || !summary?.analysed}
+              title="Rewrite every course summary in this cycle, e.g. after adding a Groq key"
+              onClick={() => run("summaries")}
+            >
+              Regenerate summaries
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={!cycleId || running || starting || nothingToDo || !summary}
+              onClick={() => run()}
+            >
+              {running ? "Running…" : starting ? "Starting…" : "Analyse waiting responses"}
+            </button>
+          </>
         }
       >
         Every text answer is redacted, checked for abuse, and scored for sentiment, teaching
