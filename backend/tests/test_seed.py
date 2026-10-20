@@ -9,6 +9,8 @@ from tests.conftest import make_user
 async def test_seed_shape_is_synthetic_and_repeatable(mongo):
     first = await seed_module.seed(mongo)
     assert first["students"] == 144 and first["offerings"] == 11
+    assert first["departments"] == 8 and await mongo.departments.count_documents({}) == 8
+    assert first["sample_logins"]["student"] == "2451-24-733-001"
     assert 280 <= first["teaching_responses"] <= 370
     for name in seed_module.COLLECTIONS:
         assert await mongo[name].count_documents({"is_synthetic": {"$ne": True}}) == 0
@@ -38,7 +40,7 @@ async def test_seeded_responses_follow_the_privacy_rules(mongo):
     assert (response["submitted_on"].hour, response["submitted_on"].minute) == (0, 0)
     assert "student_id" not in response
     # The seeded student's per-form code matches, so they see the form as submitted.
-    student = await mongo.users.find_one({"roll_no": "23A91A0501"})
+    student = await mongo.users.find_one({"roll_no": "2451-24-733-001"})
     course = await mongo.courses.find_one({"student_ids": student["_id"]})
     form = await mongo.forms.find_one({"course_id": course["_id"], "type": "teaching"})
     # Every seeded response carries the code of exactly one enrolled student.

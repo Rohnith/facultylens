@@ -2,7 +2,11 @@
 """Synthetic demo data: `python -m app.seed [--reset] [--force]`.
 
 Everything created here carries `is_synthetic: true` and is excluded from evaluation (SPEC §8).
-Shape: 2 departments, 1 IQAC admin, 2 HoDs, 9 faculty, 144 students in two sections per
+The institution, its 8 departments and the course codes and names are MVSR Engineering
+College's (mvsrec.in and its R21 scheme). Every person is fictional, so no synthetic feedback
+sits under a real teacher's name.
+
+Shape: 8 departments (only CSE and ECE populated), 1 IQAC admin, 2 HoDs, 9 faculty, 144 students in two sections per
 department, 11 odd-semester offerings for 2026-27, one open cycle, and roughly 330 teaching
 responses plus curriculum responses, all from a fixed random seed. Counting HoDs, CSE has three
 women and three men teaching (enough for the bias panel to compare groups) and ECE two women and
@@ -46,10 +50,24 @@ COLLECTIONS = [
     "responses",
 ]
 
+# MVSR Engineering College's academic units (mvsrec.in/departments.php). Only CSE and ECE get
+# demo staff, students and feedback; the rest exist so pickers and reports list the real units.
 DEPARTMENTS = [
-    ("CSE", "Computer Science and Engineering", "05"),
-    ("ECE", "Electronics and Communication Engineering", "04"),
+    ("CIVIL", "Civil Engineering"),
+    ("CSE", "Computer Science Engineering & Allied Branches"),
+    ("IT", "Information Technology"),
+    ("ECE", "Electronics & Communication Engineering"),
+    ("EEE", "Electrical & Electronics Engineering"),
+    ("MECH", "Mechanical Engineering"),
+    ("MBA", "Master of Business Administration"),
+    ("ASH", "Applied Science & Humanities"),
 ]
+# Roll numbers follow the college's Osmania University format, e.g. 2451-24-733-001:
+# college code, year of admission, branch code, serial. 751 (CSIT) was confirmed by a student;
+# 733 (CSE) and 735 (ECE) are the usual OU branch codes and still need confirming.
+COLLEGE_CODE = "2451"
+ADMISSION_YEAR = "24"  # semester 5 in 2026-27 means the 2024 intake
+BRANCH_CODES = {"CSE": "733", "ECE": "735"}
 
 # name, gender, department, role, designation, strong aspects, weak aspects, interests
 FACULTY = [
@@ -144,7 +162,7 @@ FACULTY = [
         ["Signal processing", "Speech processing"],
     ),
     (
-        "Mr. Suresh Kumar",
+        "Mr. Farhan Siddiqui",
         "male",
         "ECE",
         "faculty",
@@ -165,21 +183,22 @@ FACULTY = [
     ),
 ]
 
-# code, name, department, section, teacher name (all semester 5 of 2026-27)
+# code, name, department, section, teacher name (all semester 5 of 2026-27). Course codes and
+# names are from MVSR's R21 B.E. scheme; the teachers are fictional.
 OFFERINGS = [
-    ("CS501", "Compiler Design", "CSE", "A", "Dr. Kavitha Reddy"),
-    ("CS501", "Compiler Design", "CSE", "B", "Mr. Arvind Sharma"),
-    ("CS502", "Computer Networks", "CSE", "A", "Dr. Lakshmi Narayanan"),
-    ("CS502", "Computer Networks", "CSE", "B", "Mr. Rahul Verma"),
-    ("CS503", "Machine Learning", "CSE", "A", "Dr. Padma Rao"),
-    ("EC501", "VLSI Design", "ECE", "A", "Dr. Sneha Patil"),
-    ("EC501", "VLSI Design", "ECE", "B", "Mr. Imran Khan"),
-    ("EC502", "Digital Signal Processing", "ECE", "A", "Dr. Deepa Menon"),
-    ("EC502", "Digital Signal Processing", "ECE", "B", "Mr. Suresh Kumar"),
-    ("EC503", "Microwave Engineering", "ECE", "A", "Dr. Venkat Rao"),
+    ("U21PCN05CS", "Automata Languages and Computation", "CSE", "A", "Dr. Kavitha Reddy"),
+    ("U21PCN05CS", "Automata Languages and Computation", "CSE", "B", "Mr. Arvind Sharma"),
+    ("U21PC501CS", "Web Programming", "CSE", "A", "Dr. Lakshmi Narayanan"),
+    ("U21PC501CS", "Web Programming", "CSE", "B", "Mr. Rahul Verma"),
+    ("U21PE513CS", "Image Processing", "CSE", "A", "Dr. Padma Rao"),
+    ("U21PC501EC", "Linear Integrated Circuits and Applications", "ECE", "A", "Dr. Sneha Patil"),
+    ("U21PC501EC", "Linear Integrated Circuits and Applications", "ECE", "B", "Mr. Imran Khan"),
+    ("U21PC502EC", "Digital Signal Processing", "ECE", "A", "Dr. Deepa Menon"),
+    ("U21PC502EC", "Digital Signal Processing", "ECE", "B", "Mr. Farhan Siddiqui"),
+    ("U21PC506EC", "Antennas and Wave Propagation", "ECE", "A", "Dr. Venkat Rao"),
     # Added in Phase 6 (last, so earlier offerings draw the same random numbers): with him
     # CSE has three women and three men, enough for the bias panel to show its comparison.
-    ("CS504", "Operating Systems", "CSE", "A", "Mr. Naveen Kumar"),
+    ("U21PCN04CS", "Operating Systems", "CSE", "A", "Mr. Naveen Kumar"),
 ]
 
 FIRST = [
@@ -376,7 +395,7 @@ def _rating(rng: random.Random, mu: float) -> int:
     return max(1, min(5, round(rng.gauss(mu, 0.75))))
 
 
-DEMO_INSTITUTION = "Demo Institute of Technology"
+DEMO_INSTITUTION = "MVSR Engineering College"
 UNIVERSITIES = ["JNTU Hyderabad", "Osmania University", "NIT Warangal", "Andhra University"]
 TITLE_PATTERNS = [
     "A comparative study of {topic} techniques",
@@ -538,7 +557,7 @@ async def seed(database, force: bool = False) -> dict[str, Any]:
     common = {"is_synthetic": True, "created_at": stamp}
 
     dept_ids = {}
-    for code, name, _ in DEPARTMENTS:
+    for code, name in DEPARTMENTS:
         dept_ids[code] = (
             await database.departments.insert_one({"code": code, "name": name, **common})
         ).inserted_id
@@ -583,7 +602,7 @@ async def seed(database, force: bool = False) -> dict[str, Any]:
 
     students: dict[tuple[str, str], list[dict]] = {}
     used_names = set()
-    for code, _, branch in DEPARTMENTS:
+    for code, branch in BRANCH_CODES.items():
         for s_index, section in enumerate(["A", "B"]):
             batch = []
             for i in range(SECTION_SIZE):
@@ -592,7 +611,8 @@ async def seed(database, force: bool = False) -> dict[str, Any]:
                     if name not in used_names:
                         used_names.add(name)
                         break
-                roll = f"23A91A{branch}{s_index * SECTION_SIZE + i + 1:02d}"
+                serial = s_index * SECTION_SIZE + i + 1
+                roll = f"{COLLEGE_CODE}-{ADMISSION_YEAR}-{branch}-{serial:03d}"
                 doc = user(name, "student", roll_no=roll, department_id=dept_ids[code])
                 batch.append(doc)
             result = await database.users.insert_many(batch)

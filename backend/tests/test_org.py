@@ -70,11 +70,11 @@ async def test_enrol_add_remove_and_unknown(client, world):
     r = await client.post(
         f"/api/courses/{cid}/enrol",
         headers=h,
-        json={"add_roll_numbers": [ROLL_NUMBERS[1].lower(), "21A91A0599", ROLL_NUMBERS[1]]},
+        json={"add_roll_numbers": [ROLL_NUMBERS[1].lower(), "2451-24-733-099", ROLL_NUMBERS[1]]},
     )
     assert r.status_code == 200, r.text
     body = r.json()
-    assert body["unknown_roll_numbers"] == ["21A91A0599"]
+    assert body["unknown_roll_numbers"] == ["2451-24-733-099"]
     assert body["course"]["student_count"] == 2
     r = await client.post(
         f"/api/courses/{cid}/enrol", headers=h, json={"remove_roll_numbers": [ROLL_NUMBERS[0]]}

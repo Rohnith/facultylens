@@ -17,7 +17,7 @@ from app.main import create_app  # noqa: E402
 from app.utils import now  # noqa: E402
 
 PASSWORD = "correct-horse-battery"
-ROLL_NUMBERS = ["21A91A0501", "21A91A0502", "21A91A0503", "21A91A0504"]
+ROLL_NUMBERS = ["2451-24-733-001", "2451-24-733-002", "2451-24-733-003", "2451-24-733-004"]
 
 
 @pytest.fixture(autouse=True)

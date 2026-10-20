@@ -52,7 +52,7 @@ def test_sentence_spans_point_at_the_text():
 def test_pii_teacher_name_other_names_and_numbers():
     text = (
         "Dr. Kavitha Reddy explains well but Ravi Kumar disturbs. Call 98480 12345 or "
-        "+91-9876543210, mail me at abc.d@gmail.com, see www.example.com. I am 23A91A0505. "
+        "+91-9876543210, mail me at abc.d@gmail.com, see www.example.com. I am 2451-24-751-041. "
         "Taught here 2016 - 2020."
     )
     ravi = text.index("Ravi Kumar")

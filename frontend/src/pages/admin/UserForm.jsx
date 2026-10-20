@@ -84,7 +84,7 @@ export function UserForm({ departments, user, onSaved, onCancel }) {
           )}
         </Field>
         {isStudent ? (
-          <Field label="Roll number" hint="Students sign in with this, e.g. 21A91A0501.">
+          <Field label="Roll number" hint="Students sign in with this, e.g. 2451-24-733-001.">
             {(a) => (
               <TextInput
                 {...a}

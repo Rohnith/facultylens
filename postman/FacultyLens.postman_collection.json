@@ -575,7 +575,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"users\": [\n    {\n      \"name\": \"Meena K\",\n      \"role\": \"student\",\n      \"roll_no\": \"21A91A0511\",\n      \"department_code\": \"CSE\"\n    },\n    {\n      \"name\": \"Prakash V\",\n      \"role\": \"faculty\",\n      \"email\": \"prakash.v@college.edu\",\n      \"department_code\": \"CSE\",\n      \"gender\": \"male\"\n    }\n  ]\n}",
+              "raw": "{\n  \"users\": [\n    {\n      \"name\": \"Meena K\",\n      \"role\": \"student\",\n      \"roll_no\": \"2451-24-733-011\",\n      \"department_code\": \"CSE\"\n    },\n    {\n      \"name\": \"Prakash V\",\n      \"role\": \"faculty\",\n      \"email\": \"prakash.v@college.edu\",\n      \"department_code\": \"CSE\",\n      \"gender\": \"male\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -897,7 +897,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"add_roll_numbers\": [\n    \"21A91A0511\"\n  ],\n  \"remove_roll_numbers\": [],\n  \"faculty_ids\": [\n    \"{{userId}}\"\n  ]\n}",
+              "raw": "{\n  \"add_roll_numbers\": [\n    \"2451-24-733-011\"\n  ],\n  \"remove_roll_numbers\": [],\n  \"faculty_ids\": [\n    \"{{userId}}\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"

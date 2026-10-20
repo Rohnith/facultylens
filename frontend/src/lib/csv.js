@@ -24,4 +24,4 @@ export function downloadText(filename, text, type = "text/csv;charset=utf-8") {
 export const BULK_TEMPLATE =
   "name,email,role,department_code,roll_no,gender\r\n" +
   "Dr. Anita Rao,anita.rao@college.edu,faculty,CSE,,female\r\n" +
-  "Meena K,,student,CSE,21A91A0511,\r\n";
+  "Meena K,,student,CSE,2451-24-733-011,\r\n";

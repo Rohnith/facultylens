@@ -14,15 +14,17 @@ Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](
 python -m app.seed
 ```
 
-This fills an empty database with **synthetic** demo data:
-- 2 departments, 11 teaching staff, 144 students and 11 course offerings;
-- an open "2026-27 Odd Sem" cycle with 326 teaching and 288 syllabus responses.
+This fills an empty database with **synthetic** demo data set in **Maturi Venkata Subba Rao (MVSR) Engineering College**, Hyderabad:
+- the college's 8 departments, from [mvsrec.in](https://mvsrec.in/departments.php); only CSE and ECE have demo staff, students and feedback;
+- 11 semester-V offerings with real course codes and names from MVSR's R21 B.E. scheme (for example U21PCN05CS Automata Languages and Computation, U21PC502EC Digital Signal Processing);
+- 11 teaching staff and 144 students, with roll numbers in the college's format (`2451-24-733-001`: college code, admission year, branch code, serial);
+- an open "2026-27 Odd Sem" cycle with about 330 teaching and 290 syllabus responses.
 
-Every document is marked `is_synthetic` and is excluded from evaluation. All demo accounts use the password in `DEMO_PASSWORD` (`backend/.env.example`). Sign in as:
+**Every person is fictional.** No real MVSR teacher's name appears, so no invented feedback sits under a real name. The comments are hand-written sentence banks, not real student feedback. Every document is marked `is_synthetic` and is excluded from evaluation. All demo accounts use the password in `DEMO_PASSWORD` (`backend/.env.example`). Sign in as:
 - admin: `iqac@demo.facultylens.in`
 - HoD: `padma.rao@demo.facultylens.in`
 - faculty: `kavitha.reddy@demo.facultylens.in`
-- student: any roll number from `23A91A0501`.
+- student: any roll number from `2451-24-733-001` (CSE) or `2451-24-735-001` (ECE).
 
 `python -m app.seed --reset` removes only the synthetic data. The seed refuses to run on a database that already has real users.
 

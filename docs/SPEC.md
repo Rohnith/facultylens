@@ -257,6 +257,16 @@ Notes:
 - **HoD approval** happens in a third tab, "Action taken", on Department insights.
 - **Dev dependency:** `pypdf` (in `requirements-dev.txt`), used only by tests that read the exported PDF back.
 
+*Changed before Phase 8 (agreed with the user, 2026-10-20): demo data set in the user's college:*
+- **Institution:** `INSTITUTION_NAME` defaults to "Maturi Venkata Subba Rao (MVSR) Engineering College".
+- **Departments:** the seed creates MVSR's 8 academic units (mvsrec.in/departments.php). Only CSE and ECE get demo staff, students and feedback.
+- **Courses:** the seed's offerings use real semester-V course codes and names from MVSR's R21 B.E. scheme, in the same order, so the random draws are unchanged.
+- **People stay fictional:** no real teacher's name appears in the seed. "Mr. Suresh Kumar" was renamed "Mr. Farhan Siddiqui" to avoid any chance of matching real staff.
+- **Roll numbers:** these use the Osmania University format, `ROLL_NO_REGEX=\b\d{4}-\d{2}-\d{3}-\d{3}\b`, for example 2451-24-751-041 (college code 2451, admission year, branch code, serial).
+  - The user confirmed 751 = CSIT.
+  - The seed uses 733 (CSE) and 735 (ECE), which are the usual OU codes but not yet confirmed.
+  - The same pattern drives PII redaction.
+
 ---
 
 ## 10. API (all under `/api`; JSON; JWT bearer)

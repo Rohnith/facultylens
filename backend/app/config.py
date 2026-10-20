@@ -20,13 +20,13 @@ class Settings(BaseSettings):
     # ---- App ----
     app_name: str = "FacultyLens"
     app_version: str = "0.1.0"
-    institution_name: str = "Your College Name"
+    institution_name: str = "Maturi Venkata Subba Rao (MVSR) Engineering College"
     frontend_origin: str = "http://localhost:5173"
     jwt_secret: str = Field(default="change-me", min_length=8)
     jwt_access_minutes: int = 60
     jwt_refresh_days: int = 7
     student_hash_salt: str = Field(default="change-me", min_length=8)
-    roll_no_regex: str = r"\b\d{2}[A-Z0-9]{2,4}\d{1,2}[A-Z]\d{2}[0-9A-Z]\d\b"
+    roll_no_regex: str = r"\b\d{4}-\d{2}-\d{3}-\d{3}\b"
     min_responses_for_display: int = Field(default=5, ge=1)
     analysis_on_submit: bool = True  # queue each new response for background analysis
     demo_password: str = Field(default="facultylens-demo", min_length=8)
