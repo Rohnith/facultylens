@@ -42,6 +42,14 @@
     {
       "key": "courseId",
       "value": ""
+    },
+    {
+      "key": "facultyId",
+      "value": ""
+    },
+    {
+      "key": "pendingId",
+      "value": ""
     }
   ],
   "item": [
@@ -862,6 +870,325 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"add_roll_numbers\": [\n    \"21A91A0511\"\n  ],\n  \"remove_roll_numbers\": [],\n  \"faculty_ids\": [\n    \"{{userId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "profiles",
+      "item": [
+        {
+          "name": "GET /faculty/:id/profile-data",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile-data",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile-data"
+              ]
+            },
+            "description": "Profile facts + pending imports + courses taught. Owner (faculty/HoD) and admin; a HoD can read their own department. can_edit tells the UI whether to show editing.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /faculty/:id/profile-data",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile-data",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile-data"
+              ]
+            },
+            "description": "Replaces the editable sections. Items without an id get one; keep ids when editing so later grounding stays stable.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designation\": \"Assistant Professor\",\n  \"photo_url\": null,\n  \"interests\": [\n    \"Natural language processing\",\n    \"Information retrieval\"\n  ],\n  \"qualifications\": [\n    {\n      \"degree\": \"M.Tech\",\n      \"specialisation\": \"Computer Science\",\n      \"institution\": \"JNTU Hyderabad\",\n      \"year\": 2015\n    }\n  ],\n  \"experience\": [\n    {\n      \"role\": \"Assistant Professor\",\n      \"institution\": \"Demo College of Engineering\",\n      \"from_year\": 2016,\n      \"to_year\": null\n    }\n  ],\n  \"publications\": [\n    {\n      \"title\": \"Aspect-based sentiment of student feedback\",\n      \"venue\": \"IJERT\",\n      \"year\": 2024,\n      \"type\": \"journal\"\n    }\n  ],\n  \"achievements\": [\n    {\n      \"kind\": \"fdp\",\n      \"title\": \"AICTE FDP on Deep Learning\",\n      \"year\": 2023\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/import/orcid",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/import/orcid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "import",
+                "orcid"
+              ]
+            },
+            "description": "Fetches works, employments, educations and keywords from the public ORCID record (iD or orcid.org link, checksum verified) into pending_imports. Duplicates of accepted, pending or rejected items are skipped. Limited to 10/minute.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orcid\": \"0000-0002-1825-0097\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"pendingId\", pm.response.json().profile.pending_imports[0]?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/semantic-scholar/search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/semantic-scholar/search?q=Josiah%20Carberry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "semantic-scholar",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Josiah Carberry"
+                }
+              ]
+            },
+            "description": "Candidate authors (id, affiliations, paper count, sample titles) so the faculty member can pick the right one.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/import/semantic-scholar",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/import/semantic-scholar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "import",
+                "semantic-scholar"
+              ]
+            },
+            "description": "Author ID or profile link. Papers go to pending_imports; a paper already pending from ORCID gets its citations and TL;DR filled in instead. TL;DRs are best-effort without S2_API_KEY.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"author\": \"https://www.semanticscholar.org/author/1751762\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/imports/:item/accept",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/imports/{{pendingId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "imports",
+                "{{pendingId}}",
+                "accept"
+              ]
+            },
+            "description": "Moves one pending item into its section; optional data overrides fields before saving.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data\": {\n    \"venue\": \"Journal of Psychoceramics\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/imports/:item/reject",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/imports/{{pendingId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "imports",
+                "{{pendingId}}",
+                "reject"
+              ]
+            },
+            "description": "Drops a pending item and remembers it so re-imports don't suggest it again.",
+            "header": []
+          }
+        },
+        {
+          "name": "POST /faculty/:id/imports/bulk",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/imports/bulk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "imports",
+                "bulk"
+              ]
+            },
+            "description": "Accept and reject many pending items in one call.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accept\": [],\n  \"reject\": []\n}",
               "options": {
                 "raw": {
                   "language": "json"
