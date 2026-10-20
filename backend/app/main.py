@@ -26,6 +26,7 @@ from app.routers import (
     overview,
     profile_versions,
     profiles,
+    reports,
     users,
 )
 
@@ -67,6 +68,7 @@ def create_app() -> FastAPI:
         courses,
         profiles,
         profile_versions,
+        reports,
         overview,
         cycles,
         forms,

@@ -95,7 +95,19 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("faculty_id", ASCENDING), ("cycle_id", ASCENDING)], name="faculty_cycle"),
     ],
     "analysis_jobs": [IndexModel([("created_at", DESCENDING)], name="created_desc")],
-    "action_taken": [IndexModel([("cycle_id", ASCENDING)], name="cycle_id")],
+    "action_taken": [
+        IndexModel([("cycle_id", ASCENDING)], name="cycle_id"),
+        IndexModel(
+            [
+                ("cycle_id", ASCENDING),
+                ("department_id", ASCENDING),
+                ("kind", ASCENDING),
+                ("key", ASCENDING),
+            ],
+            unique=True,
+            name="cycle_department_issue",
+        ),
+    ],
     "labels": [
         IndexModel(
             [("response_id", ASCENDING), ("annotator_id", ASCENDING)],

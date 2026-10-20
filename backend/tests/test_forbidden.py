@@ -25,6 +25,7 @@ CYCLE = {
 }  # the profile owner (world faculty) and IQAC admin
 
 PROFILE_FIELDS = {"headline": "H", "bio_short": "S", "bio_long": "L"}
+NO_ID = "000000000000000000000000"
 
 # (method, path, allowed roles, json body). {course} / {user} are filled from the fixture.
 ENDPOINTS = [
@@ -84,6 +85,32 @@ ENDPOINTS = [
     ("GET", "/api/analytics/bias?department={dept}", {"admin", "hod"}, None),
     ("GET", "/api/analytics/sarcasm?department={dept}", {"admin", "hod"}, None),
     ("GET", "/api/analytics/sarcasm?faculty={user}", {"admin", "hod", "faculty"}, None),
+    # NAAC report: admin drafts and exports; the department's HoD reads, edits, approves.
+    ("POST", "/api/reports/naac/{cycle}/draft", {"admin"}, None),
+    ("GET", "/api/reports/naac/{cycle}/actions", {"admin", "hod"}, None),
+    ("GET", "/api/reports/naac/{cycle}/status", {"admin", "hod"}, None),
+    (
+        "POST",
+        "/api/reports/naac/{cycle}/actions",
+        {"admin", "hod"},
+        {
+            "department_id": "{dept}",
+            "label": "Library",
+            "issue": "Library closes early.",
+            "action": "Extend the hours.",
+            "responsible": "Librarian",
+        },
+    ),
+    (
+        "PUT",
+        f"/api/reports/naac/{{cycle}}/actions/{NO_ID}",
+        {"admin", "hod"},
+        {"status": "approved"},
+    ),
+    ("DELETE", f"/api/reports/naac/{{cycle}}/actions/{NO_ID}", {"admin"}, None),
+    ("GET", f"/api/reports/naac/{{cycle}}/actions/{NO_ID}/evidence", {"admin", "hod"}, None),
+    ("GET", "/api/reports/naac/{cycle}.pdf?draft=true", {"admin"}, None),
+    ("GET", "/api/reports/naac/{cycle}.docx?draft=true", {"admin"}, None),
     # Feedback collection: {cycle} is open with a teaching form {form} for the CSE offering.
     ("GET", "/api/cycles", STAFF, None),
     ("POST", "/api/cycles", {"admin"}, CYCLE),
