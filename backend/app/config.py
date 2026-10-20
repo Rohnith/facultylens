@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     tox_hide: float = 0.70
     tox_review: float = 0.40
     aspect_sim: float = 0.35
-    sarc_flag: float = 0.70
+    sarc_flag: float = 0.95
 
     # ---- LLM ----
     groq_api_key: str = ""

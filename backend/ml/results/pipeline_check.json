@@ -1,0 +1,35 @@
+{
+  "measured_at": "2026-10-20T06:57:03+00:00",
+  "cycle": "2026-27 Odd Sem",
+  "model_version": "light-r1-912bb0b3",
+  "torch_num_threads": 4,
+  "batch_size": 16,
+  "machine": {
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "logical_cores": 12,
+    "ram_gb": 15.3
+  },
+  "responses_analysed": 553,
+  "total_seconds_cold": 213.8,
+  "per_response_ms_warm_mean": 310.6,
+  "per_response_ms_warm_p95": 599.5,
+  "first_batch_ms_per_response": 2801.4,
+  "rss_before_mb": 62,
+  "peak_rss_mb": 2820,
+  "found": {
+    "hidden": 19,
+    "review": 0,
+    "pii": 16,
+    "sarcastic": 37
+  },
+  "cache_check_responses_rescored": 0,
+  "sarcasm_vs_seeded_lines": {
+    "threshold": 0.95,
+    "seeded_sarcastic_answers": 22,
+    "flagged": 37,
+    "flagged_and_seeded": 22,
+    "precision": 0.59,
+    "recall": 1.0
+  },
+  "budget": "300 responses in under 10 minutes on a 4-core CPU (SPEC \u00a713)"
+}

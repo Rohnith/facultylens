@@ -91,8 +91,9 @@ def test_sentiment_and_sarcasm_rules():
     probs = {"negative": 0.1, "neutral": 0.2, "positive": 0.7}
     assert scoring.sentiment_label(probs) == "positive"
     assert scoring.polarity_value(probs) == 0.6
-    assert scoring.sarcasm_flag(0.8, "positive") is True
-    assert scoring.sarcasm_flag(0.8, "negative") is False
+    assert scoring.sarcasm_flag(0.97, "positive") is True
+    assert scoring.sarcasm_flag(0.9, "positive") is False  # tweet-trained model: calibrated at 0.95
+    assert scoring.sarcasm_flag(0.97, "negative") is False
     assert scoring.sarcasm_flag(0.5, "positive") is False
     mean = scoring.weighted_mean([probs, {"negative": 1.0}], [3, 1])
     assert mean == {"negative": 0.325, "neutral": 0.15, "positive": 0.525}
