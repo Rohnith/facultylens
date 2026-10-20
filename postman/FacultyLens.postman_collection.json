@@ -50,6 +50,14 @@
     {
       "key": "pendingId",
       "value": ""
+    },
+    {
+      "key": "cycleId",
+      "value": ""
+    },
+    {
+      "key": "formId",
+      "value": ""
     }
   ],
   "item": [
@@ -1195,6 +1203,381 @@
                 }
               }
             }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cycles",
+      "item": [
+        {
+          "name": "GET /cycles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cycles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles"
+              ]
+            },
+            "description": "All cycles; admin also gets form, response and eligible counts.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /cycles (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cycles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles"
+              ]
+            },
+            "description": "Creates a draft. Odd term = semesters 1, 3, 5, 7.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"2026-27 Odd Sem\",\n  \"academic_year\": \"2026-27\",\n  \"term\": \"odd\",\n  \"opens_at\": \"2026-10-20T00:00:00Z\",\n  \"closes_at\": \"2026-11-30T23:59:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"cycleId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /cycles/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /cycles/:id/preview (admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "preview"
+              ]
+            },
+            "description": "What publishing would create, and offerings with no teacher.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /cycles/:id/publish (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "publish"
+              ]
+            },
+            "description": "Creates one teaching form per offering x teacher and one curriculum form per offering; opens the cycle. Idempotent.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /cycles/:id/forms (admin, hod)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/forms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "forms"
+              ]
+            },
+            "description": "Forms with response counts (never response content). HoD: own department only.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"formId\", pm.response.json()[0]?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /cycles/:id/close (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "close"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "forms (students)",
+      "item": [
+        {
+          "name": "GET /forms/my (student)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/forms/my",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "forms",
+                "my"
+              ]
+            },
+            "description": "Open forms for the student's enrolled offerings, with submitted: true/false.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"formId\", pm.response.json()[0]?.id || pm.collectionVariables.get('formId'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /forms/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/forms/{{formId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "forms",
+                "{{formId}}"
+              ]
+            },
+            "description": "Questions, course, teacher. Students: only if enrolled. Staff: within their scope.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /forms/:id/responses (student)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/forms/{{formId}}/responses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "forms",
+                "{{formId}}",
+                "responses"
+              ]
+            },
+            "description": "Teaching form shown; a curriculum form takes syllabus_relevance, outcomes_clarity, lab_adequacy, reference_material and texts.comment. One response per student per form: a second POST returns 409. Stores no student id, only a per-form HMAC code and the date.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"likert\": {\n    \"knowledge\": 5,\n    \"clarity\": 4,\n    \"punctuality\": 5,\n    \"interaction\": 4,\n    \"practical\": 3,\n    \"assessment\": 4,\n    \"behaviour\": 5,\n    \"pace\": 3\n  },\n  \"texts\": {\n    \"liked\": \"Explains every topic clearly.\",\n    \"improve\": \"The last unit felt rushed.\",\n    \"other\": \"\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "feedback",
+      "item": [
+        {
+          "name": "GET /feedback/faculty/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/feedback/faculty/{{facultyId}}?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feedback",
+                "faculty",
+                "{{facultyId}}"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Per teaching form: responses, eligible, min_required, and rating averages only once responses >= MIN_RESPONSES_FOR_DISPLAY. Comments stay hidden until Phase 4 moderates and redacts them.",
+            "header": []
           },
           "event": [
             {
