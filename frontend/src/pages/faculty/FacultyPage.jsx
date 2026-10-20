@@ -6,6 +6,7 @@ import { EvidenceDrawer } from "../../components/EvidenceDrawer";
 import { FormError, Select } from "../../components/forms";
 import { RateBar } from "../../components/RateBar";
 import { useAuth } from "../../context/auth";
+import { AcrossCourses } from "./AcrossCourses";
 import { Aspects, Footer, Overall, Summary } from "./Insights";
 import { ProfileColumn } from "./ProfileColumn";
 
@@ -79,6 +80,12 @@ function Feedback({ data, onPick, onEvidence }) {
   }
   return (
     <div className="flex flex-col gap-[var(--gap)]">
+      <AcrossCourses
+        facultyId={data.profile.id}
+        cycleId={sel.cycle.id}
+        selectedCourseId={sel.course.id}
+        onPick={onPick}
+      />
       <Pickers data={data} selected={sel} onPick={onPick} />
       {sel.status === "below_minimum" && (
         <Notice title="Not enough responses yet">
