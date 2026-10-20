@@ -5,6 +5,7 @@ import pytest
 # Tests use their own database so they never touch demo data, and cheap bcrypt rounds.
 os.environ["MONGODB_DB"] = "facultylens_test"
 os.environ["BCRYPT_ROUNDS"] = "4"
+os.environ["ANALYSIS_ON_SUBMIT"] = "false"  # no background model runs during tests
 
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 

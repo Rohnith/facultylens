@@ -1,5 +1,6 @@
 """FastAPI app factory. Imports no ML libraries: models load lazily via app.nlp.registry."""
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -11,7 +12,19 @@ from slowapi.errors import RateLimitExceeded
 from app import db
 from app.config import get_settings
 from app.limiter import limiter
-from app.routers import auth, courses, cycles, departments, feedback, forms, health, profiles, users
+from app.pipeline import jobs
+from app.routers import (
+    analysis,
+    auth,
+    courses,
+    cycles,
+    departments,
+    feedback,
+    forms,
+    health,
+    profiles,
+    users,
+)
 
 log = logging.getLogger("facultylens")
 
@@ -20,10 +33,15 @@ log = logging.getLogger("facultylens")
 async def lifespan(app: FastAPI):
     if await db.ping():
         await db.ensure_indexes()
+        # Jobs a previous process left half-done; their finished responses are cached.
+        stale = await asyncio.to_thread(jobs.mark_interrupted)
+        if stale:
+            log.info("Marked %s unfinished analysis jobs as interrupted.", stale)
     else:
         log.warning("MongoDB is unreachable at startup; /api/health will report degraded.")
     yield
     await db.close_client()
+    db.close_sync_client()
 
 
 def create_app() -> FastAPI:
@@ -38,7 +56,18 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    for module in (health, auth, users, departments, courses, profiles, cycles, forms, feedback):
+    for module in (
+        health,
+        auth,
+        users,
+        departments,
+        courses,
+        profiles,
+        cycles,
+        forms,
+        feedback,
+        analysis,
+    ):
         app.include_router(module.router, prefix="/api")
     return app
 

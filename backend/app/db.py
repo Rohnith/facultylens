@@ -6,6 +6,7 @@ from pymongo.asynchronous.database import AsyncDatabase
 from app.config import get_settings
 
 _client: AsyncMongoClient | None = None
+_sync_client = None
 
 # collection -> indexes (SPEC §9)
 INDEXES: dict[str, list[IndexModel]] = {
@@ -83,7 +84,13 @@ INDEXES: dict[str, list[IndexModel]] = {
             name="faculty_course_cycle",
         )
     ],
-    "moderation_queue": [IndexModel([("status", ASCENDING)], name="status")],
+    "moderation_queue": [
+        IndexModel([("status", ASCENDING), ("created_at", DESCENDING)], name="status_created"),
+        IndexModel(
+            [("analysis_id", ASCENDING), ("field", ASCENDING)], unique=True, name="analysis_field"
+        ),
+    ],
+    "analysis_jobs": [IndexModel([("created_at", DESCENDING)], name="created_desc")],
     "action_taken": [IndexModel([("cycle_id", ASCENDING)], name="cycle_id")],
     "labels": [
         IndexModel(
@@ -100,8 +107,28 @@ INDEXES: dict[str, list[IndexModel]] = {
 OBSOLETE_INDEXES: dict[str, list[str]] = {
     "users": ["email_unique"],
     "courses": ["code_semester"],
+    "moderation_queue": ["status"],
     "forms": ["cycle_course_faculty"],
 }
+
+
+def get_sync_db():
+    """Synchronous PyMongo database for the analysis worker thread (its own client)."""
+    global _sync_client
+    if _sync_client is None:
+        from pymongo import MongoClient
+
+        _sync_client = MongoClient(
+            get_settings().mongodb_uri, serverSelectionTimeoutMS=3000, tz_aware=True
+        )
+    return _sync_client[get_settings().mongodb_db]
+
+
+def close_sync_client() -> None:
+    global _sync_client
+    if _sync_client is not None:
+        _sync_client.close()
+        _sync_client = None
 
 
 def get_client() -> AsyncMongoClient:

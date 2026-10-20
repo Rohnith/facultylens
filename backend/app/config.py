@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     student_hash_salt: str = Field(default="change-me", min_length=8)
     roll_no_regex: str = r"\b\d{2}[A-Z0-9]{2,4}\d{1,2}[A-Z]\d{2}[0-9A-Z]\d\b"
     min_responses_for_display: int = Field(default=5, ge=1)
+    analysis_on_submit: bool = True  # queue each new response for background analysis
     demo_password: str = Field(default="facultylens-demo", min_length=8)
 
     # ---- Auth ----

@@ -7,6 +7,7 @@ from datetime import timedelta
 import pytest
 
 from app.feedback_spec import questions
+from app.pipeline import jobs
 from app.services import orcid as orcid_service
 from app.services import semantic_scholar as s2_service
 from app.utils import now
@@ -78,6 +79,18 @@ ENDPOINTS = [
     ("GET", "/api/forms/{form}", ANY, None),
     ("POST", "/api/forms/{form}/responses", {"student"}, {"likert": {}, "texts": {}}),
     ("GET", "/api/feedback/faculty/{user}", STAFF, None),
+    # Analysis and moderation: admin only.
+    ("GET", "/api/analysis/summary?cycle={cycle}", {"admin"}, None),
+    ("POST", "/api/analysis/run?cycle={cycle}", {"admin"}, None),
+    ("GET", "/api/analysis/status/000000000000000000000000", {"admin"}, None),
+    ("GET", "/api/analysis/jobs", {"admin"}, None),
+    ("GET", "/api/moderation/queue", {"admin"}, None),
+    (
+        "POST",
+        "/api/moderation/000000000000000000000000/decision",
+        {"admin"},
+        {"action": "approve"},
+    ),
 ]
 
 CASES = [
@@ -98,6 +111,7 @@ def _no_network(monkeypatch):
     monkeypatch.setattr(orcid_service, "fetch_orcid", nothing)
     monkeypatch.setattr(s2_service, "fetch_papers", no_papers)
     monkeypatch.setattr(s2_service, "search_authors", no_papers)
+    monkeypatch.setattr(jobs, "enqueue", lambda job_id: None)  # no real analysis worker
 
 
 def _fill(value, ids):

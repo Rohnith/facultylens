@@ -11,6 +11,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.auth.deps import CurrentUser, Db, User, require_roles
 from app.feedback_spec import likert_keys, text_keys
+from app.pipeline import jobs
 from app.schemas.feedback import FormOut, MyForm, ResponseIn
 from app.services.anonymity import student_form_hash
 from app.services.audit import record
@@ -149,11 +150,12 @@ async def submit_response(form_id: str, body: ResponseIn, db: Db, student: Stude
         "is_synthetic": False,
     }
     try:
-        await db.responses.insert_one(doc)
+        inserted = await db.responses.insert_one(doc)
     except DuplicateKeyError:
         raise HTTPException(
             status.HTTP_409_CONFLICT, "You've already submitted this form."
         ) from None
     # No student id in the audit trail either: only that a form received a response.
     await record(db, None, "form.response", form_id)
+    jobs.submit_auto(inserted.inserted_id)  # analysed in the background (SPEC §3 step 4)
     return {"status": "recorded"}

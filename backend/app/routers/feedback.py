@@ -10,12 +10,52 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.auth.deps import Db, User, require_roles
 from app.config import get_settings
+from app.nlp import registry
+from app.pipeline.aggregate import effective_field
 from app.schemas.feedback import FormStats
 from app.services.forms_data import course_brief, cycle_brief, lookups, response_counts
 from app.utils import oid
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 Staff = Annotated[User, Depends(require_roles("admin", "hod", "faculty"))]
+
+
+async def _visible_comments(db, form_id) -> list[dict] | None:
+    """Moderated, redacted answers for one form; None when nothing is analysed yet.
+
+    Only text that passed moderation (or that an admin approved or edited) is returned, and it
+    is the redacted text: names, phone numbers, roll numbers and links are already replaced.
+    """
+    response_ids = [r["_id"] async for r in db.responses.find({"form_id": form_id}, {"_id": 1})]
+    analyses = await db.analyses.find(
+        {"response_id": {"$in": response_ids}, "model_version": registry.model_version()},
+        {"fields": 1},
+    ).to_list()
+    if not analyses:
+        return None
+    comments = []
+    for analysis in analyses:
+        for field in analysis["fields"]:
+            shown, text = effective_field(field)
+            if not shown:
+                continue
+            comments.append(
+                {
+                    "id": f"{analysis['_id']}:{field['field']}",
+                    "field": field["field"],
+                    "text": text,
+                    "sentiment": field["sentiment"]["label"],
+                    "possibly_sarcastic": bool(field.get("sentiment_uncertain")),
+                    "aspects": sorted(
+                        {
+                            (a["key"], a.get("polarity", "neutral"))
+                            for s in field["sentences"]
+                            for a in s.get("aspects", [])
+                        }
+                    ),
+                }
+            )
+    return comments
 
 
 @router.get("/faculty/{faculty_id}", response_model=list[FormStats])
@@ -73,6 +113,11 @@ async def faculty_feedback(
             rows = [r async for r in await db.responses.aggregate(pipeline)]
             if rows:
                 means = {k: round(v, 2) for k, v in rows[0].items() if k != "_id" and v is not None}
+        comments: list[dict] = []
+        comments_status = "hidden_below_minimum"
+        if visible:
+            comments = await _visible_comments(db, form["_id"])
+            comments_status = "available" if comments is not None else "awaiting_analysis"
         course_doc = courses[form["course_id"]]
         out.append(
             FormStats(
@@ -84,8 +129,8 @@ async def faculty_feedback(
                 min_required=minimum,
                 visible=visible,
                 likert_means=means,
-                comments=[],
-                comments_status="awaiting_analysis" if visible else "hidden_below_minimum",
+                comments=comments or [],
+                comments_status=comments_status,
             )
         )
     out.sort(key=lambda s: (s.cycle.closes_at, s.course.code, s.course.section), reverse=True)
