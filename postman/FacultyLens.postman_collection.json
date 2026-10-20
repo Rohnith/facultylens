@@ -58,6 +58,14 @@
     {
       "key": "formId",
       "value": ""
+    },
+    {
+      "key": "jobId",
+      "value": ""
+    },
+    {
+      "key": "queueId",
+      "value": ""
     }
   ],
   "item": [
@@ -1578,6 +1586,232 @@
             },
             "description": "Per teaching form: responses, eligible, min_required, and rating averages only once responses >= MIN_RESPONSES_FOR_DISPLAY. Comments stay hidden until Phase 4 moderates and redacts them.",
             "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "analysis (admin)",
+      "item": [
+        {
+          "name": "GET /analysis/summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/summary?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Responses in the cycle, how many are analysed for the current model_version, and any active job.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /analysis/run",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/run?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "run"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Queues every unanalysed response in the cycle (202). Cached results are never re-scored; one active run per cycle.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 202\", () => pm.response.to.have.status(202));",
+                  "pm.collectionVariables.set(\"jobId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analysis/status/:job",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/status/{{jobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "status",
+                "{{jobId}}"
+              ]
+            },
+            "description": "done / total, counts of hidden, review, PII and sarcastic answers, timings.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analysis/jobs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/jobs?limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "moderation (admin)",
+      "item": [
+        {
+          "name": "GET /moderation/queue",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/moderation/queue?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "queue"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Answers the toxicity model hid (>= TOX_HIDE) or flagged for review (>= TOX_REVIEW), as redacted text with the flagged sentences.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"queueId\", pm.response.json().items[0]?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /moderation/:id/decision",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/moderation/{{queueId}}/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "{{queueId}}",
+                "decision"
+              ]
+            },
+            "description": "approve (show it), hide (keep it from faculty), or redact with text (show an edited version). Audited; recomputes the form's aggregate.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "event": [
             {
