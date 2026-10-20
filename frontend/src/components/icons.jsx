@@ -88,3 +88,12 @@ export function ShieldIcon() {
     </Icon>
   );
 }
+
+export function LensIcon() {
+  return (
+    <Icon>
+      <circle cx="7" cy="7" r="4.25" />
+      <path d="m10.25 10.25 3.5 3.5M5.25 8.25v-1M7 8.25v-2.5M8.75 8.25V7" />
+    </Icon>
+  );
+}

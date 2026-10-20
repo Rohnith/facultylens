@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { AppShell } from "./components/AppShell";
 import { RequireAuth, RequireRole } from "./components/guards";
@@ -18,6 +19,11 @@ import { ProfileReviewPage } from "./pages/profile/ProfileReviewPage";
 import { StatusPage } from "./pages/StatusPage";
 import { FeedbackFormPage } from "./pages/student/FeedbackFormPage";
 import { MyFormsPage } from "./pages/student/MyFormsPage";
+
+// The unified page carries Recharts; load it (and the chart library) only when opened.
+const FacultyPage = lazy(() =>
+  import("./pages/faculty/FacultyPage").then((m) => ({ default: m.FacultyPage })),
+);
 
 function NotFound() {
   return (
@@ -50,6 +56,24 @@ export default function App() {
           <Route element={<RequireRole roles={["faculty", "hod"]} />}>
             <Route path="profile" element={<ProfileEditorPage />} />
             <Route path="profile/review" element={<ProfileReviewPage />} />
+            <Route
+              path="me"
+              element={
+                <Suspense fallback={null}>
+                  <FacultyPage />
+                </Suspense>
+              }
+            />
+          </Route>
+          <Route element={<RequireRole roles={["admin", "hod", "faculty"]} />}>
+            <Route
+              path="faculty/:facultyId"
+              element={
+                <Suspense fallback={null}>
+                  <FacultyPage />
+                </Suspense>
+              }
+            />
           </Route>
           <Route path="admin" element={<RequireRole roles={["admin"]} />}>
             <Route index element={<Navigate to="users" replace />} />

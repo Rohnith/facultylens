@@ -213,6 +213,10 @@ export function ProfileEditorPage() {
             >
               Generated profile →
             </Link>
+            {" · "}
+            <Link to={ownPage ? "/me" : `/faculty/${facultyId}`} className="font-medium text-text">
+              {ownPage ? "My page" : "Their page"} →
+            </Link>
           </span>
         </PageHeader>
         <FormError>{saveError}</FormError>

@@ -10,6 +10,7 @@ import {
   CalendarIcon,
   ClipboardIcon,
   PeopleIcon,
+  LensIcon,
   PersonIcon,
   ShieldIcon,
   SparkIcon,
@@ -30,10 +31,12 @@ const NAV_BY_ROLE = {
   ],
   hod: [
     { to: "/", label: "Department courses", icon: BookIcon, end: true },
+    { to: "/me", label: "My page", icon: LensIcon },
     { to: "/profile", label: "My profile", icon: PersonIcon },
   ],
   faculty: [
     { to: "/", label: "My courses", icon: BookIcon, end: true },
+    { to: "/me", label: "My page", icon: LensIcon },
     { to: "/profile", label: "My profile", icon: PersonIcon },
   ],
   student: [

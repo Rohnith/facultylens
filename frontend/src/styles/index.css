@@ -193,6 +193,21 @@
     }
   }
 
+  /* Evidence drawer: enters from the right edge it is pinned to. */
+  .drawer[open] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-sheet) var(--ease-out),
+      transform var(--dur-sheet) var(--ease-out);
+  }
+  @starting-style {
+    .drawer[open] {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+  }
+
   /* Loading placeholder: a flat bar at the real size of the value it replaces. No shimmer. */
   .skeleton {
     display: inline-block;
