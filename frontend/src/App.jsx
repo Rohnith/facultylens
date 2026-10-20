@@ -11,6 +11,8 @@ import { LoginPage } from "./pages/LoginPage";
 import { MyCoursesPage } from "./pages/MyCoursesPage";
 import { ProfileEditorPage } from "./pages/profile/ProfileEditorPage";
 import { StatusPage } from "./pages/StatusPage";
+import { FeedbackFormPage } from "./pages/student/FeedbackFormPage";
+import { MyFormsPage } from "./pages/student/MyFormsPage";
 
 function NotFound() {
   return (
@@ -24,7 +26,8 @@ function NotFound() {
 /** Each role lands on its own first screen. */
 function Home() {
   const { user } = useAuth();
-  return user.role === "admin" ? <Navigate to="/admin/users" replace /> : <MyCoursesPage />;
+  if (user.role === "admin") return <Navigate to="/admin/users" replace />;
+  return user.role === "student" ? <MyFormsPage /> : <MyCoursesPage />;
 }
 
 export default function App() {
@@ -35,6 +38,10 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route index element={<Home />} />
+          <Route element={<RequireRole roles={["student"]} />}>
+            <Route path="feedback/:formId" element={<FeedbackFormPage />} />
+            <Route path="courses" element={<MyCoursesPage />} />
+          </Route>
           <Route element={<RequireRole roles={["faculty", "hod"]} />}>
             <Route path="profile" element={<ProfileEditorPage />} />
           </Route>

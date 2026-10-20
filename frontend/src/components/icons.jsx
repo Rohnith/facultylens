@@ -53,3 +53,21 @@ export function PersonIcon() {
     </Icon>
   );
 }
+
+export function ClipboardIcon() {
+  return (
+    <Icon>
+      <rect x="3" y="2.75" width="10" height="11.5" rx="1.5" />
+      <path d="M6 2.75v-.5h4v.5M5.75 7h4.5M5.75 9.75h4.5M5.75 12.25h2.5" />
+    </Icon>
+  );
+}
+
+export function CalendarIcon() {
+  return (
+    <Icon>
+      <rect x="2.25" y="3.25" width="11.5" height="10.5" rx="1.5" />
+      <path d="M2.25 6.5h11.5M5.5 1.75v3M10.5 1.75v3" />
+    </Icon>
+  );
+}
