@@ -74,6 +74,10 @@
     {
       "key": "evidenceIds",
       "value": ""
+    },
+    {
+      "key": "actionId",
+      "value": ""
     }
   ],
   "item": [
@@ -1955,6 +1959,301 @@
               ]
             },
             "description": "One teacher's possibly-sarcastic answer ids, for GET /faculty/:id/evidence.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NAAC report (1.4)",
+      "item": [
+        {
+          "name": "POST /reports/naac/:cycle/draft (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/draft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "draft"
+              ]
+            },
+            "description": "Drafts the Action Taken rows (department x aspect and department x curriculum item; no teacher named) from stored aggregates. Re-drafting replaces only untouched drafts and keeps edited or approved rows.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle/actions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions"
+              ]
+            },
+            "description": "All rows for the admin; a HoD gets their own department's rows.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"actionId\", pm.response.json()[0]?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /reports/naac/:cycle/actions/:id",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{actionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions",
+                "{{actionId}}"
+              ]
+            },
+            "description": "Edit issue, action, responsible or timeline, and/or set status (draft | approved). An edit without status reopens an approved row. Admin, or the row's department HoD.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"Share a weekly coverage plan and pause for questions.\",\n  \"status\": \"approved\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /reports/naac/:cycle/actions",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions"
+              ]
+            },
+            "description": "Adds a manual row (admin, or HoD for their department).",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"department_id\": \"{{departmentId}}\",\n  \"label\": \"Library\",\n  \"issue\": \"The library closes before evening classes end.\",\n  \"action\": \"Keep the library open until 7 pm on weekdays.\",\n  \"responsible\": \"Librarian\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle/actions/:id/evidence",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{actionId}}/evidence",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions",
+                "{{actionId}}",
+                "evidence"
+              ]
+            },
+            "description": "The redacted, visible student sentences behind a row (no teacher named).",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle/status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "status"
+              ]
+            },
+            "description": "Readiness for the final export: responses analysed, actions approved.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle.pdf (draft preview)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}.pdf?draft=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}.pdf"
+              ],
+              "query": [
+                {
+                  "key": "draft",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Watermarked 'DRAFT – not for submission' preview, available any time (admin). Without ?draft the export returns 409 until every row is approved.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle.docx (draft preview)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}.docx?draft=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}.docx"
+              ],
+              "query": [
+                {
+                  "key": "draft",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "The same report as Word, from the same content blocks as the PDF.",
             "header": []
           },
           "event": [
