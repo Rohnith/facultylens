@@ -7,11 +7,13 @@ import { PageHeader } from "../../components/PageHeader";
 import { useAuth } from "../../context/auth";
 import { useDepartments } from "../../hooks/useDepartments";
 import { BiasTab } from "./BiasTab";
+import { ActionsTab } from "./ActionsTab";
 import { OverviewTab } from "./OverviewTab";
 
 const TABS = [
   ["overview", "Overview"],
   ["bias", "Bias & sarcasm"],
+  ["actions", "Action taken"],
 ];
 
 /**
@@ -22,7 +24,10 @@ export function InsightsPage() {
   const { user } = useAuth();
   const departments = useDepartments();
   const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") === "bias" ? "bias" : "overview";
+  const requested = params.get("tab");
+  // "Action taken" is the HoD's place to approve their rows; the admin uses the NAAC report page.
+  const tabs = user.role === "hod" ? TABS : TABS.slice(0, 2);
+  const tab = tabs.some(([k]) => k === requested) ? requested : "overview";
   const cycle = params.get("cycle") ?? "";
   const department =
     user.role === "hod"
@@ -123,7 +128,7 @@ export function InsightsPage() {
           )}
         </div>
         <div role="tablist" aria-label="View" className="flex gap-5 border-b border-border">
-          {TABS.map(([k, label]) => (
+          {tabs.map(([k, label]) => (
             <button
               key={k}
               type="button"
@@ -171,6 +176,12 @@ export function InsightsPage() {
       {loaded && data?.cycle && tab === "overview" && <OverviewTab data={data} />}
       {loaded && data?.cycle && tab === "bias" && state.bias && (
         <BiasTab panel={state.bias} sarcasm={state.sarcasm} />
+      )}
+      {loaded && data?.cycle && tab === "actions" && (
+        <ActionsTab
+          cycleId={data.cycle.id}
+          department={{ id: data.department.id, name: data.department.name }}
+        />
       )}
     </div>
   );

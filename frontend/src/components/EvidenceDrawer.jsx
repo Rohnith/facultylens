@@ -40,7 +40,7 @@ function Answer({ item, tone }) {
 
 /**
  * Right-side sheet listing the redacted answers behind a strength, an improvement or the
- * possibly-sarcastic count. A native modal <dialog>: Esc closes it and focus returns to the
+ * possibly-sarcastic count, or an Action Taken row (with request.load). A native modal <dialog>: Esc closes it and focus returns to the
  * button that opened it.
  */
 export function EvidenceDrawer({ facultyId, request, onClose }) {
@@ -55,11 +55,12 @@ export function EvidenceDrawer({ facultyId, request, onClose }) {
     if (!request && dialog.open) dialog.close();
   }, [request]);
 
+  const load = request?.load;
   useEffect(() => {
     if (!key) return undefined;
     let alive = true;
-    profilesApi
-      .evidence(facultyId, key.split(","))
+    // A request may bring its own loader (an Action Taken row); otherwise ids are a teacher's.
+    (load ? load() : profilesApi.evidence(facultyId, key.split(",")))
       .then((items) => alive && setState({ key, items, error: null }))
       .catch(
         (err) =>
@@ -69,7 +70,7 @@ export function EvidenceDrawer({ facultyId, request, onClose }) {
     return () => {
       alive = false;
     };
-  }, [facultyId, key]);
+  }, [facultyId, key, load]);
 
   const loaded = state.key === key;
   return (

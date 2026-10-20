@@ -11,6 +11,7 @@ import {
   ClipboardIcon,
   PeopleIcon,
   ChartIcon,
+  DocumentIcon,
   LensIcon,
   PersonIcon,
   ShieldIcon,
@@ -29,6 +30,7 @@ const NAV_BY_ROLE = {
     { to: "/insights", label: "Insights", icon: ChartIcon },
     { to: "/admin/analysis", label: "Analysis", icon: SparkIcon },
     { to: "/admin/moderation", label: "Moderation", icon: ShieldIcon, badge: "moderation" },
+    { to: "/admin/reports", label: "NAAC report", icon: DocumentIcon },
     { to: "/admin/status", label: "System status", icon: PulseIcon },
   ],
   hod: [

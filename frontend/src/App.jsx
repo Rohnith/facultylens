@@ -10,6 +10,7 @@ import { AnalysisPage } from "./pages/admin/AnalysisPage";
 import { CyclesPage } from "./pages/admin/CyclesPage";
 import { DepartmentsPage } from "./pages/admin/DepartmentsPage";
 import { ModerationPage } from "./pages/admin/ModerationPage";
+import { ReportsPage } from "./pages/admin/ReportsPage";
 import { UsersPage } from "./pages/admin/UsersPage";
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -100,6 +101,7 @@ export default function App() {
             <Route path="cycles/:cycleId" element={<CycleDetailPage />} />
             <Route path="analysis" element={<AnalysisPage />} />
             <Route path="moderation" element={<ModerationPage />} />
+            <Route path="reports" element={<ReportsPage />} />
             <Route path="status" element={<StatusPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />

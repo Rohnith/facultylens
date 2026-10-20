@@ -106,3 +106,12 @@ export function ChartIcon() {
     </Icon>
   );
 }
+
+export function DocumentIcon() {
+  return (
+    <Icon>
+      <path d="M4 1.75h5.5L12.75 5v9.25H4z" />
+      <path d="M9.25 1.75V5.25h3.5M6.25 8.25h4M6.25 10.75h4" />
+    </Icon>
+  );
+}
