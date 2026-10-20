@@ -17,7 +17,25 @@ export const profilesApi = {
       .then((r) => r.data),
   decide: (id, accept, reject) =>
     api.post(`${base(id)}/imports/bulk`, { accept, reject }).then((r) => r.data),
+  generate: (id) =>
+    api.post(`${base(id)}/profile/generate`, null, { timeout: 120000 }).then((r) => r.data),
+  versions: (id) => api.get(`${base(id)}/profile/versions`).then((r) => r.data),
+  editVersion: (id, version, fields) =>
+    api.put(`${base(id)}/profile/versions/${version}`, fields).then((r) => r.data),
+  approve: (id, version) =>
+    api.post(`${base(id)}/profile/versions/${version}/approve`).then((r) => r.data),
+  overview: (id, params) => api.get(`${base(id)}/overview`, { params }).then((r) => r.data),
+  evidence: (id, ids) =>
+    api.get(`${base(id)}/evidence`, { params: { ids: ids.join(",") } }).then((r) => r.data),
 };
+
+/** How a generated text was written, in words for the page. */
+export function engineLabel(engine) {
+  if (!engine) return "";
+  if (engine.startsWith("groq:")) return `Written by Groq (${engine.slice(5)})`;
+  if (engine === "template") return "Written from a fixed template (no AI model configured)";
+  return "Built from the feedback statistics (no AI model configured)";
+}
 
 /** The editable part of a profile, as sent to PUT. */
 export function editable(profile) {

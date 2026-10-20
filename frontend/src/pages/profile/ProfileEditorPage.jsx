@@ -206,7 +206,13 @@ export function ProfileEditorPage() {
             .join(" · ")}
           <span className="mt-1 block">
             These facts are what {ownPage ? "your" : "their"} generated profile will be written
-            from. Only accepted, saved items are used.
+            from. Only accepted, saved items are used.{" "}
+            <Link
+              to={ownPage ? "/profile/review" : `/admin/faculty/${facultyId}/profile/review`}
+              className="font-medium text-text"
+            >
+              Generated profile →
+            </Link>
           </span>
         </PageHeader>
         <FormError>{saveError}</FormError>

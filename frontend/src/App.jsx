@@ -14,6 +14,7 @@ import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MyCoursesPage } from "./pages/MyCoursesPage";
 import { ProfileEditorPage } from "./pages/profile/ProfileEditorPage";
+import { ProfileReviewPage } from "./pages/profile/ProfileReviewPage";
 import { StatusPage } from "./pages/StatusPage";
 import { FeedbackFormPage } from "./pages/student/FeedbackFormPage";
 import { MyFormsPage } from "./pages/student/MyFormsPage";
@@ -48,6 +49,7 @@ export default function App() {
           </Route>
           <Route element={<RequireRole roles={["faculty", "hod"]} />}>
             <Route path="profile" element={<ProfileEditorPage />} />
+            <Route path="profile/review" element={<ProfileReviewPage />} />
           </Route>
           <Route path="admin" element={<RequireRole roles={["admin"]} />}>
             <Route index element={<Navigate to="users" replace />} />
@@ -56,6 +58,7 @@ export default function App() {
             <Route path="courses" element={<CoursesPage />} />
             <Route path="courses/:courseId" element={<CourseDetailPage />} />
             <Route path="faculty/:facultyId/profile" element={<ProfileEditorPage />} />
+            <Route path="faculty/:facultyId/profile/review" element={<ProfileReviewPage />} />
             <Route path="cycles" element={<CyclesPage />} />
             <Route path="cycles/:cycleId" element={<CycleDetailPage />} />
             <Route path="analysis" element={<AnalysisPage />} />
