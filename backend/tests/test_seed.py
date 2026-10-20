@@ -31,11 +31,10 @@ async def test_seeded_responses_follow_the_privacy_rules(mongo):
     student = await mongo.users.find_one({"roll_no": "23A91A0501"})
     course = await mongo.courses.find_one({"student_ids": student["_id"]})
     form = await mongo.forms.find_one({"course_id": course["_id"], "type": "teaching"})
-    expected = student_form_hash(student["_id"], form["_id"])
-    found = await mongo.responses.count_documents(
-        {"form_id": form["_id"], "student_hash": expected}
-    )
-    assert found in (0, 1)  # about 82% of students answered
+    # Every seeded response carries the code of exactly one enrolled student.
+    codes = {student_form_hash(s, form["_id"]) for s in course["student_ids"]}
+    stored = [r["student_hash"] async for r in mongo.responses.find({"form_id": form["_id"]})]
+    assert stored and set(stored) <= codes and len(stored) == len(set(stored))
 
 
 async def test_seed_refuses_real_data_and_reset_keeps_it(mongo):
