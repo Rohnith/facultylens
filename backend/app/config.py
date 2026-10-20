@@ -57,6 +57,7 @@ class Settings(BaseSettings):
 
     # ---- Profile imports ----
     s2_api_key: str = ""
+    import_timeout_seconds: float = Field(default=15, gt=0, le=60)
 
     @property
     def hf_home_path(self) -> Path:
