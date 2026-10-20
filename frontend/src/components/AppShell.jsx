@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { getHealth } from "../api/client";
 import { ROLE_LABELS, useAuth } from "../context/auth";
 import { useAsync } from "../hooks/useAsync";
-import { BookIcon, BuildingIcon, PeopleIcon } from "./icons";
+import { BookIcon, BuildingIcon, PeopleIcon, PersonIcon } from "./icons";
 import { Mark } from "./Mark";
 import { ThemeSwitch } from "./ThemeSwitch";
 
@@ -15,8 +15,14 @@ const NAV_BY_ROLE = {
     { to: "/admin/courses", label: "Courses", icon: BookIcon },
     { to: "/admin/status", label: "System status", icon: PulseIcon },
   ],
-  hod: [{ to: "/", label: "Department courses", icon: BookIcon, end: true }],
-  faculty: [{ to: "/", label: "My courses", icon: BookIcon, end: true }],
+  hod: [
+    { to: "/", label: "Department courses", icon: BookIcon, end: true },
+    { to: "/profile", label: "My profile", icon: PersonIcon },
+  ],
+  faculty: [
+    { to: "/", label: "My courses", icon: BookIcon, end: true },
+    { to: "/profile", label: "My profile", icon: PersonIcon },
+  ],
   student: [{ to: "/", label: "My courses", icon: BookIcon, end: true }],
 };
 

@@ -9,6 +9,7 @@ import { UsersPage } from "./pages/admin/UsersPage";
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MyCoursesPage } from "./pages/MyCoursesPage";
+import { ProfileEditorPage } from "./pages/profile/ProfileEditorPage";
 import { StatusPage } from "./pages/StatusPage";
 
 function NotFound() {
@@ -34,12 +35,16 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route index element={<Home />} />
+          <Route element={<RequireRole roles={["faculty", "hod"]} />}>
+            <Route path="profile" element={<ProfileEditorPage />} />
+          </Route>
           <Route path="admin" element={<RequireRole roles={["admin"]} />}>
             <Route index element={<Navigate to="users" replace />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="departments" element={<DepartmentsPage />} />
             <Route path="courses" element={<CoursesPage />} />
             <Route path="courses/:courseId" element={<CourseDetailPage />} />
+            <Route path="faculty/:facultyId/profile" element={<ProfileEditorPage />} />
             <Route path="status" element={<StatusPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />

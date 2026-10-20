@@ -78,6 +78,7 @@ async def test_refresh_rotates_and_detects_reuse(client, mongo):
     client.cookies.set("fl_refresh", first)
     r = await client.post("/api/auth/refresh")
     assert r.status_code == 401
+    assert 'fl_refresh=""' in r.headers["set-cookie"] or "Max-Age=0" in r.headers["set-cookie"]
     assert await mongo.refresh_tokens.count_documents({"revoked": False}) == 0
 
 

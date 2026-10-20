@@ -4,6 +4,7 @@ from datetime import timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.responses import JSONResponse
 
 from app.auth.deps import Db, User, get_user_allow_pw_change
 from app.auth.security import (
@@ -59,6 +60,13 @@ def _clear_cookie(response: Response) -> None:
     response.delete_cookie(get_settings().refresh_cookie_name, path="/api/auth")
 
 
+def _session_ended(detail: str) -> JSONResponse:
+    """401 that also deletes the cookie, so a dead token isn't sent again on every page load."""
+    response = JSONResponse({"detail": detail}, status_code=status.HTTP_401_UNAUTHORIZED)
+    _clear_cookie(response)
+    return response
+
+
 def _bad_login() -> HTTPException:
     return HTTPException(status.HTTP_401_UNAUTHORIZED, "Wrong username or password.")
 
@@ -100,12 +108,10 @@ async def refresh(request: Request, response: Response, db: Db) -> TokenOut | Re
             await db.refresh_tokens.update_many(
                 {"user_id": reused["user_id"]}, {"$set": {"revoked": True}}
             )
-        _clear_cookie(response)
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Session expired")
+        return _session_ended("Session expired")
     user = await db.users.find_one({"_id": doc["user_id"]})
     if not user or not user.get("is_active", True):
-        _clear_cookie(response)
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Account not active")
+        return _session_ended("Account not active")
     return await _issue(db, response, user)
 
 

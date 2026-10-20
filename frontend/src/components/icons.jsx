@@ -44,3 +44,12 @@ export function BookIcon() {
     </Icon>
   );
 }
+
+export function PersonIcon() {
+  return (
+    <Icon>
+      <circle cx="8" cy="5.5" r="2.75" />
+      <path d="M2.75 14c.5-2.75 2.6-4.25 5.25-4.25s4.75 1.5 5.25 4.25" />
+    </Icon>
+  );
+}

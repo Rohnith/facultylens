@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router";
 import { api, errorMessage } from "../../api/client";
 import { CredentialsNotice } from "../../components/CredentialsNotice";
 import { FormError, Select, TextInput } from "../../components/forms";
@@ -273,6 +274,14 @@ export function UsersPage() {
                       </td>
                       <td className="px-[var(--card-pad)] text-right max-md:col-span-2 max-md:p-0 max-md:text-left">
                         <div className="flex justify-end gap-1 max-md:justify-start max-md:-ml-2">
+                          {(u.role === "faculty" || u.role === "hod") && (
+                            <Link
+                              to={`/admin/faculty/${u.id}/profile`}
+                              className="btn btn-ghost h-8 px-2 text-small no-underline"
+                            >
+                              Profile
+                            </Link>
+                          )}
                           <button
                             type="button"
                             className="btn btn-ghost h-8 px-2 text-small"
