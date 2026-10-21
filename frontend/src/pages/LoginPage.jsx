@@ -8,39 +8,21 @@ import { useAuth } from "../context/auth";
 const FACTS = [
   {
     title: "Student feedback is anonymous",
-    body: "Teachers never see who wrote a comment. The system keeps only a one-way code to check that each student submits a form once.",
+    body: "Teachers never see who wrote a comment; only a one-way code checks that each student submits once.",
   },
   {
     title: "Comments are screened before anyone reads them",
-    body: "Abusive language is held back for the IQAC coordinator, and names, phone numbers and roll numbers are removed from the text teachers see.",
+    body: "Abusive language is held back for IQAC, and names, phone and roll numbers are removed.",
   },
   {
     title: "Small classes stay private",
-    body: "Comment-level detail appears only once a course has enough responses that no single student can be picked out.",
+    body: "Comments appear only once enough students respond that no one can be picked out.",
   },
   {
     title: "Faculty approve their own profile",
-    body: "Profiles are written from each teacher's own records and stay hidden until the teacher reviews and approves them.",
+    body: "Profiles are written from each teacher's records and stay hidden until they approve them.",
   },
 ];
-
-function HowItWorks() {
-  return (
-    <section aria-labelledby="how-h" className="flex flex-col gap-6">
-      <h2 id="how-h" className="m-0 text-section font-medium">
-        How FacultyLens treats feedback
-      </h2>
-      <dl className="m-0 grid gap-x-10 gap-y-6 sm:grid-cols-2">
-        {FACTS.map((f) => (
-          <div key={f.title} className="flex flex-col gap-1.5">
-            <dt className="text-body font-medium">{f.title}</dt>
-            <dd className="m-0 text-body text-muted">{f.body}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
-  );
-}
 
 export function LoginPage() {
   const { status, user, login } = useAuth();
@@ -71,7 +53,7 @@ export function LoginPage() {
   }
 
   return (
-    <StandaloneLayout aside={<HowItWorks />}>
+    <StandaloneLayout notes={FACTS}>
       <h1 className="m-0 font-marker text-marker">Sign in</h1>
       <p className="mt-2 mb-8 text-body text-muted">
         Staff use their college email. Students use their roll number.

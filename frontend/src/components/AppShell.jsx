@@ -25,6 +25,7 @@ import { ThemeSwitch } from "./ThemeSwitch";
 /** Navigation per role. Only screens that exist are listed; later phases add theirs here. */
 const NAV_BY_ROLE = {
   admin: [
+    { to: "/", label: "Home", icon: HomeIcon, end: true },
     { to: "/admin/users", label: "Users", icon: PeopleIcon },
     { to: "/admin/departments", label: "Departments", icon: BuildingIcon },
     { to: "/admin/courses", label: "Courses", icon: BookIcon },
@@ -52,6 +53,19 @@ const NAV_BY_ROLE = {
     { to: "/courses", label: "My courses", icon: BookIcon },
   ],
 };
+
+function HomeIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M2.5 7.2 8 2.75l5.5 4.45V13a.75.75 0 0 1-.75.75H9.5V10h-3v3.75H3.25A.75.75 0 0 1 2.5 13Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 function PulseIcon() {
   return (

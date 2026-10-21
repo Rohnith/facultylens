@@ -6,6 +6,7 @@ import { useAuth } from "./context/auth";
 import { CourseDetailPage } from "./pages/admin/CourseDetailPage";
 import { CoursesPage } from "./pages/admin/CoursesPage";
 import { CycleDetailPage } from "./pages/admin/CycleDetailPage";
+import { AdminHome } from "./pages/admin/AdminHome";
 import { AnalysisPage } from "./pages/admin/AnalysisPage";
 import { CyclesPage } from "./pages/admin/CyclesPage";
 import { DepartmentsPage } from "./pages/admin/DepartmentsPage";
@@ -46,7 +47,7 @@ function NotFound() {
 /** Each role lands on its own first screen. */
 function Home() {
   const { user } = useAuth();
-  if (user.role === "admin") return <Navigate to="/admin/users" replace />;
+  if (user.role === "admin") return <AdminHome />;
   return user.role === "student" ? <MyFormsPage /> : <MyCoursesPage />;
 }
 
