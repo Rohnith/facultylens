@@ -72,7 +72,7 @@ export function LoginPage() {
 
   return (
     <StandaloneLayout aside={<HowItWorks />}>
-      <h1 className="m-0 font-serif text-title font-semibold tracking-[-0.01em]">Sign in</h1>
+      <h1 className="m-0 font-marker text-marker">Sign in</h1>
       <p className="mt-2 mb-8 text-body text-muted">
         Staff use their college email. Students use their roll number.
       </p>

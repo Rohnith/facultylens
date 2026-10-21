@@ -48,11 +48,7 @@ function ThankYou({ form }) {
 
   return (
     <div className="mx-auto flex max-w-[640px] flex-col gap-4 pt-8">
-      <h1
-        ref={heading}
-        tabIndex={-1}
-        className="m-0 font-serif text-title font-semibold outline-none"
-      >
+      <h1 ref={heading} tabIndex={-1} className="m-0 font-marker text-marker outline-none">
         Thank you. Your feedback was recorded.
       </h1>
       <p className="m-0 text-body text-muted">
@@ -135,7 +131,7 @@ export function FeedbackFormPage() {
   if (loadError) {
     return (
       <div className="mx-auto flex max-w-[640px] flex-col gap-3">
-        <h1 className="m-0 font-serif text-title font-semibold">Feedback form</h1>
+        <h1 className="m-0 font-marker text-marker">Feedback form</h1>
         <FormError>{loadError}</FormError>
         <Link to="/" className="text-body text-muted">
           ← All my forms
@@ -163,7 +159,7 @@ export function FeedbackFormPage() {
           ← All my forms
         </Link>
         <header className="flex flex-col gap-2">
-          <h1 className="m-0 font-serif text-title font-semibold tracking-[-0.01em]">
+          <h1 className="m-0 font-marker text-marker">
             {course.code} · {course.name}
           </h1>
           <p className="m-0 text-body text-muted">

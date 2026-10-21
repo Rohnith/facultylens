@@ -135,7 +135,7 @@ export function ProfileEditorPage() {
   if (loadError) {
     return (
       <div className="mx-auto flex max-w-[1184px] flex-col gap-3">
-        <h1 className="m-0 font-serif text-title font-semibold">Profile data</h1>
+        <h1 className="m-0 font-marker text-marker">Profile data</h1>
         <div className="flex flex-wrap items-center gap-3">
           <FormError>{loadError}</FormError>
           <button

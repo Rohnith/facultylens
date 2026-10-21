@@ -37,7 +37,7 @@ const FacultyPage = lazy(() =>
 function NotFound() {
   return (
     <div className="mx-auto flex max-w-[1184px] flex-col gap-2">
-      <h1 className="m-0 font-serif text-title font-semibold">Page not found</h1>
+      <h1 className="m-0 font-marker text-marker">Page not found</h1>
       <p className="m-0 text-muted">This address doesn&apos;t match any FacultyLens screen.</p>
     </div>
   );

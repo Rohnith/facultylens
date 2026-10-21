@@ -26,8 +26,11 @@ export function ProfileColumn({ profile, isOwner, reviewLink, showHighlights = t
   const meta = [profile.designation, profile.department?.name].filter(Boolean).join(" · ");
 
   return (
-    <article aria-label="Profile" className="card flex flex-col gap-4 p-[var(--card-pad)]">
-      <header className="flex items-start gap-4">
+    <article
+      aria-label="Profile"
+      className="card flex flex-col gap-4 overflow-hidden p-[var(--card-pad)]"
+    >
+      <header className="-mx-[var(--card-pad)] -mt-[var(--card-pad)] flex items-start gap-4 bg-board px-[var(--card-pad)] pt-5 pb-4 text-on-board">
         {profile.photo_url && (
           <img
             src={profile.photo_url}
@@ -38,13 +41,11 @@ export function ProfileColumn({ profile, isOwner, reviewLink, showHighlights = t
           />
         )}
         <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="m-0 font-serif text-title font-semibold tracking-[-0.01em]">
-            {profile.name}
-          </h1>
+          <h1 className="m-0 font-marker text-marker">{profile.name}</h1>
           {fields?.headline && fields.headline !== meta && (
             <p className="m-0 text-body">{fields.headline}</p>
           )}
-          {meta && <p className="m-0 text-small text-muted">{meta}</p>}
+          {meta && <p className="m-0 text-small text-on-board-muted">{meta}</p>}
         </div>
       </header>
 

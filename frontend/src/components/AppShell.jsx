@@ -72,8 +72,8 @@ function Brand({ institution }) {
     <div className="flex items-center gap-2.5">
       <Mark size={28} />
       <div className="min-w-0 leading-tight">
-        <div className="text-section font-semibold tracking-[-0.01em]">FacultyLens</div>
-        <div className="truncate text-small text-muted" title={institution ?? undefined}>
+        <div className="text-section font-bold tracking-[-0.01em]">FacultyLens</div>
+        <div className="truncate text-small text-on-board-muted" title={institution ?? undefined}>
           {institution ?? <span className="skeleton h-3 w-28 align-middle" />}
         </div>
       </div>
@@ -114,15 +114,17 @@ function NavItems({ items, onNavigate, badges = {} }) {
             end={end}
             onClick={onNavigate}
             className={({ isActive }) =>
-              `flex h-[var(--nav-row)] items-center gap-2.5 rounded-control px-2.5 text-body no-underline transition-colors duration-150 ${
-                isActive ? "bg-active text-text" : "text-muted hover:bg-active hover:text-text"
+              `flex h-[var(--nav-row)] items-center gap-2.5 rounded-button px-3 text-body no-underline transition-colors duration-150 ${
+                isActive
+                  ? "here font-semibold"
+                  : "text-on-board-muted hover:bg-board-2 hover:text-on-board"
               }`
             }
           >
             <Icon />
             {label}
             {badge && badges[badge] > 0 && (
-              <span className="num ml-auto rounded-chip bg-surface px-1.5 text-small font-medium text-text">
+              <span className="num ml-auto rounded-chip bg-note-criticism px-1.5 text-small font-semibold text-text">
                 {badges[badge]}
                 <span className="sr-only"> pending</span>
               </span>
@@ -143,12 +145,12 @@ function Account({ onNavigate }) {
     navigate("/login", { replace: true, state: null });
   }
   return (
-    <div className="flex flex-col gap-2 border-t border-border pt-4">
+    <div className="flex flex-col gap-2 border-t border-board-rule pt-4">
       <div className="min-w-0 leading-tight">
         <div className="truncate text-body font-medium" title={user.name}>
           {user.name}
         </div>
-        <div className="truncate text-small text-muted">
+        <div className="truncate text-small text-on-board-muted">
           {ROLE_LABELS[user.role]}
           {user.roll_no ? ` · ${user.roll_no}` : ""}
         </div>
@@ -157,14 +159,14 @@ function Account({ onNavigate }) {
         <Link
           to="/change-password"
           onClick={onNavigate}
-          className="text-muted underline underline-offset-3 hover:text-text"
+          className="text-on-board-muted underline underline-offset-3 hover:text-on-board"
         >
           Change password
         </Link>
         <button
           type="button"
           onClick={signOut}
-          className="cursor-pointer text-muted underline underline-offset-3 hover:text-text"
+          className="cursor-pointer text-on-board-muted underline underline-offset-3 hover:text-on-board"
         >
           Sign out
         </button>
@@ -205,8 +207,8 @@ export function AppShell() {
         Skip to content
       </a>
 
-      {/* Desktop sidebar: on the page ground, one hairline to the canvas. */}
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border px-3 pt-5 pb-4 lg:flex">
+      {/* Desktop rail: the deep board beside the wall. */}
+      <aside className="sticky top-0 hidden h-dvh flex-col bg-board px-3 pt-5 pb-4 text-on-board lg:flex">
         <div className="px-2.5 pb-6">
           <Brand institution={institution} />
         </div>
@@ -215,19 +217,19 @@ export function AppShell() {
         </nav>
         <div className="mt-auto flex flex-col gap-4 px-2.5">
           <Account />
-          <ThemeSwitch />
+          <ThemeSwitch onBoard />
         </div>
       </aside>
 
       {/* Phone and tablet: 48px top bar; the nav opens as a full-screen sheet. */}
-      <header className="sticky top-0 z-10 flex h-12 items-center justify-between border-b border-border bg-ground px-4 lg:hidden">
+      <header className="sticky top-0 z-10 flex h-12 items-center justify-between bg-board px-4 text-on-board lg:hidden">
         <div className="flex items-center gap-2.5">
           <Mark size={24} />
-          <span className="text-body font-medium">{current}</span>
+          <span className="text-body font-semibold">{current}</span>
         </div>
         <button
           type="button"
-          className="btn btn-ghost h-11 w-11 px-0"
+          className="btn h-11 w-11 px-0 text-on-board hover:bg-board-2"
           aria-label="Open menu"
           aria-haspopup="dialog"
           aria-expanded={sheetOpen}
@@ -248,14 +250,14 @@ export function AppShell() {
         ref={sheetRef}
         aria-label="Menu"
         onClose={() => setSheetOpen(false)}
-        className="sheet m-0 h-dvh max-h-none w-full max-w-none border-0 bg-ground p-0 text-text backdrop:bg-black/30"
+        className="sheet m-0 h-dvh max-h-none w-full max-w-none border-0 bg-board p-0 text-on-board backdrop:bg-black/30"
       >
         <div className="flex h-full flex-col px-4 pt-3 pb-6">
           <div className="flex h-12 items-center justify-between">
             <Brand institution={institution} />
             <button
               type="button"
-              className="btn btn-ghost h-11 w-11 px-0"
+              className="btn h-11 w-11 px-0 text-on-board hover:bg-board-2"
               aria-label="Close menu"
               onClick={() => setSheetOpen(false)}
             >
@@ -274,7 +276,7 @@ export function AppShell() {
           </nav>
           <div className="mt-auto flex flex-col gap-4">
             <Account onNavigate={() => setSheetOpen(false)} />
-            <ThemeSwitch />
+            <ThemeSwitch onBoard />
           </div>
         </div>
       </dialog>

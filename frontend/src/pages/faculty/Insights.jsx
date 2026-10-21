@@ -43,55 +43,93 @@ export function Legend() {
   );
 }
 
-/** Net sentiment as the one headline figure, and the split as a 100% bar with labels. */
-export function Overall({ insights }) {
+// On the deep board the split bar uses the note papers, which stay apart from the board green.
+const BOARD_FILL = {
+  negative: "var(--note-criticism)",
+  neutral: "color-mix(in srgb, var(--on-board-muted) 55%, transparent)",
+  positive: "var(--note-praise)",
+};
+
+/**
+ * The board strip at the top of the feedback: net sentiment as the one headline figure, the
+ * split as a labelled 100% bar, the response rate and the best-rated aspect.
+ */
+export function Overall({ insights, responses, eligible }) {
   const weights = insights.sentiment ?? {};
   const total = SENT.reduce((n, s) => n + (weights[s] ?? 0), 0);
   const net = insights.net_score;
+  const rated = Object.values(insights.aspects ?? {}).filter((a) => a.likert_mean != null);
+  const best = rated.length
+    ? rated.reduce((a, b) => (b.likert_mean > a.likert_mean ? b : a))
+    : null;
   return (
-    <section aria-labelledby="overall-h" className="card flex flex-col gap-4 p-[var(--card-pad)]">
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-        <div className="flex flex-col gap-1">
-          <h2 id="overall-h" className="m-0 text-small font-medium text-muted">
-            Net sentiment
-          </h2>
-          <span className="num text-kpi font-medium">{net == null ? "–" : signed(net)}</span>
-        </div>
-        <p className="m-0 max-w-[46ch] text-small text-muted">
-          Share of positive minus share of negative answers, from −1 to +1. Answers that may be
-          sarcastic count half.
-        </p>
+    <section
+      aria-labelledby="overall-h"
+      className="board grid gap-x-8 gap-y-5 p-[var(--card-pad)] md:grid-cols-[auto_minmax(0,1fr)] md:p-6"
+    >
+      <div className="flex flex-col gap-0.5">
+        <h2 id="overall-h" className="m-0 text-small font-semibold text-on-board-muted">
+          Net sentiment
+        </h2>
+        <span className="num font-marker text-[2.75rem] leading-none">
+          {net == null ? "–" : signed(net)}
+        </span>
+        <span className="mt-1 max-w-[30ch] text-small text-on-board-muted">
+          Positive share minus negative, from −1 to +1. Possibly sarcastic answers count half.
+        </span>
       </div>
-      {total > 0 && (
-        <div className="flex flex-col gap-2">
-          <div
-            className="flex h-3 w-full gap-[2px] overflow-hidden rounded-full"
-            role="img"
-            aria-label={SENT.map((s) => `${SENT_LABEL[s]} ${pct((weights[s] ?? 0) / total)}`).join(
-              ", ",
-            )}
-          >
-            {SENT.map(
-              (s) =>
-                (weights[s] ?? 0) > 0 && (
-                  <span
-                    key={s}
-                    title={`${SENT_LABEL[s]}: ${pct(weights[s] / total)}`}
-                    style={{ width: `${(100 * weights[s]) / total}%`, background: SENT_VAR[s] }}
-                  />
-                ),
-            )}
+      <div className="flex min-w-0 flex-col justify-between gap-4">
+        {total > 0 && (
+          <div className="flex flex-col gap-2">
+            <div
+              className="flex h-3.5 w-full gap-[3px] overflow-hidden rounded-full"
+              role="img"
+              aria-label={SENT.map(
+                (s) => `${SENT_LABEL[s]} ${pct((weights[s] ?? 0) / total)}`,
+              ).join(", ")}
+            >
+              {SENT.map(
+                (s) =>
+                  (weights[s] ?? 0) > 0 && (
+                    <span
+                      key={s}
+                      title={`${SENT_LABEL[s]}: ${pct(weights[s] / total)}`}
+                      style={{ width: `${(100 * weights[s]) / total}%`, background: BOARD_FILL[s] }}
+                    />
+                  ),
+              )}
+            </div>
+            <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 text-small">
+              {SENT.map((s) => (
+                <span key={s} className="num">
+                  <span className="text-on-board-muted">{SENT_LABEL[s]}</span>{" "}
+                  <span className="font-semibold">{pct((weights[s] ?? 0) / total)}</span>
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 text-small">
-            {SENT.map((s) => (
-              <span key={s} className="num">
-                <span className="text-muted">{SENT_LABEL[s]}</span>{" "}
-                <span className="font-medium">{pct((weights[s] ?? 0) / total)}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+        )}
+        <dl className="m-0 grid grid-cols-2 gap-4 border-t border-board-rule pt-4">
+          {eligible > 0 && (
+            <div className="flex flex-col gap-0.5">
+              <dt className="text-small text-on-board-muted">Responded</dt>
+              <dd className="num m-0 text-lead font-semibold">
+                {responses}{" "}
+                <span className="text-body font-normal text-on-board-muted">of {eligible}</span>
+              </dd>
+            </div>
+          )}
+          {best && (
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <dt className="text-small text-on-board-muted">Best rated</dt>
+              <dd className="num m-0 truncate text-lead font-semibold" title={best.label}>
+                {best.likert_mean.toFixed(1)}{" "}
+                <span className="text-body font-normal text-on-board-muted">{best.label}</span>
+              </dd>
+            </div>
+          )}
+        </dl>
+      </div>
     </section>
   );
 }
@@ -243,14 +281,26 @@ export function Aspects({ insights, showAgreement = true, title = "Teaching aspe
   );
 }
 
+function SummaryIcon({ kind }) {
+  const up = kind === "strength";
+  return (
+    <svg width="14" height="14" viewBox="0 0 12 12" aria-hidden="true">
+      <path
+        d={up ? "M2 9.5 6 4l4 5.5Z" : "M2 3.5 6 9l4-5.5Z"}
+        fill={up ? "var(--edge-praise)" : "var(--edge-criticism)"}
+      />
+    </svg>
+  );
+}
+
 function Item({ item, kind, onEvidence }) {
   return (
     <li className="flex flex-col gap-1.5 border-t border-rule py-3 first:border-t-0 first:pt-0">
       <span className="pill pill-neutral w-fit">{item.aspectLabel}</span>
       <p className="m-0 text-body">{item.text}</p>
       {kind === "improvement" && item.suggested_action && (
-        <p className="m-0 text-small text-muted">
-          <span className="font-medium text-text">Next step:</span> {item.suggested_action}
+        <p className="m-0 rounded-note bg-raised px-3 py-2 text-small text-muted">
+          <span className="font-semibold text-text">Next step:</span> {item.suggested_action}
         </p>
       )}
       <button
@@ -290,15 +340,18 @@ export function Summary({ summary, aspects, onEvidence }) {
   return (
     <section aria-labelledby="summary-h" className="flex flex-col gap-[var(--gap)]">
       <div className="flex flex-col gap-1">
-        <h2 id="summary-h" className="m-0 text-section font-medium">
+        <h2 id="summary-h" className="m-0 font-marker text-marker">
           What students said
         </h2>
-        <p className="m-0 max-w-[72ch] text-body">{summary.overall_summary}</p>
+        <p className="m-0 max-w-[72ch] text-lead">{summary.overall_summary}</p>
       </div>
-      <div className="grid gap-[var(--gap)] md:grid-cols-2">
+      <div className="grid items-start gap-[var(--gap)] md:grid-cols-2">
         {columns.map(([title, items, kind, empty]) => (
           <section key={title} aria-label={title} className="card p-[var(--card-pad)]">
-            <h3 className="m-0 mb-3 text-section font-medium">{title}</h3>
+            <h3 className="m-0 mb-3 flex items-center gap-2 text-section font-bold">
+              <SummaryIcon kind={kind} />
+              {title}
+            </h3>
             {items.length === 0 ? (
               <p className="m-0 text-body text-muted">{empty}</p>
             ) : (

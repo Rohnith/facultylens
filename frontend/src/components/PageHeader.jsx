@@ -3,7 +3,7 @@ export function PageHeader({ title, children, actions }) {
   return (
     <header className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-8">
       <div className="flex max-w-[72ch] flex-col gap-2">
-        <h1 className="m-0 font-serif text-title font-semibold tracking-[-0.01em]">{title}</h1>
+        <h1 className="m-0 font-marker text-marker">{title}</h1>
         {children && <div className="m-0 text-body text-muted">{children}</div>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}

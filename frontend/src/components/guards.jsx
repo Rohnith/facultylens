@@ -24,7 +24,7 @@ export function RequireAuth() {
 function NotAllowed({ children }) {
   return (
     <div className="mx-auto flex max-w-[1184px] flex-col gap-2">
-      <h1 className="m-0 font-serif text-title font-semibold">Not available for your account</h1>
+      <h1 className="m-0 font-marker text-marker">Not available for your account</h1>
       <p className="m-0 max-w-[60ch] text-muted">{children}</p>
     </div>
   );

@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/source-serif-4";
+@import "@fontsource-variable/figtree";
+@import "@fontsource/kalam/700.css";
 @import "./tokens.css";
 
 /* Map the raw tokens onto Tailwind's theme so utilities follow the active theme. */
@@ -26,14 +26,34 @@
   --color-sent-positive: var(--sent-positive);
   --color-sent-neutral: var(--sent-neutral);
   --color-sent-negative: var(--sent-negative);
+  --color-board: var(--board);
+  --color-board-2: var(--board-2);
+  --color-board-rule: var(--board-rule);
+  --color-on-board: var(--on-board);
+  --color-on-board-muted: var(--on-board-muted);
+  --color-note-praise: var(--note-praise);
+  --color-note-criticism: var(--note-criticism);
+  --color-note-neutral: var(--note-neutral);
+  --color-edge-praise: var(--edge-praise);
+  --color-edge-criticism: var(--edge-criticism);
+  --color-edge-neutral: var(--edge-neutral);
+  --color-highlight: var(--highlight);
+  --color-highlight-ink: var(--highlight-ink);
+  --color-tape: var(--tape);
 
   --font-sans: var(--ff-sans);
-  --font-serif: var(--ff-serif);
+  --font-marker: var(--ff-marker);
   --font-mono: var(--ff-mono);
 
   --radius-card: var(--r-card);
   --radius-control: var(--r-control);
   --radius-chip: var(--r-chip);
+  --radius-note: var(--r-note);
+  --radius-button: var(--r-button);
+
+  --shadow-paper: var(--shadow-paper);
+  --shadow-note: var(--shadow-note);
+  --shadow-lift: var(--shadow-lift);
 }
 
 /* Type scale (fixed rem, ratio ~1.2): 12 / 14 / 16 / 18 / 24 / 30. */
@@ -50,6 +70,8 @@
   --text-title--line-height: 2rem;
   --text-kpi: 1.875rem;
   --text-kpi--line-height: 2.25rem;
+  --text-marker: 1.75rem;
+  --text-marker--line-height: 2.125rem;
 }
 
 @layer base {
@@ -71,10 +93,19 @@
     background: var(--selection);
     color: var(--text);
   }
+  input,
+  textarea {
+    caret-color: var(--edge-praise);
+  }
   :focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
     border-radius: 2px;
+  }
+  /* On the deep board the teal ring would vanish; the highlighter takes over. */
+  .bg-board :focus-visible,
+  .board :focus-visible {
+    outline-color: var(--highlight);
   }
   a {
     color: inherit;
@@ -87,6 +118,12 @@
   }
   * {
     scrollbar-color: var(--control) transparent;
+    scrollbar-width: thin;
+  }
+  /* Marker headings: the hand-lettered voice of the wall. */
+  .font-marker {
+    font-weight: 700;
+    letter-spacing: 0;
   }
 }
 
@@ -95,22 +132,23 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Buttons: one shape (6px), near-black primary, grey secondary, press feedback. */
+  /* Buttons: one pill shape, ink primary, sage secondary, press feedback. */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     height: var(--control-height);
-    padding: 0 0.875rem;
-    border-radius: var(--r-control);
+    padding: 0 1rem;
+    border-radius: var(--r-button);
     font-size: var(--text-body);
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1;
     cursor: pointer;
     transition:
       transform var(--dur-press) var(--ease-out),
       background-color var(--dur-ui) ease,
+      box-shadow var(--dur-ui) ease,
       opacity var(--dur-ui) ease;
     user-select: none;
   }
@@ -135,7 +173,8 @@
   }
   @media (hover: hover) and (pointer: fine) {
     .btn-primary:hover:not(:disabled) {
-      opacity: 0.88;
+      opacity: 0.9;
+      box-shadow: var(--shadow-note);
     }
     .btn-secondary:hover:not(:disabled),
     .btn-ghost:hover:not(:disabled) {
@@ -152,7 +191,7 @@
     padding: 0 0.5rem;
     border-radius: var(--r-chip);
     font-size: var(--text-small);
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
   }
   .pill-positive {
@@ -172,10 +211,105 @@
     color: var(--pill-neutral-ink);
   }
 
+  /* Paper pinned to the wall. */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--r-card);
+    box-shadow: var(--shadow-paper);
+  }
+
+  /* The deep board: headers and summary strips that sit behind the notes. */
+  .board {
+    background: var(--board);
+    color: var(--on-board);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-paper);
+  }
+
+  /* A student comment as a sticky note: tinted paper, a sentiment edge, a strip of tape. */
+  .note {
+    position: relative;
+    border-radius: var(--r-note);
+    box-shadow:
+      inset 5px 0 0 var(--note-edge, var(--edge-neutral)),
+      var(--shadow-note);
+    background: var(--note-paper, var(--note-neutral));
+    color: var(--text);
+    transform: rotate(var(--tilt, 0deg));
+    transition:
+      transform var(--dur-ui) var(--ease-out),
+      box-shadow var(--dur-ui) var(--ease-out);
+  }
+  .note::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    width: 46px;
+    height: 14px;
+    translate: -50% 0;
+    rotate: var(--tape-tilt, -3deg);
+    background: color-mix(in srgb, var(--tape) 82%, transparent);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+  .note-praise {
+    --note-paper: var(--note-praise);
+    --note-edge: var(--edge-praise);
+  }
+  .note-criticism {
+    --note-paper: var(--note-criticism);
+    --note-edge: var(--edge-criticism);
+  }
+  .note-neutral {
+    --note-paper: var(--note-neutral);
+    --note-edge: var(--edge-neutral);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .note-lift:hover {
+      transform: rotate(0deg) translateY(-2px);
+      box-shadow:
+        inset 5px 0 0 var(--note-edge, var(--edge-neutral)),
+        var(--shadow-lift);
+    }
+  }
+
+  /*
+   * The signature moment: notes fly in from scattered positions and settle into their
+   * clusters, once per load. --i staggers them 40ms apart; --dx/--dy/--r0 set the start.
+   */
+  .settle {
+    animation: note-settle var(--dur-settle) var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * var(--stagger));
+  }
+  @keyframes note-settle {
+    from {
+      opacity: 0;
+      transform: translate(var(--dx, 0px), var(--dy, 24px)) rotate(var(--r0, 0deg)) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(var(--tilt, 0deg));
+    }
+  }
+
+  /* A marker stroke under a wall heading, drawn as its cluster settles. */
+  .marker-line {
+    stroke-dasharray: 1;
+    animation: marker-draw 520ms var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * var(--stagger) + 120ms);
+  }
+  @keyframes marker-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  /* Highlighter for "where you are": the current nav item, the selected row. */
+  .here {
+    background: var(--highlight);
+    color: var(--highlight-ink);
   }
 
   /* Phone menu sheet: a short rise and fade from where it will rest. */
@@ -226,5 +360,17 @@
   }
   .btn:active:not(:disabled) {
     transform: none;
+  }
+  /* Notes still arrive, but as a short fade in place: no travel. */
+  .settle {
+    animation: note-fade 150ms ease-out both !important;
+  }
+  .marker-line {
+    animation: none !important;
+  }
+}
+@keyframes note-fade {
+  from {
+    opacity: 0;
   }
 }

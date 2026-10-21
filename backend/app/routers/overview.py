@@ -56,7 +56,7 @@ def agreement_label(rho: float | None, n: int) -> str:
 
 
 def _insights(stats: dict[str, Any]) -> dict[str, Any]:
-    """The aggregate without raw evidence text (the drawer fetches that by id)."""
+    """The aggregate without raw evidence text (the drawer and the wall fetch that by id)."""
     aspects = {}
     for key in ASPECT_KEYS:
         a = (stats.get("aspects") or {}).get(key)
@@ -72,6 +72,11 @@ def _insights(stats: dict[str, Any]) -> dict[str, Any]:
                 "rho": agreement.get("rho"),
                 "n": agreement.get("n", 0),
                 "label": agreement_label(agreement.get("rho"), agreement.get("n", 0)),
+            },
+            # Ids only, best first per polarity; the page reads the text from /evidence.
+            "note_ids": {
+                polarity: [e["id"] for e in items]
+                for polarity, items in (a.get("evidence") or {}).items()
             },
         }
     return {

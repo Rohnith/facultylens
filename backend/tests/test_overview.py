@@ -58,6 +58,9 @@ async def test_overview_for_owner_hod_and_others(client, analysed_world, monkeyp
     assert sel["insights"]["aspects"]["clarity"]["polarity"]["positive"] == 1
     assert sel["insights"]["hidden_comments"] == 1
     assert "evidence" not in str(sel["insights"])  # evidence text comes only from /evidence
+    note_ids = sel["insights"]["aspects"]["clarity"]["note_ids"]
+    assert note_ids["positive"] and note_ids["positive"][0].endswith(":liked:0")
+    assert "Clear" not in str(sel["insights"])
     assert sel["summary"]["engine"] == "fallback"
 
     hod = (await client.get(url, headers=h["hod"])).json()

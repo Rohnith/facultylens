@@ -4,11 +4,11 @@ import { errorMessage } from "../../api/client";
 import { profilesApi } from "../../api/profiles";
 import { EvidenceDrawer } from "../../components/EvidenceDrawer";
 import { FormError, Select } from "../../components/forms";
-import { RateBar } from "../../components/RateBar";
 import { useAuth } from "../../context/auth";
 import { AcrossCourses } from "./AcrossCourses";
-import { Aspects, Footer, Overall, Summary } from "./Insights";
+import { Footer, Overall, Summary } from "./Insights";
 import { ProfileColumn } from "./ProfileColumn";
+import { Wall } from "./Wall";
 
 /** A select when there is a choice to make; plain text when there isn't. */
 function Picker({ label, value, options, onChange, className = "" }) {
@@ -53,9 +53,6 @@ function Pickers({ data, selected, onPick }) {
         options={cycle.offerings.map((o) => [o.id, `${o.code} · ${o.name} · Section ${o.section}`])}
         onChange={(id) => onPick({ cycle: cycle.id, course: id })}
       />
-      <div className="min-w-0 md:w-64 md:flex-auto">
-        <RateBar value={selected.responses} total={selected.eligible} />
-      </div>
     </div>
   );
 }
@@ -69,7 +66,7 @@ function Notice({ title, children }) {
   );
 }
 
-function Feedback({ data, onPick, onEvidence }) {
+function Feedback({ data, facultyId, onPick, onEvidence }) {
   const sel = data.selected;
   if (!sel) {
     return (
@@ -101,7 +98,12 @@ function Feedback({ data, onPick, onEvidence }) {
       )}
       {sel.status === "available" && (
         <>
-          <Overall insights={sel.insights} />
+          <Overall insights={sel.insights} responses={sel.responses} eligible={sel.eligible} />
+          <Wall
+            facultyId={facultyId}
+            insights={sel.insights}
+            onEvidence={(request) => onEvidence(null, request)}
+          />
           <Summary
             summary={sel.summary}
             aspects={sel.insights.aspects}
@@ -114,7 +116,6 @@ function Feedback({ data, onPick, onEvidence }) {
               })
             }
           />
-          <Aspects insights={sel.insights} />
           <Footer
             insights={sel.insights}
             sarcasticCount={sel.sarcastic_ids.length}
@@ -205,6 +206,7 @@ export function FacultyPage() {
           {data.feedback_access ? (
             <Feedback
               data={data}
+              facultyId={facultyId}
               onPick={(p) => setParams(p)}
               onEvidence={(_event, request) => setDrawer(request)}
             />

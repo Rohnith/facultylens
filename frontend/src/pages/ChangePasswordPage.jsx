@@ -43,7 +43,7 @@ export function ChangePasswordPage() {
 
   return (
     <StandaloneLayout>
-      <h1 className="m-0 font-serif text-title font-semibold tracking-[-0.01em]">
+      <h1 className="m-0 font-marker text-marker">
         {forced ? "Choose your own password" : "Change password"}
       </h1>
       <p className="mt-2 mb-8 text-body text-muted">
