@@ -2609,6 +2609,476 @@
           ]
         }
       ]
+    },
+    {
+      "name": "evaluation (labelling, results, survey)",
+      "item": [
+        {
+          "name": "PATCH /users/:id annotator (admin)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Mark a staff account as 'annotator' (labels blind) or 'adjudicator' (settles disagreements); null clears it. Students can't be annotators.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"annotator\": \"annotator\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/next (annotator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/next",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "next"
+              ]
+            },
+            "description": "The next comment this annotator hasn't labelled, without anyone else's label. Faculty/HoD annotators get only the public dataset; admin annotators also get the app's own redacted comments.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"itemId\", pm.response.json().item?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /labels (annotator)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/labels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels"
+              ]
+            },
+            "description": "Save or replace my label. Skip with skip_reason (not_english | not_about_teaching | unclear) instead of a sentiment.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item_id\": \"{{itemId}}\",\n  \"sentiment\": \"negative\",\n  \"aspects\": [\n    {\n      \"key\": \"pace\",\n      \"polarity\": \"negative\"\n    }\n  ],\n  \"sarcastic\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/progress (admin or annotator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "progress"
+              ]
+            },
+            "description": "Counts per annotator, live Cohen's kappa once 30 comments have two labels, gold and open disagreements, and reference/grounding progress.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/disagreements (adjudicator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/disagreements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "disagreements"
+              ]
+            },
+            "description": "Up to 20 comments the two annotators labelled differently, with both labels.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /labels/resolve (adjudicator)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/labels/resolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "resolve"
+              ]
+            },
+            "description": "The adjudicator's final label, which becomes the gold label.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item_id\": \"{{itemId}}\",\n  \"sentiment\": \"negative\",\n  \"aspects\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/groups/next (annotator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/groups/next",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "groups",
+                "next"
+              ]
+            },
+            "description": "One teacher's redacted comments (public dataset) to write a reference summary for.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"groupId\", pm.response.json().group?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /labels/groups/:id/reference (annotator)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/labels/groups/{{groupId}}/reference",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "groups",
+                "{{groupId}}",
+                "reference"
+              ]
+            },
+            "description": "1-4 strengths and 1-4 improvements; writing again replaces mine.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"strengths\": [\n    \"Explains concepts clearly\"\n  ],\n  \"improvements\": [\n    \"Grades harshly with little feedback\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/grounding/next (annotator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/grounding/next",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "grounding",
+                "next"
+              ]
+            },
+            "description": "A generated summary's bullets with the evidence each cites, to mark as supported or not.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /labels/grounding (annotator)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/labels/grounding",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "grounding"
+              ]
+            },
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"group_id\": \"{{groupId}}\",\n  \"checks\": [\n    {\n      \"index\": 0,\n      \"supported\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /evaluation/results (admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/evaluation/results",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "evaluation",
+                "results"
+              ]
+            },
+            "description": "ml/results/evaluation.json as written by `python -m ml.evaluate`, or status not_run.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /survey (faculty, HoD)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/survey",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "survey"
+              ]
+            },
+            "description": "The usefulness survey: four 1-5 answers and a comment, one per teacher (answering again replaces it).",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": {\n    \"usefulness\": 4,\n    \"accuracy\": 4,\n    \"fairness\": 3,\n    \"actionability\": 5\n  },\n  \"comment\": \"Helpful summaries.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /survey/mine (faculty, HoD)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/survey/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "survey",
+                "mine"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
