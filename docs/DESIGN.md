@@ -280,3 +280,7 @@ Recharts, styled to these tokens, never library defaults.
 - design-taste-frontend `lint.mjs --app` and `inspect.mjs --app`: 0 FAIL, 0 WARN at 1440/768/390 on the status page. Mono is used for model IDs only.
 - impeccable `detect`: no findings.
 - Browser: light and dark, keyboard (skip link, radio group, dialog Esc/focus return), and the API-down error state all checked in the desktop app's browser.
+- Phase 9: design-taste `lint --app` on the Phase 8 pages gave 0 FAIL and 2 WARN, both defended:
+  - the shadow is on a chart tooltip, which floats;
+  - the monospace text is the `model_version` key.
+- Phase 9 fresh-clone run: every role's screens were visited with no console errors.
