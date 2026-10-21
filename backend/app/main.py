@@ -20,9 +20,11 @@ from app.routers import (
     courses,
     cycles,
     departments,
+    evaluation,
     feedback,
     forms,
     health,
+    labels,
     overview,
     profile_versions,
     profiles,
@@ -75,6 +77,8 @@ def create_app() -> FastAPI:
         feedback,
         analysis,
         analytics,
+        labels,
+        evaluation,
     ):
         app.include_router(module.router, prefix="/api")
     return app

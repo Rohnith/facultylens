@@ -39,3 +39,6 @@ desktop.ini
 .taste-skill/
 .impeccable/review/
 .impeccable/mocks/
+
+# Raw public datasets (real names inside); only the import script and results are committed
+backend/ml/data/rmp/

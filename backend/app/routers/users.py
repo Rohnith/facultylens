@@ -315,6 +315,8 @@ async def update_user(user_id: str, body: UserUpdate, db: Db, admin: AdminUser) 
         merged.get("department_id"),
         merged.get("gender") if merged["role"] in MAY_HAVE_GENDER else None,
     )
+    if merged.get("annotator") and merged["role"] == "student":
+        problems.append("Students can't be annotators.")
     if problems:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, " ".join(problems))
 

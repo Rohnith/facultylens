@@ -108,12 +108,24 @@ INDEXES: dict[str, list[IndexModel]] = {
             name="cycle_department_issue",
         ),
     ],
+    # Phase 8 evaluation: items to label (public dataset or the app's own redacted comments),
+    # one label per item per annotator, adjudicated gold, summary groups and the faculty survey.
+    "eval_items": [
+        IndexModel([("set", ASCENDING), ("order", ASCENDING)], name="set_order"),
+        IndexModel([("source", ASCENDING), ("ref", ASCENDING)], unique=True, name="source_ref"),
+    ],
     "labels": [
         IndexModel(
-            [("response_id", ASCENDING), ("annotator_id", ASCENDING)],
+            [("item_id", ASCENDING), ("annotator_id", ASCENDING)],
             unique=True,
-            name="response_annotator",
-        )
+            name="item_annotator",
+        ),
+        IndexModel([("annotator_id", ASCENDING)], name="annotator"),
+    ],
+    "adjudications": [IndexModel([("item_id", ASCENDING)], unique=True, name="item_unique")],
+    "eval_groups": [IndexModel([("order", ASCENDING)], name="order")],
+    "survey_responses": [
+        IndexModel([("faculty_id", ASCENDING)], unique=True, name="faculty_unique")
     ],
     "audit_log": [IndexModel([("at", DESCENDING)], name="at_desc")],
 }
@@ -125,6 +137,7 @@ OBSOLETE_INDEXES: dict[str, list[str]] = {
     "courses": ["code_semester"],
     "moderation_queue": ["status"],
     "forms": ["cycle_course_faculty"],
+    "labels": ["response_annotator"],
 }
 
 

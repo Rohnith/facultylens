@@ -136,6 +136,34 @@ ENDPOINTS = [
         {"admin"},
         {"action": "approve"},
     ),
+    # Evaluation. Labelling needs the annotator flag, which no role has by default.
+    ("GET", "/api/labels/next", set(), None),
+    ("POST", "/api/labels", set(), {"item_id": NO_ID, "sentiment": "positive"}),
+    ("GET", "/api/labels/progress", {"admin"}, None),
+    ("GET", "/api/labels/disagreements", set(), None),
+    ("POST", "/api/labels/resolve", set(), {"item_id": NO_ID, "sentiment": "neutral"}),
+    ("GET", "/api/labels/groups/next", set(), None),
+    (
+        "POST",
+        f"/api/labels/groups/{NO_ID}/reference",
+        set(),
+        {"strengths": ["a"], "improvements": ["b"]},
+    ),
+    ("GET", "/api/labels/grounding/next", set(), None),
+    (
+        "POST",
+        "/api/labels/grounding",
+        set(),
+        {"group_id": NO_ID, "checks": [{"index": 0, "supported": True}]},
+    ),
+    ("GET", "/api/evaluation/results", {"admin"}, None),
+    ("GET", "/api/survey/mine", {"hod", "faculty"}, None),
+    (
+        "POST",
+        "/api/survey",
+        {"hod", "faculty"},
+        {"answers": {"usefulness": 4, "accuracy": 4, "fairness": 3, "actionability": 5}},
+    ),
 ]
 
 CASES = [

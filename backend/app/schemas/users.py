@@ -12,6 +12,8 @@ from app.config import get_settings
 
 Role = Literal["admin", "hod", "faculty", "student"]
 Gender = Literal["female", "male", "other", "undisclosed"]
+# Phase 8 labelling: an annotator labels comments blind; an adjudicator settles disagreements.
+Annotator = Literal["annotator", "adjudicator"]
 NEEDS_DEPARTMENT = {"hod", "faculty", "student"}
 MAY_HAVE_GENDER = {"hod", "faculty"}
 
@@ -127,6 +129,7 @@ class UserUpdate(BaseModel):
     department_id: str | None = None
     gender: Gender | None = None
     is_active: bool | None = None
+    annotator: Annotator | None = None
 
     @field_validator("email")
     @classmethod
@@ -149,6 +152,7 @@ class UserOut(BaseModel):
     is_active: bool = True
     must_change_pw: bool = False
     created_at: datetime | None = None
+    annotator: Annotator | None = None
 
 
 class UserAdminOut(UserOut):
