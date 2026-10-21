@@ -222,16 +222,18 @@ export function AppShell() {
       </a>
 
       {/* Desktop rail: the deep board beside the wall. */}
-      <aside className="sticky top-0 hidden h-dvh flex-col bg-board px-3 pt-5 pb-4 text-on-board lg:flex">
-        <div className="px-2.5 pb-6">
-          <Brand institution={institution} />
-        </div>
-        <nav aria-label="Main">
-          <NavItems items={nav} badges={badges} />
-        </nav>
-        <div className="mt-auto flex flex-col gap-4 px-2.5">
-          <Account />
-          <ThemeSwitch onBoard />
+      <aside className="hidden bg-board text-on-board lg:block">
+        <div className="sticky top-0 flex h-dvh flex-col px-3 pt-5 pb-4">
+          <div className="px-2.5 pb-6">
+            <Brand institution={institution} />
+          </div>
+          <nav aria-label="Main">
+            <NavItems items={nav} badges={badges} />
+          </nav>
+          <div className="mt-auto flex flex-col gap-4 px-2.5">
+            <Account />
+            <ThemeSwitch onBoard />
+          </div>
         </div>
       </aside>
 

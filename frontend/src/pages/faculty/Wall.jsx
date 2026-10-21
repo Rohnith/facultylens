@@ -257,6 +257,7 @@ export function Wall({ facultyId, insights, onEvidence }) {
                 onEvidence({
                   ids: allIds,
                   tone,
+                  toneFromItem: true,
                   kicker: `Teaching aspect · ${a.mentions} mentions`,
                   title: a.label,
                 })

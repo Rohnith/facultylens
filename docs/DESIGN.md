@@ -1,81 +1,89 @@
 # FacultyLens design system
 
-Settled in Phase 0. Every later page reuses it. Tokens are in `frontend/src/styles/tokens.css` (raw values per theme) and mapped to Tailwind utilities in `frontend/src/styles/index.css` (`@theme inline`). Change values there, never inline in components.
+Redesigned on 2026-10-21 as the **Affinity Wall**, replacing the Phase 0 "achromatic ledger". Every page reuses it. Tokens are in `frontend/src/styles/tokens.css` (raw values per theme) and mapped to Tailwind utilities in `frontend/src/styles/index.css` (`@theme inline`). Change values there, never inline in components. The approved Figma file is [FacultyLens: Affinity Wall redesign](https://www.figma.com/design/3hl9JFkm5nwpkk5iwdjy7K) (variables, the Note / Button / NavItem / Pill components, and five screens).
 
 ## Direction
 
-**Calm academic, "achromatic ledger".** This style came from the design-taste-frontend app draw (`--kind analytics --style achromatic-ledger`, seed 1993640354), and it fits the user's "calm academic" choice. FacultyLens is a working tool for IQAC staff, HoDs and faculty, read in long sessions near NAAC deadlines. It should feel like a well-kept university register, not a SaaS dashboard.
+**Feedback is sorted the way researchers sort it by hand.** Every student comment is a paper note, clustered under the teaching aspect it talks about, with a marker heading that states the verdict. It was chosen through impeccable's direction round (seed `42001c6f43eb851a`, candidate 4) over a lens/highlighter and a metro direction, and it refuses the usual dashboard of white stat tiles and one big table.
 
-- **The chrome holds no colour.** Text and controls are ink; the primary action is near-black.
-- **Colour is for data and judgement only:** the one chart hue on the main data element, the sentiment pair on sentiment, and status pills where something is good or bad.
-- **Its face:** a blue-grey "ledger" ground (`#f2f4f7`) under white cards, and a serif used for one job: page titles (and later the faculty member's name on the unified page).
-- **Its signature element** (from Phase 5): the evidence link. Every strength or improvement opens the redacted sentences that support it, highlighted in place.
+- **The wall:** a pale sage ground (`#dde5e1`) under white paper cards.
+- **The board:** a deep green (`#183f3a`) carries the rail, page headers and summary strips, like the board the notes are pinned to.
+- **Notes:** tinted paper with a strip of tape, tilted a degree or two. Sentiment lives on the note's 5px left edge and in its words (Praise / Criticism / Neutral), never in colour alone.
+- **Highlighter yellow** (`#ffd84d`) is reserved for "where you are": the current nav item and the chosen rating.
+- **Its signature moment:** on load, notes fly in from scattered positions and settle into their clusters.
 
 ## Colour
 
 | Role | Light | Dark | Use |
 |---|---|---|---|
-| `--ground` | `#f2f4f7` | `#0b0b0c` | page and sidebar |
-| `--surface` | `#ffffff` | `#151516` | cards, tables |
-| `--raised` / `--active` | `#f7f8fa` / `#e6e9ee` | `#1c1c1e` / `#262628` | hover, active nav pill, skeletons |
-| `--border` / `--rule` / `--control` | `#e3e6eb` / `#eef0f3` / `#cfd4db` | `#2a2a2d` / `#202022` / `#46464a` | card edge / row rule / input border |
-| `--text` / `--muted` / `--faint` | `#0e0f11` / `#535960` / `#626870` | `#f4f4f5` / `#b4b4b8` / `#9a9aa0` | three text tiers, all ≥ 4.5:1 |
-| `--primary` | `#16181b` | `#f4f4f5` (inverted) | the one primary button |
-| `--chart-main` | `#1d5fbf` | `#3987e5` | the main series in any chart |
-| `--focus` | `#1d5fbf` | `#6ea3ec` | 2px focus ring, 2px offset |
+| `--ground` (wall) | `#dde5e1` | `#0e1816` | page |
+| `--surface` (paper) | `#ffffff` | `#16221f` | cards, tables, drawer |
+| `--raised` / `--active` | `#eef3f0` / `#cfdad5` | `#1c2a26` / `#26362f` | hover, next-step boxes, skeletons |
+| `--border` / `--rule` / `--control` | `#c3cfca` / `#e2e9e6` / `#7f8c88` | `#2a3a35` / `#21302b` / `#6c7d77` | card edge / row rule / input border (3.5:1) |
+| `--text` / `--muted` / `--faint` | `#16201e` / `#46524f` / `#56625f` | `#eef4f1` / `#adbeb8` / `#97aaa3` | three text tiers, all ≥ 4.5:1 on wall and paper |
+| `--board` / `--board-2` | `#183f3a` / `#22524b` | `#12302c` / `#1a413b` | rail, headers, summary strips; hover on the board |
+| `--on-board` / `--on-board-muted` | `#f3f7f5` / `#b8cec7` | `#eef4f1` / `#a9c4bc` | text on the board (10.7:1 / 7.0:1) |
+| `--note-praise` + `--edge-praise` | `#cdf1e5` + `#0f7f6c` | `#173b33` + `#3fbfa2` | praise notes |
+| `--note-criticism` + `--edge-criticism` | `#ffd8cc` + `#cf4b29` | `#3f241b` + `#f07a57` | criticism notes |
+| `--note-neutral` + `--edge-neutral` | `#eceeed` + `#7c8582` | `#252d2a` + `#8f9a96` | neutral notes, blank answer notes |
+| `--highlight` | `#ffd84d` | `#ffd84d` | "where you are" only, ink text on it |
+| `--tape` | `#f4e7b8` | `#5b5338` | the tape strip on notes |
+| `--primary` | `#16201e` | `#eef4f1` | the one primary button |
+| `--focus` | `#0b6b5b` | `#5fd0b8` | 2px ring; on the board it turns highlighter yellow |
 
-**Sentiment (diverging, never red/green):** positive `#2a78d6` / `#3987e5`, neutral `#8a8a8a` / `#a3a3a3`, negative `#e34948` / `#e66767`. Validated with the dataviz `validate_palette.js`. In light mode every adjacent pair passes CVD separation. Dark neutral was lifted to `#a3a3a3` so red↔grey clears the CVD threshold (8.1). The grey midpoint "fails" the chroma check on purpose, because neutral must read as no colour. **Rule:** sentiment marks always carry a text label or legend (positive / neutral / negative); colour never carries the meaning alone.
+**Sentiment in charts** follows the notes: positive `--sent-positive` (teal), negative `--sent-negative` (coral), neutral grey. Teal against coral differs in hue and lightness for the common colour-vision deficiencies, and every sentiment mark still carries a text label or legend. On the deep board the split bar uses the note papers (mint, peach, muted grey) because the edge colours vanish against the board green.
 
-**Status pills:** pale tint plus dark ink of the same hue (positive, negative, warning, neutral). They appear only inside rows or beside a value, never above a heading.
+**Two compared groups** (bias panel) keep the validated categorical blue/orange pair, so they are never read as praise and criticism.
 
-Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it both ways (the sidebar's Theme switch, stored in `localStorage` as a per-viewer convenience). An inline script in `index.html` applies it before first paint.
+**Status pills:** pale tint plus dark ink of the same hue (positive, negative, warning, neutral), pill-shaped.
+
+All text pairs above were checked for WCAG AA in both themes when the tokens were generated. Theme: the OS setting by default; `<html data-theme="light|dark">` overrides it both ways (the rail's Theme switch, a per-viewer `localStorage` convenience applied before first paint).
 
 ## Type
 
-- **Geist Variable** (self-hosted via @fontsource, works offline) for everything.
-- **Source Serif 4 Variable** for page titles only.
+- **Figtree Variable** (self-hosted via @fontsource, works offline) for the interface.
+- **Kalam Bold** (self-hosted) for headings written on the wall: page titles (`.font-marker text-marker`, 28/34), cluster and column headings (22/28), the net-sentiment figure, and the sign-in promise.
 - Monospace (system `ui-monospace`) only for IDs and model keys.
-- Fixed rem scale, ratio ~1.2:
+- Fixed rem scale: `text-small` 12/16, `text-body` 14/20, `text-section` 16/24, `text-lead` 18/26, `text-title` 24/32, `text-marker` 28/34, `text-kpi` 30/36.
+- Weights 400 / 600 / 700. `.num` (tabular figures) on every number that lines up or updates.
+- Sentence case everywhere; no tracked uppercase labels, no eyebrow labels.
 
-| Token | Size / line | Use |
-|---|---|---|
-| `text-small` | 12 / 16 | labels, meta, table headers, pills |
-| `text-body` | 14 / 20 | body, nav, cells |
-| `text-section` | 16 / 24 | section headings (500) |
-| `text-lead` | 18 / 26 | values in a stat strip |
-| `text-title` | 24 / 32 | page title (serif 600, -0.01em) |
-| `text-kpi` | 30 / 36 | headline figures (max one per screen) |
+## Space, shape and depth
 
-- Weights: 400 / 500 / 600.
-- `.num` (tabular figures) on every number in a table, stat or anything that updates. Numbers are right-aligned in columns.
-- Sentence case everywhere; no tracked uppercase labels.
-
-## Space and shape
-
-- 4px base. One gap (`--gap` 12px) between sibling cards. Card padding 20px. Canvas padding 32px on desktop and 16px on a phone.
-- Content column max 1184px. Sections 40px apart.
-- Radius: cards 8px, controls 6px, chips 4px (the tight pair, chosen once).
-- Surfaces are separated by a 1px border **or** a tone step, never a shadow. Shadows only on what floats (menus, dialogs).
-- Stat strips are one card split by 1px dividers (implemented as a 1px grid gap over `--rule`), never a row of separate KPI tiles. No icons on KPIs and no sparklines.
+- 4px base. `--gap` 12px between sibling cards, card padding 20px, canvas padding 32px on desktop and 16px on a phone. Content column max 1184px.
+- Radius: paper 6px, notes 3px, inputs 6px; buttons, pills and nav items are full pills.
+- Depth is physical: paper sits on the wall with a short offset shadow (`--shadow-paper`), notes lift a little more (`--shadow-note`) and lift further on hover (`--shadow-lift`). No zero-offset glows, no gradients, no glass.
 
 ## Shell
 
-**Open plane.**
-- A 256px labelled sidebar on the page ground, one hairline to the canvas.
-- The product mark (a lens over three feedback bars, `components/Mark.jsx`), the name and the institution sit at the top; the theme switch sits at the bottom.
-- The active nav item is a neutral grey pill. Only screens that exist are listed.
-- There is no top bar on desktop.
-- **Below 1024px** the sidebar folds into a 48px top bar (mark, screen name, menu button) and a full-screen `<dialog>` sheet. Esc closes the sheet and focus returns to the trigger.
+- A 248px rail on the deep board: mark, name and institution at the top, the account and theme switch at the bottom. The current page is a highlighter-yellow pill; the moderation badge is a small peach pill with its count.
+- The mark (`components/Mark.jsx`, `public/mark.svg`) is two tilted notes, praise over criticism, taped to the board.
+- **Below 1024px** the rail folds into a 48px board-green top bar (mark, screen name, menu) and a full-screen `<dialog>` sheet; Esc closes it and focus returns to the trigger.
+- **Signed-out screens** (`StandaloneLayout`): the board on the left with the promise "Every comment, sorted and heard." and the privacy facts pinned as notes; the form on paper on the wall to the right. Phones stack them.
 
 ## Components (in `styles/index.css`)
 
-- `.btn` + `.btn-primary` (near-black), `.btn-secondary` (grey), `.btn-ghost`: 36px tall.
+- `.btn` + `.btn-primary` (ink), `.btn-secondary` (sage), `.btn-ghost`: 38px pill.
 - `.pill` + `.pill-positive|negative|warning|neutral`.
-- `.card`: white surface, 1px border, 8px radius.
-- `.skeleton`: a flat bar at the real size of the value it replaces, with no shimmer and no layout shift when data lands.
-- Tables: 12px grey sentence-case headers, 44px rows, 1px row rules, no zebra stripes and no header band. Below 768px a table becomes two-line rows (identity + status on line 1, detail on line 2). Tablet hides the least important columns.
+- `.card`: white paper, 1px border, 6px radius, paper shadow.
+- `.board`: the deep green strip for page headers and summaries.
+- `.note` + `.note-praise|criticism|neutral`: tinted paper, sentiment edge, tape, `--tilt`. `.note-lift` straightens and lifts it on hover.
+- `.here`: highlighter fill for "where you are".
+- `.skeleton`: a flat bar at the real size of the value it replaces, no shimmer.
+- Tables keep their Phase 1 rules (sentence-case headers, 44px rows, 1px rules, two-line rows on phones).
 
-## Phase 1 additions
+## The key screens
+
+- **Faculty My page** (`pages/faculty/FacultyPage.jsx`, `Wall.jsx`): profile on a board header at the left; cycle and course pickers; a board strip with net sentiment, the split bar, responses and the best-rated aspect; then **the wall**: one cluster per aspect students wrote about, ordered by how often, each with a Kalam heading, a marker stroke in the verdict colour, the verdict in words with a drawn ▲/▼ icon, the note and rating counts, and up to five real redacted sentences as notes (two praise, two criticism, one neutral). "Read n notes in full" opens the evidence drawer, where each answer's highlight takes its own sentiment's tint. Aspects nobody wrote about are listed in one line. The written summary, next steps and emotion panels follow.
+  - The API supplies note ids per aspect (`insights.aspects[k].note_ids`); the text still comes only from `/evidence`, so the moderation, redaction and minimum-response rules are unchanged.
+- **IQAC home** (`pages/admin/AdminHome.jsx`): the open cycle on a board header (responded, to moderate, analysed, actions approved), then its work sorted into four columns of task notes: Needs a decision, Ready to run, Waiting on people, Done. Every count comes from the cycles, analysis, moderation and NAAC status APIs.
+- **Student form**: the course on a board header, the 1–5 scale with the chosen rating in highlighter, and the free-text answers written on blank neutral notes.
+
+## History: page notes from Phases 1–8
+
+These notes describe how each page was laid out when it was built. Their structure still holds; where they name the old ledger colours, fonts or the grey active pill, the Affinity Wall tokens above now apply.
+
+### Phase 1 additions
 
 - **Forms** (`components/forms.jsx`):
   - The label sits above a 40px control (1px `--control` border, 6px radius, `--focus` ring); a hint or error goes underneath.
@@ -100,7 +108,7 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - impeccable `detect`: no findings.
   - Signed-in screens checked through Playwright at 1440, 768 and 390.
 
-## Phase 2 additions
+### Phase 2 additions
 
 - **Review queue** (`pages/profile/ReviewPanel.jsx`):
   - A card above the page body whenever imports are pending. Its heading is the count ("35 imported items wait for your review").
@@ -122,7 +130,7 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - `beforeunload` warns on unsaved edits.
 - **Two-column page:** `minmax(0,1fr) 360px`. The right rail (import, courses taught) comes first in the DOM, so on phones it sits above the long sections.
 
-## Phase 3 additions
+### Phase 3 additions
 
 - **Rating control** (`components/LikertScale.jsx`):
   - Five equal segments, each showing its number *and* word (Poor, Fair, Good, Very good, Excellent), so colour never carries the meaning.
@@ -141,7 +149,7 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - It shows a grey dash when nothing is eligible, and is used for response rates everywhere.
 - **Cycle status:** pills read Draft (neutral), Open (positive), Closed (neutral). Publishing explains what it will create before the button, and why offerings are skipped.
 
-## Phase 4 additions
+### Phase 4 additions
 
 - **Analysis runner** (`pages/admin/AnalysisPage.jsx`):
   - The screen's question is "how much of this cycle is analysed, and what did it flag?".
@@ -160,7 +168,7 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - Decided items show the decision pill, time and edited text.
 - **Nav count:** "Moderation 18" is a small surface chip on the nav row. It appears only when items are pending, refreshes after every decision (a window event) and each minute, and is read as "18 pending".
 
-## Phase 5 additions
+### Phase 5 additions
 
 - **Unified faculty page** (`pages/faculty/*`, `/me` and `/faculty/:id`):
   - Two columns: the profile (360px, sticky on desktop) and the feedback insights. They stack on tablets and phones, profile first.
@@ -193,7 +201,7 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - Rejected AI claims are listed in a `--raised` note when the template was used instead.
 - **Code splitting:** the unified page and Recharts load as their own chunk (`React.lazy`), so other screens don't download the chart library.
 
-## Phase 6 additions
+### Phase 6 additions
 
 - **Department insights** (`/insights`, `pages/insights/*`, lazy-loaded):
   - HoDs see their own department and the title is its name; admins get a department picker.
@@ -217,7 +225,7 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
   - **Method:** a "How these numbers are made" disclosure.
 - **My page:** "Across your courses" (only with two or more offerings in a cycle). Each course name selects that course below; an "All courses" line closes the table.
 
-## Phase 7 additions
+### Phase 7 additions
 
 - **NAAC report builder** (`/admin/reports`): the cycle picker, then "Draft action items" (secondary; its title says edited and approved rows are never overwritten). Below that are two columns:
   - **Left:** the Action Taken rows grouped by department in cards. Each card header shows "n of m approved" and a ghost "Add an action".
@@ -234,7 +242,7 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
 - **HoD "Action taken" tab** on Department insights: one paragraph saying what the rows are for and how many still need approval, then the same table for their department.
 - **The printed report** keeps the app's restraint: DejaVu Sans, black ink, the sentiment trio and the single chart blue in the charts, light grey table headings, and the draft mark at 10% opacity across each page.
 
-## Phase 8 additions
+### Phase 8 additions
 
 - **Segmented choice** (`components/Segmented.jsx`): native radios in a labelled radiogroup, drawn as equal joined segments like the rating scale. The selected segment is the primary ink. A `quiet` value (a default such as "Not mentioned") is only a grey `--active` tone, so eight untouched rows don't shout.
 - **Labelling** (`/label`, only for accounts the admin marks as annotator or adjudicator; a nav item appears for them):
@@ -262,10 +270,10 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
 
 ## Motion
 
-- Feedback only; nothing performs an entrance.
-- `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`. Press 140ms (`scale(0.97)` on `:active`), UI 180ms, sheet 240ms (rise 12px + fade via `@starting-style`).
-- Hover effects are gated behind `(hover: hover) and (pointer: fine)`.
-- `prefers-reduced-motion` drops travel and keeps state changes.
+- **One authored moment:** notes settle onto the wall. Each note starts from a scattered offset (`--dx`, `--dy`, `--r0`), slightly scaled down and transparent, and lands at its tilt in 400ms on the strong ease-out, staggered 40ms across the whole wall (`.settle`). The cluster's marker stroke draws itself as its notes land (`.marker-line`). It plays once per load: on the faculty page, the IQAC home board and the sign-in board.
+- Everything else is feedback, not entrance: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`; press 140ms (`scale(0.97)` on `:active`), UI 180ms, the sheet and drawer 240ms from the edge they belong to (`@starting-style`).
+- Hover effects (note lift, button shadow) are gated behind `(hover: hover) and (pointer: fine)`. Keyboard-driven changes (labelling keys) never animate.
+- `prefers-reduced-motion`: notes arrive with a 150ms fade in place, no travel; the marker stroke is drawn already; transitions drop to 1ms.
 
 ## Charts (from Phase 5)
 
@@ -276,6 +284,8 @@ Recharts, styled to these tokens, never library defaults.
 - A crosshair tooltip on hover; a table view for accessibility; an empty chart draws its zero line with one sentence.
 
 ## Checks used
+
+- Affinity Wall (2026-10-21): token contrast pairs checked in both themes; every role's main screens visited in light and dark, at 1440 and 390, with no console errors; screenshots in `docs/screenshots` retaken. design-taste `lint --app` on the changed files: 0 FAIL; its shadow warnings are the paper and note depth this world chose (offset, soft blur) and the mono warning is the model-key token.
 
 - design-taste-frontend `lint.mjs --app` and `inspect.mjs --app`: 0 FAIL, 0 WARN at 1440/768/390 on the status page. Mono is used for model IDs only.
 - impeccable `detect`: no findings.

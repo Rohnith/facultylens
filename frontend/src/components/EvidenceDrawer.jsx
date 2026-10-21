@@ -88,7 +88,7 @@ export function EvidenceDrawer({ facultyId, request, onClose }) {
           <div className="flex items-start justify-between gap-4 border-b border-rule px-[var(--card-pad)] py-4">
             <div className="flex min-w-0 flex-col gap-1">
               <span className="text-small text-muted">{request.kicker}</span>
-              <h2 id="evidence-title" className="m-0 text-section font-medium">
+              <h2 id="evidence-title" className="m-0 font-marker text-[1.375rem] leading-7">
                 {request.title}
               </h2>
             </div>
@@ -128,7 +128,11 @@ export function EvidenceDrawer({ facultyId, request, onClose }) {
             ) : (
               <ul className="m-0 list-none p-0">
                 {state.items.map((item) => (
-                  <Answer key={item.id} item={item} tone={request.tone} />
+                  <Answer
+                    key={item.id}
+                    item={item}
+                    tone={request.toneFromItem ? item.sentiment : request.tone}
+                  />
                 ))}
               </ul>
             )}

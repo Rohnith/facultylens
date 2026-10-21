@@ -15,6 +15,8 @@ Everything runs on a CPU, and offline once the models are downloaded.
 |---|---|---|
 | ![Faculty page](docs/screenshots/03-faculty-page.png) | ![Evidence drawer](docs/screenshots/04-evidence-drawer.png) | ![Bias panel](docs/screenshots/06-bias-panel.png) |
 
+The IQAC home board: ![IQAC home](docs/screenshots/14-admin-home.png)
+
 More screens are in [`docs/screenshots`](docs/screenshots). A 5-minute demo script is in [`docs/DEMO.md`](docs/DEMO.md). Requirements are in [`docs/SPEC.md`](docs/SPEC.md), the design system in [`docs/DESIGN.md`](docs/DESIGN.md), and measured model speed and memory in [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
 > **Status:** all nine phases of SPEC §14 are built. The human-labelled parts of the evaluation are pending until the annotators label (see [Evaluation](#evaluation)).
