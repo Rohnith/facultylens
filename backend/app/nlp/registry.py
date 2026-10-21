@@ -228,6 +228,10 @@ class Seq2SeqModel:
         self.repo, self.stats = repo, stats
         self.tokenizer = AutoTokenizer.from_pretrained(repo)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(repo).eval()
+        # The checkpoint's own length limits clash with the *_new_tokens passed to generate()
+        # (which win anyway) and log a warning on every call; drop them.
+        self.model.generation_config.min_length = 0
+        self.model.generation_config.max_length = None
 
     def summarize(self, text: str, max_new_tokens: int = 120, min_new_tokens: int = 20) -> str:
         import torch

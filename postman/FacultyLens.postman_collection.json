@@ -78,6 +78,10 @@
     {
       "key": "actionId",
       "value": ""
+    },
+    {
+      "key": "manualActionId",
+      "value": ""
     }
   ],
   "item": [
@@ -2126,7 +2130,40 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"manualActionId\", pm.response.json().id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /reports/naac/:cycle/actions/:id (admin)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{manualActionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions",
+                "{{manualActionId}}"
+              ]
+            },
+            "description": "Deletes a row (admin only). Drafted rows come back on the next re-draft if the data still supports them.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
                 ]
               }
             }
