@@ -2,51 +2,74 @@
 
 **Faculty Profile Generation and Student Feedback Evaluation based on Text Summarization and Sentiment Analysis.** This is a B.Tech mini project (AI & NLP).
 
-FacultyLens builds one page per faculty member. It joins an auto-generated profile with an analysis of anonymous student feedback: aspect-level sentiment with evidence, moderation and PII redaction, a bias & sarcasm panel, and a NAAC Criterion 1.4 report. Everything runs on a CPU.
+FacultyLens builds one page per faculty member. It joins an auto-generated profile with an analysis of anonymous student feedback:
+- aspect-level sentiment with evidence;
+- moderation and PII redaction before any teacher reads a word;
+- a bias & sarcasm panel;
+- a NAAC Criterion 1.4 Feedback Analysis and Action Taken Report;
+- an honest evaluation against human labels.
 
-Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
+Everything runs on a CPU, and offline once the models are downloaded.
 
-> **Status: Phase 8 (evaluation).** Sign-in for all four roles, admin setup, faculty profiles with imports, anonymous feedback, the CPU NLP pipeline with moderation, grounded summaries, generated profiles, the unified faculty page, department insights, the bias & sarcasm panel and the NAAC Criterion 1.4 report all work. The evaluation module now has a labelling tool, Cohen's kappa, baselines against the transformer, moderation and PII checks, summary scoring and a faculty survey. The human-labelled results fill in as the team labels. Polish (Phase 9) comes next. Feature phases follow SPEC §14.
+| The unified faculty page | Evidence behind every point | Bias & sarcasm panel |
+|---|---|---|
+| ![Faculty page](docs/screenshots/03-faculty-page.png) | ![Evidence drawer](docs/screenshots/04-evidence-drawer.png) | ![Bias panel](docs/screenshots/06-bias-panel.png) |
 
-## Demo data
+More screens are in [`docs/screenshots`](docs/screenshots). A 5-minute demo script is in [`docs/DEMO.md`](docs/DEMO.md). Requirements are in [`docs/SPEC.md`](docs/SPEC.md), the design system in [`docs/DESIGN.md`](docs/DESIGN.md), and measured model speed and memory in [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-```bash
-python -m app.seed
-```
+> **Status:** all nine phases of SPEC §14 are built. The human-labelled parts of the evaluation are pending until the annotators label (see [Evaluation](#evaluation)).
 
-This fills an empty database with **synthetic** demo data set in **Maturi Venkata Subba Rao (MVSR) Engineering College**, Hyderabad:
-- the college's 8 departments, from [mvsrec.in](https://mvsrec.in/departments.php); only CSE and ECE have demo staff, students and feedback;
-- 11 semester-V offerings with real course codes and names from MVSR's R21 B.E. scheme (for example U21PCN05CS Automata Languages and Computation, U21PC502EC Digital Signal Processing);
-- 11 teaching staff and 144 students, with roll numbers in the college's format (`2451-24-733-001`: college code, admission year, branch code, serial);
-- an open "2026-27 Odd Sem" cycle with about 330 teaching and 290 syllabus responses.
+## Contents
 
-**Every person is fictional.** No real MVSR teacher's name appears, so no invented feedback sits under a real name. The comments are hand-written sentence banks, not real student feedback. Every document is marked `is_synthetic` and is excluded from evaluation. All demo accounts use the password in `DEMO_PASSWORD` (`backend/.env.example`). Sign in as:
-- admin: `iqac@demo.facultylens.in`
-- HoD: `padma.rao@demo.facultylens.in`
-- faculty: `kavitha.reddy@demo.facultylens.in`
-- student: any roll number from `2451-24-733-001` (CSE) or `2451-24-735-001` (ECE).
+- [Quick start](#quick-start)
+- [Demo data](#demo-data)
+- [Architecture](#architecture)
+- [What each role sees](#what-each-role-sees)
+- [Evaluation](#evaluation)
+- [Testing](#testing)
+- [Limitations](#limitations)
+- [Future work](#future-work)
+- [Troubleshooting](#troubleshooting)
+- [Credits](#credits)
 
-`python -m app.seed --reset` removes only the synthetic data. The seed refuses to run on a database that already has real users.
+## Quick start
 
-## Prerequisites
+### Prerequisites
 
-- Python 3.13, Node 22+ (developed on Node 24)
-- MongoDB Community Server running on `127.0.0.1:27017`. Use `127.0.0.1`, not `localhost`; a default local install listens on IPv4 only.
-- About 4 GB of free disk for the light-mode models. No GPU is needed.
+- **Python 3.13** and **Node 22+** (developed on Node 24).
+- **MongoDB Community Server** running on `127.0.0.1:27017`. Use `127.0.0.1`, not `localhost`: a default local install listens on IPv4 only.
+- About **4 GB** of free disk for the models. No GPU is needed; 8 GB of RAM is enough.
 
-## Backend setup
+### 1. Backend
 
-On Windows PowerShell, run each command on its own line (`&&` does not work in PowerShell 5.1).
+Run each command on its own line. On Windows PowerShell 5.1, `&&` does not work.
 
 ```bash
 cd backend
 ```
 
-```bash
-py -3.13 -m venv .venv
-```
+Create and activate a virtual environment.
+- **Windows:**
 
-Activate the venv: Windows `.venv\Scripts\activate`, Mac/Linux `source .venv/bin/activate`. Then:
+  ```bash
+  py -3.13 -m venv .venv
+  ```
+
+  ```bash
+  .venv\Scripts\activate
+  ```
+
+- **Mac or Linux:**
+
+  ```bash
+  python3.13 -m venv .venv
+  ```
+
+  ```bash
+  source .venv/bin/activate
+  ```
+
+Install the CPU build of PyTorch first, then the rest:
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -60,51 +83,27 @@ pip install -r requirements-dev.txt
 python -m spacy download en_core_web_sm
 ```
 
-Copy `.env.example` to `.env` and set `JWT_SECRET` and `STUDENT_HASH_SALT` to long random strings. `GROQ_API_KEY` is optional; without it the app uses its no-LLM fallback.
+Copy `.env.example` to `.env`: `copy .env.example .env` on Windows, `cp .env.example .env` on Mac or Linux. Then set `JWT_SECRET` and `STUDENT_HASH_SALT` to long random strings. `GROQ_API_KEY` is optional; without it the app uses its no-LLM fallback.
 
-Download the models once (about 4 GB, cached in `backend/.hf_cache`):
+Download the models once (about 4 GB, cached in `backend/.hf_cache`; this is the only step that needs a fast connection):
 
 ```bash
 python -m app.nlp.registry --download
 ```
 
-Measure every model on this machine (writes `docs/MODEL_CHECK.md`):
+Load the demo data, then start the API (docs at http://127.0.0.1:8000/docs):
 
 ```bash
-python -m app.nlp.registry --check
+python -m app.seed
 ```
-
-Create the first IQAC admin (prints a temporary password once; change it at first sign-in):
-
-```bash
-python -m app.cli create-admin --email iqac@yourcollege.ac.in --name "IQAC Coordinator"
-```
-
-Run the API (docs at http://127.0.0.1:8000/docs):
 
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
 
-Tests and lint:
+### 2. Frontend
 
-```bash
-pytest -q
-```
-
-```bash
-pytest -m slow
-```
-
-```bash
-ruff check .
-```
-
-`pytest -m network` imports two real public ORCID records (ORCID's test record 0000-0002-1825-0097 and Yoshua Bengio, 0000-0002-9322-3515); it needs internet.
-
-The fast suite needs MongoDB running: it uses a separate `facultylens_test` database and drops it afterwards. It includes a role matrix that calls every endpoint as each role and checks the 401/403 answers. `-m slow` loads every real model.
-
-## Frontend setup
+In a second terminal:
 
 ```bash
 cd frontend
@@ -118,63 +117,123 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. Run `npm run lint` and `npm run build` to check the code.
+Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`; set `VITE_API_TARGET` to use another address.
 
-## Signing in
+### 3. Sign in and analyse
 
-- Staff sign in with their college email; students with their roll number (`ROLL_NO_REGEX` in `.env`).
-- Accounts made by the admin (one at a time or by CSV on the Users page) get a temporary password, shown once with a CSV download. Everyone must replace it at first sign-in.
-- The refresh token is an httpOnly cookie on `/api/auth`; the access token lives only in memory.
+1. Sign in as the admin, `iqac@demo.facultylens.in`. The password is `DEMO_PASSWORD` in `backend/.env.example`.
+2. Open **Analysis** and press **Analyse waiting responses**. The first batch loads the models (about 45 s); the whole cycle takes about 3 minutes on a 4-core CPU.
+3. Sign in as each role (below), or follow [`docs/DEMO.md`](docs/DEMO.md).
 
-## Profile imports
+For a real deployment, skip the seed and create the first IQAC admin instead. It prints a temporary password once:
 
-- Faculty open **My profile** and import from **ORCID** (paste the iD or orcid.org link) or **Semantic Scholar** (search your name, then pick the right author).
-- Everything imported waits for review. Nothing reaches the profile until the faculty member accepts it, and rejected items aren't suggested again.
-- Semantic Scholar's shared rate limit is low. If imports say "limiting requests", wait a minute, or put a free key in `S2_API_KEY` in `backend/.env`.
+```bash
+python -m app.cli create-admin --email iqac@yourcollege.ac.in --name "IQAC Coordinator"
+```
 
-## Feedback analysis
+## Demo data
 
-- New submissions are analysed in the background as they arrive (`ANALYSIS_ON_SUBMIT`). To analyse a whole cycle, sign in as admin, open **Analysis**, pick the cycle and press **Analyse waiting responses**. The first batch loads the models (about 45 s); after that, each response takes about 0.3–0.5 s.
-- Results are cached per response and model version, so running again only scores new responses.
-- `python -m app.pipeline.bench` times a full cycle and writes `backend/ml/results/pipeline_check.json`. Run it on a scratch copy (`MONGODB_DB=facultylens_bench`), because it writes analyses.
-- Answers the abuse check hides wait in **Moderation**. Faculty never see them until an admin shows, edits or keeps them hidden. Names, phone numbers and roll numbers are replaced with placeholders before any model or person sees the text.
-- Measured on the seeded cycle (`docs/MODEL_CHECK.md`):
-  - 553 responses in 213.8 s from a cold start on a Ryzen 5 5600H with 4 threads; peak RAM 2.8 GB.
-  - Every seeded phone number and roll number was redacted, and all 8 seeded abusive answers were hidden. The abuse check also hid 11 compliments containing the word "stupid" (precision 0.42).
-  - The sarcasm flag caught all 22 seeded sarcastic answers, along with 15 sincere ones (precision 0.59).
+`python -m app.seed` fills an empty database with **synthetic** demo data set in **Maturi Venkata Subba Rao (MVSR) Engineering College**, Hyderabad:
+- the college's 8 departments, from [mvsrec.in](https://mvsrec.in/departments.php); only CSE and ECE have demo staff, students and feedback;
+- 11 semester-V offerings with real course codes and names from MVSR's R21 B.E. scheme (for example U21PCN05CS Automata Languages and Computation);
+- 11 teaching staff and 144 students, with roll numbers in the college's Osmania University format (`2451-24-733-001`: college code, admission year, branch code, serial);
+- an open "2026-27 Odd Sem" cycle with 326 teaching and 288 syllabus responses.
 
-## Summaries, generated profiles and the unified page
+**Every person is fictional.** No real MVSR teacher's name appears, so no invented feedback sits under a real name. The comments are hand-written sentence banks, not real student feedback. Every document is marked `is_synthetic` and is never used in the evaluation.
 
-- **My page** (faculty and HoDs) puts the approved profile beside the feedback for one course at a time:
+| Role | Sign in as |
+|---|---|
+| IQAC admin | `iqac@demo.facultylens.in` |
+| HoD (CSE) | `padma.rao@demo.facultylens.in` |
+| Faculty | `kavitha.reddy@demo.facultylens.in` |
+| Student | any roll number from `2451-24-733-001` (CSE) or `2451-24-735-001` (ECE) |
+
+`python -m app.seed --reset` removes only the synthetic data. The seed refuses to run on a database that already has real users.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Browser
+    UI["React 18 + Vite<br/>Tailwind, Recharts"]
+  end
+  subgraph API["FastAPI (Python 3.13)"]
+    R["Routers<br/>auth · users · courses · profiles · forms<br/>feedback · analysis · analytics · reports · labels"]
+    J["Background analysis jobs<br/>(batches, cached per model version)"]
+    REG["nlp/registry<br/>CPU models, loaded lazily once"]
+    LLM["nlp/llm<br/>Groq, or templates when there is no key"]
+    REP["NAAC report<br/>matplotlib · fpdf2 · python-docx"]
+  end
+  DB[("MongoDB<br/>users · forms · responses<br/>analyses · aggregates · labels")]
+  EXT["ORCID · Semantic Scholar<br/>(optional imports)"]
+  ML["ml/ (CLI)<br/>import_items · evaluate"]
+  RES["ml/results<br/>evaluation.json · RESULTS.md"]
+
+  UI -- "/api, JWT" --> R
+  R --> DB
+  R -- "run analysis" --> J
+  J --> REG
+  J --> LLM
+  J --> DB
+  R --> REP
+  R -. imports .-> EXT
+  ML --> REG
+  ML --> DB
+  ML --> RES
+  R -- "evaluation page" --> RES
+```
+
+- **Pipeline (SPEC §5):** each answer goes through normalise → PII redaction (spaCy names plus patterns) → toxicity moderation → sentiment → aspect detection (MiniLM similarity plus a lexicon) with aspect polarity (DeBERTa ABSA) → emotion → irony. Results are stored per response and per `model_version`, so nothing is scored twice.
+- **Models** (`app/nlp/registry.py`), all CPU:
+  - `cardiffnlp/twitter-roberta-base-sentiment-latest`
+  - `sentence-transformers/all-MiniLM-L6-v2`
+  - `yangheng/deberta-v3-base-absa-v1.1`
+  - `unitary/unbiased-toxic-roberta`
+  - `j-hartmann/emotion-english-distilroberta-base`
+  - `cardiffnlp/twitter-roberta-base-irony`
+  - `sshleifer/distilbart-cnn-12-6`
+  - spaCy `en_core_web_sm`
+- **Privacy:**
+  - A student is stored only as a salted one-way code per form.
+  - Teachers see moderated, redacted text, and only from 5 responses up.
+  - The bias panel and the NAAC report never name a teacher.
+
+## What each role sees
+
+**Students** fill one teaching form per teacher and one syllabus form per course: 8 ratings and 3 short questions. Every screen says plainly how answers are stored.
+
+**Faculty**
+- **My page** puts the approved profile beside the feedback for one course at a time:
   - net sentiment and its split;
-  - grounded strengths and areas to improve, where "Show the evidence" opens the redacted student answers with the supporting sentence marked;
-  - every teaching aspect with its rating and whether ratings and comments agree;
+  - grounded strengths and areas to improve, where **Show the evidence** opens the redacted answers with the supporting sentence marked;
+  - every teaching aspect with its rating, and whether ratings and comments agree;
   - the emotion mix, and the sarcasm and moderation counts.
-- **Who sees what:** colleagues outside the department see only the approved profile. Feedback appears once a course has `MIN_RESPONSES_FOR_DISPLAY` responses.
-- **Summaries** are written after each analysis run, and only when a course's data changed.
-  - With `GROQ_API_KEY` set, Groq writes them. Every point must cite real evidence ids, or it is dropped.
-  - Without a key, a built-in summary is made from the same statistics, plus an automatic digest by distilbart.
-  - Adding a key later upgrades them on the next run, or press **Regenerate** via `POST /analysis/summaries`.
-- **Generated profile** (My profile → Generated profile): a draft written only from the saved facts, with each claim checked against them. Without a key, or if a claim fails the check twice, a plain template is used. The faculty member edits it and approves it; only approved versions are shown to colleagues.
+- **My profile:** facts imported from ORCID or Semantic Scholar wait for review, and nothing reaches the profile until it is accepted.
+- **Generated profile:** a draft written only from the saved facts, checked claim by claim. The teacher edits and approves it.
+- **Survey:** a short usefulness survey at the foot of My page.
 
-## Department insights and the bias & sarcasm panel
+**HoDs** get everything faculty get, plus **Department insights** for their department:
+- **Overview:** a sortable table of teachers.
+- **Bias & sarcasm panel:**
+  - It compares feedback by the gender the IQAC office recorded, never shown next to a name. It looks at ability and warmth words, the rating gap per aspect with a 95% interval in which each teacher counts once, emotion, and possible sarcasm.
+  - It hides itself unless each group has at least 3 teachers and 30 answers.
+- **Action taken:** they edit and approve the NAAC rows for their department.
 
-- **Department insights** (HoDs: their own department; IQAC admin: any department) show every teacher in a cycle in one sortable table: responses, net sentiment, rating, top strength and area to improve. Each name opens that teacher's page. Below it are the teaching aspects across the department.
-- **The bias & sarcasm panel** looks for patterns in the feedback itself, by the gender the IQAC office recorded for each teacher, never shown next to a name. It shows:
-  - how often comments use "ability" words (brilliant, genius…) and "warmth" words (helpful, caring…);
-  - the rating gap per aspect, with a 95% interval in which each teacher counts once;
-  - the emotion mix;
-  - the possibly-sarcastic rate.
-- **When it hides itself:** unless each group has at least `BIAS_MIN_GROUP_FACULTY` teachers (3) and `BIAS_MIN_GROUP_ANSWERS` answers (30), it shows only the group sizes. In the demo data, CSE (3 women, 3 men) shows the comparison and ECE (2 women, 3 men) does not.
-- On the demo data every interval includes zero ("no clear difference"), even though some point gaps look large. With 3 teachers per group, individual teachers dominate; see `docs/MODEL_CHECK.md`. The API answers in under 35 ms at p95.
+**The IQAC admin**
+- **Setup:** users (one at a time or by CSV), departments, courses and enrolment, and feedback cycles.
+- **Analysis and Moderation:** answers the abuse check hides stay hidden until a person decides.
+- **Insights:** any department.
+- **NAAC report:**
+  - Draft the Action Taken rows; each is an issue for a whole department, such as "raised in 4 of 6 CSE courses".
+  - Edit and approve them.
+  - Export the Criterion 1.4 report as PDF and Word. Draft previews are watermarked, and the final export unlocks when every row is approved.
+- **Evaluation:** the evaluation results.
+- **System status:** the models that are loaded, memory, and the LLM.
 
-## NAAC report (Criterion 1.4)
-
-1. As admin, open **NAAC report**, pick the cycle and press **Draft action items**. Each row is an issue for a whole department, such as "Pace & syllabus coverage was raised in 4 of 6 CSE courses", or a low-rated curriculum item. The suggested action comes from Groq if a key is set, otherwise from a fixed table.
-2. Edit each action so the department will really do it, then approve it. HoDs can do the same for their department under **Department insights → Action taken**. Re-drafting never overwrites a row someone edited or approved.
-3. **Preview PDF / Word** works at any time and is marked "DRAFT – not for submission" on every page. **Download PDF / Word** unlocks when every action is approved.
-
-The report has these sections: the cover, feedback collection by department and course, methodology in plain words (including the models used), teaching analysis with charts and anonymised, redacted sample comments, curriculum feedback (1.4.1), the Action Taken Report, and the statement for the website (1.4.2) with signature lines. It is built for publication, so it reports departments and never names or scores an individual teacher.
+Measured on this project's demo data (details in `docs/MODEL_CHECK.md`):
+- The cycle analyses in about 3 minutes on a 4-core CPU.
+- Analytics answer in under 35 ms at p95.
+- The NAAC PDF builds in under 2 s.
 
 ## Evaluation
 
@@ -194,9 +253,9 @@ python -m ml.import_items --rmp
 
 The import keeps only each comment (redacted), the student's star rating and a one-way teacher key.
 
-**Labelling.** On the **Users** page, the admin marks two staff accounts as *Annotator* and one as *Adjudicator*.
-1. The annotators open **Labelling**. Each one labels the same 300 comments on their own: sentiment with keys 1–3, plus the aspects mentioned.
-2. Each annotator also writes reference summaries for 20 teachers and checks the generated summaries against their evidence.
+**Labelling.** On the **Users** page, the admin marks two staff accounts as *Annotator* and one as *Adjudicator*. Use real accounts: labels from demo accounts never count.
+1. Each annotator opens **Labelling** and labels the same 300 comments on their own: sentiment with keys 1–3, plus the aspects mentioned.
+2. Each annotator writes reference summaries for 20 teachers and checks the generated summaries against their evidence.
 3. The adjudicator settles the disagreements.
 
 Then run:
@@ -224,11 +283,71 @@ Add `--finetune` to also fine-tune DistilBERT on the CPU, which took about 15 mi
   - Every phone number, roll number, email and link was redacted (recall 1.00).
 - **Pending, until the team labels:** kappa, the human-gold sentiment and aspect scores, ROUGE/BERTScore against human references, the grounding rate, and the faculty survey. The report says *pending* for each; nothing is estimated.
 
+## Testing
+
+In `backend`:
+
+```bash
+pytest -q
+```
+
+```bash
+pytest -q --cov=app --cov-fail-under=70
+```
+
+```bash
+ruff check .
+```
+
+- **The fast suite** needs MongoDB. It uses a separate `facultylens_test` database and drops it afterwards. It includes:
+  - a role matrix that calls every endpoint as each role and checks the 401/403 answers;
+  - a test that every endpoint has a Postman request.
+- **Coverage of `app/`** is 88% (the target is 70%).
+- **`pytest -m slow`** loads every real model. **`pytest -m network`** imports two real public ORCID records.
+- **Frontend:** in `frontend`, run `npm run lint` and `npm run build`.
+- **Postman:** [`postman/FacultyLens.postman_collection.json`](postman/FacultyLens.postman_collection.json) has a request for every endpoint. Set `baseUrl`, sign in with the first request, and the rest reuse the token.
+
+## Limitations
+
+- **English only:** code-mixed comments (Hinglish, Telugu-English) are flagged "low confidence" but not understood.
+- **The evaluation's human-labelled numbers are still pending.** The benchmark labels come from star ratings, which are weak labels for tone. The public reviews are from US colleges, not Indian engineering colleges.
+- **The abuse model reacts to words, not meaning:** it hides some fair criticism, such as a comment containing "stupid". That's why every hidden answer waits for a person.
+- **Name detection over-reaches:** spaCy sometimes redacts things that aren't names, such as a grade or a school. That is the safe side, but some evidence loses words.
+- **The bias panel needs at least 3 teachers per group.** With so few, intervals are wide, and the panel says "no clear difference" more often than not.
+- **The no-LLM summaries are template sentences** plus an extractive digest. Groq summaries need a free key, and no LLM-versus-template numbers exist without one.
+- **Students are the only stakeholder surveyed;** NAAC 1.4 also asks for teachers, alumni, employers and parents.
+
+## Future work
+
+- Code-mixed (Hinglish / Telugu-English) sentiment and aspect models.
+- Semester-on-semester trends with alerts when an aspect drops.
+- A question-answering chatbot over a department's feedback (RAG), grounded the same way the summaries are.
+- CSV/Excel import of feedback collected on paper or Google Forms.
+- Feedback forms for the other NAAC stakeholders, and a mobile app.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| "MongoDB is not reachable" | Start the MongoDB service, and use `mongodb://127.0.0.1:27017` in `.env` (not `localhost`). |
+| `&&` errors in PowerShell | Run each command on its own line. |
+| The first analysis is slow | Models load once (about 45 s). Run `python -m app.nlp.registry --download` beforehand so nothing downloads during a demo. |
+| Port 8000 or 5173 in use | Start uvicorn with another `--port`, and run `npm run dev -- --port 5180` with `VITE_API_TARGET=http://127.0.0.1:<port>`. |
+| Semantic Scholar says "limiting requests" | Its shared rate limit is low. Wait a minute, or put a free key in `S2_API_KEY`. |
+| A course shows no feedback | Feedback appears from 5 responses (`MIN_RESPONSES_FOR_DISPLAY`). Comments appear after analysis. |
+| Groq errors | The app falls back to templates. Check `GROQ_MODEL` against https://console.groq.com/docs/models. |
+
+## Credits
+
+- **Evaluation data:** Jibo He, *Big Data Set from RateMyProfessor.com for Professors' Teaching Evaluation*, Mendeley Data, V2, 2020, DOI 10.17632/fvtfjyvw7d.2, licensed CC BY 4.0. Only redacted comments and star ratings are used, and the raw file is not redistributed here.
+- **Institution:** the institution details (name, departments, course codes) are from MVSR Engineering College's public website and syllabus. All people in the demo data are fictional.
+- **Models:** the pretrained models are by their authors on Hugging Face (see the list above).
+
 ## Repository layout
 
 ```
 backend/   FastAPI app (app/), evaluation (ml/), tests
 frontend/  React 18 + Vite + Tailwind v4
-docs/      SPEC, DESIGN, MODEL_CHECK
+docs/      SPEC, DESIGN, MODEL_CHECK, DEMO, screenshots
 postman/   API collection
 ```
