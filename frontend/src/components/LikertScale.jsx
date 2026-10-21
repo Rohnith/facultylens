@@ -38,7 +38,7 @@ export function LikertScale({ id, name, label, question, value, onChange, invali
               key={v}
               className={`flex min-h-12 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-control border px-1 py-1.5 text-center transition-[background-color,border-color,transform] duration-150 select-none active:scale-[0.97] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus ${
                 checked
-                  ? "border-primary bg-primary text-primary-ink"
+                  ? "here border-text font-semibold"
                   : "border-control bg-surface text-text hover:bg-raised"
               }`}
             >

@@ -2,25 +2,35 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import { errorMessage } from "../../api/client";
 import { feedbackApi, formatDate } from "../../api/feedback";
-import { FormError, TextArea } from "../../components/forms";
+import { FormError } from "../../components/forms";
 import { LikertScale } from "../../components/LikertScale";
 
 const MAX = 2000;
 
-function TextQuestion({ id, label, value, onChange }) {
+/** A blank note to write on: the comment students leave is pinned to the wall later. */
+function TextQuestion({ id, label, value, onChange, index }) {
   const count = value.length;
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-body font-medium">
+    <div className="flex flex-col gap-2">
+      <label htmlFor={id} className="text-body font-semibold">
         {label} <span className="font-normal text-muted">(optional)</span>
       </label>
-      <TextArea
-        id={id}
-        value={value}
-        maxLength={MAX}
-        onChange={(e) => onChange(e.target.value)}
-        aria-describedby={`${id}-count`}
-      />
+      <div
+        className="note note-neutral mt-1 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
+        style={{
+          "--tilt": `${index % 2 ? 0.4 : -0.4}deg`,
+          "--tape-tilt": `${index % 2 ? 3 : -3}deg`,
+        }}
+      >
+        <textarea
+          id={id}
+          value={value}
+          maxLength={MAX}
+          onChange={(e) => onChange(e.target.value)}
+          aria-describedby={`${id}-count`}
+          className="block min-h-32 w-full resize-y border-0 bg-transparent py-4 pr-4 pl-6 text-body leading-6 text-text outline-none placeholder:text-faint"
+        />
+      </div>
       <span
         id={`${id}-count`}
         className={`num self-end text-small ${count > MAX - 100 ? "text-warning" : "text-muted"}`}
@@ -158,11 +168,11 @@ export function FeedbackFormPage() {
         <Link to="/" className="w-fit text-body text-muted hover:text-text">
           ← All my forms
         </Link>
-        <header className="flex flex-col gap-2">
+        <header className="board flex flex-col gap-2 p-6">
           <h1 className="m-0 font-marker text-marker">
             {course.code} · {course.name}
           </h1>
-          <p className="m-0 text-body text-muted">
+          <p className="m-0 text-body text-on-board-muted">
             {form.type === "teaching"
               ? `Teaching feedback for ${form.faculty?.name}`
               : "Feedback on the course and syllabus"}
@@ -190,7 +200,7 @@ export function FeedbackFormPage() {
         <form onSubmit={submit} noValidate className="flex flex-col gap-[var(--gap)]">
           <section className="card" aria-labelledby="ratings-h">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule px-[var(--card-pad)] py-3">
-              <h2 id="ratings-h" className="m-0 text-section font-medium">
+              <h2 id="ratings-h" className="m-0 font-marker text-[1.375rem]">
                 Ratings
               </h2>
               <span className="num text-small text-muted" aria-live="polite">
@@ -216,17 +226,18 @@ export function FeedbackFormPage() {
 
           <section className="card" aria-labelledby="comments-h">
             <div className="border-b border-rule px-[var(--card-pad)] py-3">
-              <h2 id="comments-h" className="m-0 text-section font-medium">
+              <h2 id="comments-h" className="m-0 font-marker text-[1.375rem]">
                 In your own words
               </h2>
               <p className="m-0 text-small text-muted">
                 Avoid names and phone numbers; they are removed before teachers read comments.
               </p>
             </div>
-            <div className="flex flex-col gap-5 p-[var(--card-pad)]">
-              {textQs.map((q) => (
+            <div className="flex flex-col gap-7 p-[var(--card-pad)]">
+              {textQs.map((q, i) => (
                 <TextQuestion
                   key={q.key}
+                  index={i}
                   id={`t-${q.key}`}
                   label={q.text}
                   value={texts[q.key] ?? ""}
