@@ -227,6 +227,28 @@
     box-shadow: var(--shadow-paper);
   }
 
+  /* Controls on the board invert, so they stay readable on the deep green. */
+  .board .btn-primary {
+    background: var(--on-board);
+    color: var(--board);
+  }
+  .board .btn-secondary {
+    background: var(--board-2);
+    color: var(--on-board);
+  }
+  .board .btn-ghost {
+    color: var(--on-board);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .board .btn-secondary:hover:not(:disabled),
+    .board .btn-ghost:hover:not(:disabled) {
+      background: var(--board-rule);
+    }
+  }
+  .board a:not(.btn) {
+    color: var(--on-board);
+  }
+
   /* A student comment as a sticky note: tinted paper, a sentiment edge, a strip of tape. */
   .note {
     position: relative;

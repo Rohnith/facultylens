@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router";
 import { errorMessage } from "../../api/client";
 import { labelsApi } from "../../api/evaluation";
 import { FormError } from "../../components/forms";
+import { Tabs } from "../../components/Tabs";
 import { PageHeader } from "../../components/PageHeader";
 import { RateBar } from "../../components/RateBar";
 import { useAuth } from "../../context/auth";
@@ -48,7 +49,7 @@ function LabelTab() {
   if (!next.data) return <span className="skeleton h-80 w-full" aria-busy="true" />;
   if (!item)
     return (
-      <div className="flex flex-col gap-3">
+      <div className="card flex flex-col gap-3 p-[var(--card-pad)]">
         <RateBar value={progress.mine} total={progress.total} label="labelled" />
         <p className="m-0 text-body">
           {progress.total
@@ -60,67 +61,85 @@ function LabelTab() {
 
   return (
     <form
-      className="flex flex-col gap-6"
+      className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
       onSubmit={(e) => {
         e.preventDefault();
         if (value.sentiment && !busy) save();
       }}
     >
-      <RateBar value={progress.mine} total={progress.total} label="labelled" />
-      <figure className="m-0 flex flex-col gap-2 rounded-card border border-border bg-raised p-5">
-        <figcaption className="text-small text-muted">
-          {item.source === "app"
-            ? "Student comment (this college)"
-            : "Student comment (public dataset)"}
-        </figcaption>
-        <blockquote className="m-0 max-w-[72ch] text-section leading-7 whitespace-pre-line">
-          {item.text}
-        </blockquote>
-      </figure>
-      <LabelForm key={item.id} value={value} onChange={setValue} idPrefix="label" />
-      {error && <FormError>{error}</FormError>}
-      <div className="flex flex-wrap items-center gap-3 border-t border-rule pt-4">
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={!value.sentiment || busy || next.refreshing}
+      <div className="flex flex-col gap-6 lg:sticky lg:top-8">
+        <RateBar value={progress.mine} total={progress.total} label="labelled" />
+        {/* The comment as a note; its paper follows the sentiment you pick, instantly. */}
+        <figure
+          key={item.id}
+          className={`note settle m-0 flex flex-col gap-3 py-6 pr-6 pl-8 ${TONE_NOTE[value.sentiment] ?? "note-neutral"}`}
+          style={{ "--tilt": "-0.8deg", "--dy": "36px", "--r0": "-5deg", transition: "none" }}
         >
-          {busy ? "Saving…" : "Save and next"}
-        </button>
-        {!skipping ? (
-          <button type="button" className="btn btn-ghost" onClick={() => setSkipping(true)}>
-            Skip this comment…
+          <blockquote className="m-0 max-w-[60ch] text-lead leading-8 whitespace-pre-line">
+            {item.text}
+          </blockquote>
+          <figcaption className="text-small text-muted">
+            {item.source === "app"
+              ? "Student comment (this college)"
+              : "Student comment (public dataset)"}
+            {value.sentiment && ` · sorted as ${value.sentiment}`}
+          </figcaption>
+        </figure>
+        <p className="m-0 text-small text-muted">Keys 1, 2, 3 choose the sentiment; Enter saves.</p>
+      </div>
+      <div className="card flex flex-col gap-6 p-[var(--card-pad)]">
+        <LabelForm key={item.id} value={value} onChange={setValue} idPrefix="label" />
+        {error && <FormError>{error}</FormError>}
+        <div className="flex flex-wrap items-center gap-3 border-t border-rule pt-4">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={!value.sentiment || busy || next.refreshing}
+          >
+            {busy ? "Saving…" : "Save and next"}
           </button>
-        ) : (
-          <div role="group" aria-label="Why skip it?" className="flex flex-wrap items-center gap-2">
-            <span className="text-small text-muted">Why skip it?</span>
-            {SKIP_REASONS.map(([reason, label]) => (
-              <button
-                key={reason}
-                type="button"
-                className="btn btn-secondary h-8 px-3 text-small"
-                disabled={busy}
-                onClick={() => save({ skip_reason: reason })}
-              >
-                {label}
-              </button>
-            ))}
-            <button
-              type="button"
-              className="btn btn-ghost h-8 px-2 text-small"
-              onClick={() => setSkipping(false)}
-            >
-              Cancel
+          {!skipping ? (
+            <button type="button" className="btn btn-ghost" onClick={() => setSkipping(true)}>
+              Skip this comment…
             </button>
-          </div>
-        )}
-        <span className="text-small text-muted max-sm:w-full sm:ml-auto">
-          Keys 1, 2, 3 choose the sentiment; Enter saves.
-        </span>
+          ) : (
+            <div
+              role="group"
+              aria-label="Why skip it?"
+              className="flex flex-wrap items-center gap-2"
+            >
+              <span className="text-small text-muted">Why skip it?</span>
+              {SKIP_REASONS.map(([reason, label]) => (
+                <button
+                  key={reason}
+                  type="button"
+                  className="btn btn-secondary h-8 px-3 text-small"
+                  disabled={busy}
+                  onClick={() => save({ skip_reason: reason })}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="btn btn-ghost h-8 px-2 text-small"
+                onClick={() => setSkipping(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </form>
   );
 }
+
+const TONE_NOTE = {
+  positive: "note-praise",
+  negative: "note-criticism",
+  neutral: "note-neutral",
+};
 
 const TABS = {
   annotator: [
@@ -148,34 +167,18 @@ export function LabelPage() {
           ? "You settle the comments the two annotators labelled differently. Your decision becomes the gold label the models are scored against."
           : "Label each comment on your own, without discussing it: the evaluation compares your labels with a second annotator's. Students' names and numbers are already removed."}
       </PageHeader>
-      <section className="card" aria-label="Labelling tasks">
-        <div className="border-b border-rule px-[var(--card-pad)]">
-          <div role="tablist" aria-label="Tasks" className="-mb-px flex gap-5 overflow-x-auto">
-            {tabs.map(([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                role="tab"
-                aria-selected={tab === key}
-                className={`h-11 cursor-pointer border-b-2 text-body whitespace-nowrap transition-colors ${
-                  tab === key
-                    ? "border-text font-medium text-text"
-                    : "border-transparent text-muted hover:text-text"
-                }`}
-                onClick={() => setParams({ tab: key }, { replace: true })}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div role="tabpanel" className="p-[var(--card-pad)]">
-          {tab === "label" && <LabelTab />}
-          {tab === "resolve" && <ResolveTab />}
-          {tab === "reference" && <ReferenceTab />}
-          {tab === "grounding" && <GroundingTab />}
-        </div>
-      </section>
+      <Tabs
+        label="Tasks"
+        tabs={tabs}
+        value={tab}
+        onChange={(key) => setParams({ tab: key }, { replace: true })}
+      />
+      <div role="tabpanel" className={tab === "label" ? "" : "card p-[var(--card-pad)]"}>
+        {tab === "label" && <LabelTab />}
+        {tab === "resolve" && <ResolveTab />}
+        {tab === "reference" && <ReferenceTab />}
+        {tab === "grounding" && <GroundingTab />}
+      </div>
     </div>
   );
 }

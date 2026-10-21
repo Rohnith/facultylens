@@ -79,6 +79,12 @@ All text pairs above were checked for WCAG AA in both themes when the tokens wer
 - **IQAC home** (`pages/admin/AdminHome.jsx`): the open cycle on a board header (responded, to moderate, analysed, actions approved), then its work sorted into four columns of task notes: Needs a decision, Ready to run, Waiting on people, Done. Every count comes from the cycles, analysis, moderation and NAAC status APIs.
 - **Student form**: the course on a board header, the 1–5 scale with the chosen rating in highlighter, and the free-text answers written on blank neutral notes.
 
+- **Every other screen** opens with the shared board header (`PageHeader`: marker title, one sentence in board-muted, actions on the right). On the board, buttons invert: the primary is pale on green, the secondary is `--board-2`.
+- **Tabs** (`components/Tabs.jsx`) are a pill row on the wall; the current tab wears the highlighter, and the arrow keys move between tabs. Used on moderation, labelling and department insights. Tabs inside a card (the import review) keep the underline style.
+- **Moderation queue**: each flagged answer is a held note (neutral paper, the flagged sentence marked in coral) in a two-column wall, with its decision buttons under it. The main button follows the check: "Keep hidden" for answers it hid, "Show to faculty" for answers it only wants read. A decided note lifts and fades out in 160ms before the gap closes (instant under reduced motion).
+- **Labelling**: the comment is one large note on the left, sticky while you work. Its paper follows the sentiment you choose (mint, peach, grey), instantly and with no animation, because the 1/2/3 keys drive it. The form sits on paper to the right.
+- **List screens** (users, departments, courses, cycles, analysis, NAAC report, evaluation, system status) keep their tables and forms on paper under the board header. Tables are the right shape for that data; they take the new tokens.
+
 ## History: page notes from Phases 1–8
 
 These notes describe how each page was laid out when it was built. Their structure still holds; where they name the old ledger colours, fonts or the grey active pill, the Affinity Wall tokens above now apply.

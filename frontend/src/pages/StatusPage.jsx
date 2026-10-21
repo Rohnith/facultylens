@@ -226,7 +226,7 @@ export function StatusPage() {
 
   return (
     <div className="mx-auto flex max-w-[1184px] flex-col gap-10">
-      <header className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-8">
+      <header className="board flex flex-col gap-4 px-[var(--card-pad)] py-5 md:flex-row md:items-center md:justify-between md:gap-8 md:px-6">
         <div className="flex max-w-[72ch] flex-col gap-2">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="m-0 font-marker text-marker">System status</h1>
@@ -236,13 +236,13 @@ export function StatusPage() {
               </span>
             )}
           </div>
-          <p className="m-0 min-h-10 text-body text-muted" aria-live="polite">
+          <p className="m-0 min-h-10 text-body text-on-board-muted" aria-live="polite">
             {sentence ?? <span className="skeleton h-4 w-[420px] max-w-full" />}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
           {checkedAt && (
-            <span className="num text-small text-muted">
+            <span className="num text-small text-on-board-muted">
               Checked {checkedAt.toLocaleTimeString("en-IN", { hour12: false })}
             </span>
           )}

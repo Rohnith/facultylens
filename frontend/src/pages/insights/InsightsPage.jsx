@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router";
 import { errorMessage } from "../../api/client";
 import { insightsApi } from "../../api/insights";
 import { FormError, Select } from "../../components/forms";
+import { Tabs } from "../../components/Tabs";
 import { PageHeader } from "../../components/PageHeader";
 import { useAuth } from "../../context/auth";
 import { useDepartments } from "../../hooks/useDepartments";
@@ -127,24 +128,12 @@ export function InsightsPage() {
             </div>
           )}
         </div>
-        <div role="tablist" aria-label="View" className="flex gap-5 border-b border-border">
-          {tabs.map(([k, label]) => (
-            <button
-              key={k}
-              type="button"
-              role="tab"
-              aria-selected={tab === k}
-              className={`-mb-px h-10 cursor-pointer border-b-2 text-body whitespace-nowrap transition-colors ${
-                tab === k
-                  ? "border-text font-medium text-text"
-                  : "border-transparent text-muted hover:text-text"
-              }`}
-              onClick={() => set({ tab: k === "overview" ? "" : k })}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          label="View"
+          tabs={tabs}
+          value={tab}
+          onChange={(k) => set({ tab: k === "overview" ? "" : k })}
+        />
       </div>
 
       {state.error && state.key === key && (

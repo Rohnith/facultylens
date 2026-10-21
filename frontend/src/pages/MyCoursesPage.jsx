@@ -1,3 +1,4 @@
+import { PageHeader } from "../components/PageHeader";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../api/client";
 import { feedbackApi } from "../api/feedback";
@@ -73,10 +74,7 @@ export function MyCoursesPage() {
 
   return (
     <div className="mx-auto flex max-w-[1184px] flex-col gap-8">
-      <header className="flex flex-col gap-2">
-        <h1 className="m-0 font-marker text-marker">{copy.title}</h1>
-        <p className="m-0 max-w-[72ch] text-body text-muted">{copy.lead}</p>
-      </header>
+      <PageHeader title={copy.title}>{copy.lead}</PageHeader>
 
       <section aria-label="Course offerings" className="card overflow-hidden">
         {courses.error ? (
