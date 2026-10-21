@@ -97,6 +97,21 @@ MODELS: dict[str, ModelSpec] = {
 }
 
 
+# Used only by `ml.evaluate` (SPEC §8), never by the app's pipeline, so they are kept out of
+# MODELS and out of model_version(): adding them must not invalidate cached analyses.
+EVAL_MODELS: dict[str, str] = {
+    # the base model fine-tuned on CPU for the sentiment comparison, and BERTScore's encoder
+    # (the default roberta-large is 1.4 GB and slow on a CPU)
+    "finetune_base": "distilbert-base-uncased",
+    "bertscore": "distilbert-base-uncased",
+}
+
+
+def eval_model_id(name: str) -> str:
+    _init_runtime()
+    return EVAL_MODELS[name]
+
+
 def model_id(task: str) -> str:
     spec = MODELS[task]
     return spec.full if get_settings().ml_mode == "full" else spec.light
