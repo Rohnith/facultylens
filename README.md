@@ -6,7 +6,7 @@ FacultyLens builds one page per faculty member. It joins an auto-generated profi
 
 Requirements: [`docs/SPEC.md`](docs/SPEC.md). Design system: [`docs/DESIGN.md`](docs/DESIGN.md). Measured model performance: [`docs/MODEL_CHECK.md`](docs/MODEL_CHECK.md).
 
-> **Status: Phase 7 (NAAC report).** Sign-in for all four roles, admin setup, faculty profiles with imports, anonymous feedback, the CPU NLP pipeline with moderation, grounded summaries, generated profiles, the unified faculty page, department insights and the bias & sarcasm panel all work. The IQAC team can now draft, approve and export the NAAC Criterion 1.4 Feedback Analysis and Action Taken Report as PDF and Word. The evaluation module comes next. Feature phases follow SPEC §14.
+> **Status: Phase 8 (evaluation).** Sign-in for all four roles, admin setup, faculty profiles with imports, anonymous feedback, the CPU NLP pipeline with moderation, grounded summaries, generated profiles, the unified faculty page, department insights, the bias & sarcasm panel and the NAAC Criterion 1.4 report all work. The evaluation module now has a labelling tool, Cohen's kappa, baselines against the transformer, moderation and PII checks, summary scoring and a faculty survey. The human-labelled results fill in as the team labels. Polish (Phase 9) comes next. Feature phases follow SPEC §14.
 
 ## Demo data
 
@@ -175,6 +175,54 @@ Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`. R
 3. **Preview PDF / Word** works at any time and is marked "DRAFT – not for submission" on every page. **Download PDF / Word** unlocks when every action is approved.
 
 The report has these sections: the cover, feedback collection by department and course, methodology in plain words (including the models used), teaching analysis with charts and anonymised, redacted sample comments, curriculum feedback (1.4.1), the Action Taken Report, and the statement for the website (1.4.2) with signature lines. It is built for publication, so it reports departments and never names or scores an individual teacher.
+
+## Evaluation
+
+The full report is [`backend/ml/results/RESULTS.md`](backend/ml/results/RESULTS.md). The admin sees the same numbers on the **Evaluation** page.
+
+**Data.** The evaluation uses no synthetic data. It uses:
+- public student reviews: the RateMyProfessors sample by Jibo He (Mendeley Data, [DOI 10.17632/fvtfjyvw7d.2](https://data.mendeley.com/datasets/fvtfjyvw7d/2), CC BY 4.0);
+- this college's real comments, once collected.
+
+To set up the data:
+1. Download `RateMyProfessor_Sample data.csv` from that page into `backend/ml/data/rmp/`. The folder is gitignored because the file contains real names.
+2. Run:
+
+```bash
+python -m ml.import_items --rmp
+```
+
+The import keeps only each comment (redacted), the student's star rating and a one-way teacher key.
+
+**Labelling.** On the **Users** page, the admin marks two staff accounts as *Annotator* and one as *Adjudicator*.
+1. The annotators open **Labelling**. Each one labels the same 300 comments on their own: sentiment with keys 1–3, plus the aspects mentioned.
+2. Each annotator also writes reference summaries for 20 teachers and checks the generated summaries against their evidence.
+3. The adjudicator settles the disagreements.
+
+Then run:
+
+```bash
+python -m ml.evaluate
+```
+
+Add `--finetune` to also fine-tune DistilBERT on the CPU, which took about 15 minutes here. Results go to `ml/results/`.
+
+**Results so far.** These come from `ml/results/evaluation.json` (2026-10-21).
+- **Sentiment, scored against each student's own star rating** (weak labels: 2,388 training and 611 test comments, split by teacher):
+
+  | Model | Accuracy | Macro-F1 |
+  |---|---:|---:|
+  | VADER | 0.741 | 0.517 |
+  | TF-IDF + Logistic Regression | 0.789 | **0.671** |
+  | TF-IDF + Random Forest | 0.764 | 0.552 |
+  | Twitter-RoBERTa (pretrained, zero-shot) | **0.815** | 0.647 |
+  | DistilBERT (fine-tuned on CPU, 2 epochs) | 0.807 | 0.653 |
+
+  The transformers are the most accurate, but the classical baseline trained on these reviews handles the *neutral* class better, so it has the best macro-F1. Every model is weak on neutral (F1 0.04–0.38). A star rating is a weak label for tone, so the human gold set will settle this.
+- **Moderation and PII, on a hand-built set of 50 tricky sentences:**
+  - Abuse: recall 1.00, precision 0.73. Four harsh but fair comments were hidden and wait for a person in the moderation queue.
+  - Every phone number, roll number, email and link was redacted (recall 1.00).
+- **Pending, until the team labels:** kappa, the human-gold sentiment and aspect scores, ROUGE/BERTScore against human references, the grounding rate, and the faculty survey. The report says *pending* for each; nothing is estimated.
 
 ## Repository layout
 

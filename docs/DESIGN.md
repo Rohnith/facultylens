@@ -234,6 +234,23 @@ Theme: the OS setting by default. `<html data-theme="light|dark">` overrides it 
 - **HoD "Action taken" tab** on Department insights: one paragraph saying what the rows are for and how many still need approval, then the same table for their department.
 - **The printed report** keeps the app's restraint: DejaVu Sans, black ink, the sentiment trio and the single chart blue in the charts, light grey table headings, and the draft mark at 10% opacity across each page.
 
+## Phase 8 additions
+
+- **Segmented choice** (`components/Segmented.jsx`): native radios in a labelled radiogroup, drawn as equal joined segments like the rating scale. The selected segment is the primary ink. A `quiet` value (a default such as "Not mentioned") is only a grey `--active` tone, so eight untouched rows don't shout.
+- **Labelling** (`/label`, only for accounts the admin marks as annotator or adjudicator; a nav item appears for them):
+  - Underlined tabs: Label comments / Settle disagreements, Write reference summaries, Check summaries. The tab is kept in the URL.
+  - Each task opens with a `RateBar` ("12 of 300 labelled"). The comment sits in a `--raised` figure at `text-section` size and 72ch.
+  - Labelling is keyboard-first: keys 1, 2 and 3 choose the sentiment and Enter saves. The hint says so at the foot of the form.
+  - Skipping asks for a reason with three small secondary buttons.
+  - Adjudication shows both annotators' labels as two small cards, then a blank form. It is never prefilled, so neither side anchors the decision.
+  - Grounding checks show each generated point with its quotes under a 2px rule and a Supported / Not supported segmented choice.
+- **Evaluation** (`/admin/evaluation`, lazy-loaded with Recharts):
+  - One card per question, in this order: labelling progress (a divided stat strip and a `RateBar` per annotator), sentiment, aspects, moderation and redaction, summaries, survey, and data and its limits.
+  - **Sentiment chart:** horizontal bars of macro-F1 per model on a 0–1 scale, with value labels at the bar ends. The best model is in `--chart-main` and the rest in `--chart-muted`. There is no legend, because it is a single series and the title names it. The full table follows.
+  - **Confusion matrix:** a table with tinted cells (`--chart-main` mixed into the surface by count) and the number always printed in each cell.
+  - **Pending sections:** a section without data says what it needs ("this needs 100 gold-labelled comments") and shows a `RateBar` of progress. It never shows an empty chart or a zero.
+- **Survey** (`/survey`): four `LikertScale` questions and an optional comment, reached from one muted line at the foot of the teacher's own My page.
+
 ## States (every block)
 
 - **Loading:** final layout with skeleton bars.

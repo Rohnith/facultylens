@@ -264,8 +264,25 @@ Notes:
 - **People stay fictional:** no real teacher's name appears in the seed. "Mr. Suresh Kumar" was renamed "Mr. Farhan Siddiqui" to avoid any chance of matching real staff.
 - **Roll numbers:** these use the Osmania University format, `ROLL_NO_REGEX=\b\d{4}-\d{2}-\d{3}-\d{3}\b`, for example 2451-24-751-041 (college code 2451, admission year, branch code, serial).
   - The user confirmed 751 = CSIT.
-  - The seed uses 733 (CSE) and 735 (ECE), which are the usual OU codes but not yet confirmed.
+  - The seed uses 733 (CSE) and 735 (ECE); the user confirmed both on 2026-10-21.
   - The same pattern drives PII redaction.
+
+*Changed in Phase 8 (agreed with the user, 2026-10-21):*
+- **Public data:** the evaluation uses the RateMyProfessors sample by Jibo He (Mendeley Data, DOI 10.17632/fvtfjyvw7d.2, CC BY 4.0). The licence was checked on the dataset page.
+  - `python -m ml.import_items --rmp` keeps only the comment (redacted by the app's PII step, the professor's name becoming `[FACULTY]`), the student's own star rating and a one-way professor key. The raw CSV is gitignored.
+  - Sets: 300 comments to label (balanced by star band), about 3,000 for a benchmark scored against the star ratings (80/20 split by professor), and 20 professors for reference summaries.
+  - The app's own real comments join the labelling queue with `--app`, for admin annotators only.
+- **Extra benchmark:** sentiment is also scored against each student's star rating (RateMyProfessors bands: 3.5–5 positive, 2.5–3 neutral, 1–2 negative). It is reported as weak labels, in addition to the human gold set, never instead of it.
+- **Annotators** are a flag on staff accounts (`annotator: annotator | adjudicator`, set by the admin; never students), not a fifth role. Faculty and HoD annotators see only public comments. Labels from demo accounts never count in `ml.evaluate`.
+- **Gold:** an item's gold label is the two annotators' label when they agree on sentiment and every aspect; otherwise it is the adjudicator's decision. The adjudicator's form starts blank.
+- **Endpoints added** to §10's `/labels/next`, `POST /labels`, `/evaluation/results` and `POST /survey`:
+  - `/labels/progress`, `/labels/disagreements`, `/labels/resolve`;
+  - `/labels/groups/next` and `/labels/groups/{id}/reference`;
+  - `/labels/grounding/next` and `/labels/grounding`;
+  - `/survey/mine`.
+- **Fine-tuning:** DistilBERT is fine-tuned on CPU (2 epochs, 128 tokens) only with `ml.evaluate --finetune`, on the benchmark, and on gold once there are 300 gold labels. BERTScore uses `distilbert-base-uncased`, not the 1.4 GB default. Both models are listed in `registry.EVAL_MODELS`, outside `model_version()`, so cached analyses stay valid.
+- **`ASPECT_SIM`** tuning is reported, not applied automatically.
+- **Moderation/PII set:** the 50 sentences were written by hand for this project, with labels by construction. RESULTS.md says so.
 
 ---
 
