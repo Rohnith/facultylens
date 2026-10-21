@@ -89,8 +89,8 @@ def test_llm_items_without_real_evidence_are_dropped(stats, monkeypatch):
         return schema.model_validate(
             {
                 "strengths": [
-                    {"text": "Clear.", "aspect": "clarity", "evidence_ids": [real, "made:up:1"]},
                     {"text": "Invented.", "aspect": "clarity", "evidence_ids": ["made:up:2"]},
+                    {"text": "Clear.", "aspect": "clarity", "evidence_ids": [real, "made:up:1"]},
                     {"text": "Odd aspect.", "aspect": "charisma", "evidence_ids": [real]},
                 ],
                 "improvements": [],
@@ -101,8 +101,57 @@ def test_llm_items_without_real_evidence_are_dropped(stats, monkeypatch):
     monkeypatch.setattr(summarize.llm, "complete_json", fake)
     out = summarize.summarise(stats)
     assert out["engine"] == "groq:openai/gpt-oss-120b"
-    assert out["strengths"] == [{"text": "Clear.", "aspect": "clarity", "evidence_ids": [real]}]
-    assert out["dropped_ungrounded"] == 2 and out["digest"] is None
+    # The LLM's clarity item is kept; knowledge and both gaps, which it skipped, come from the
+    # template, so the summary still covers exactly what the counts chose.
+    assert out["strengths"][0] == {"text": "Clear.", "aspect": "clarity", "evidence_ids": [real]}
+    assert [s["aspect"] for s in out["strengths"]] == ["clarity", "knowledge"]
+    assert [i["aspect"] for i in out["improvements"]] == ["pace", "assessment"]
+    assert out["dropped_ungrounded"] == 2 and out["filled_from_template"] == 3
+    assert out["digest"] is None
+
+
+def test_llm_cannot_turn_a_concern_into_a_strength(stats, monkeypatch):
+    """The bug seen live: the LLM praised punctuality although most students criticised it."""
+    pace_praise = stats["aspects"]["pace"]["evidence"]["positive"][0]["id"]
+    pace_criticism = stats["aspects"]["pace"]["evidence"]["negative"][0]["id"]
+    knowledge = stats["aspects"]["knowledge"]["evidence"]["positive"][0]["id"]
+    clarity = stats["aspects"]["clarity"]["evidence"]["positive"][0]["id"]
+    seen = {}
+
+    def fake(system, user, schema):
+        seen["prompt"] = user
+        return schema.model_validate(
+            {
+                "strengths": [
+                    # a concern dressed up as a strength, citing the one student who liked it
+                    {"text": "Great pace.", "aspect": "pace", "evidence_ids": [pace_praise]},
+                    # the right aspect, but citing another aspect's sentence
+                    {"text": "Clear.", "aspect": "clarity", "evidence_ids": [knowledge]},
+                    {"text": "Knows it.", "aspect": "knowledge", "evidence_ids": [knowledge]},
+                    {"text": "Clear again.", "aspect": "clarity", "evidence_ids": [clarity]},
+                ],
+                "improvements": [
+                    {
+                        "text": "Too fast.",
+                        "aspect": "pace",
+                        "evidence_ids": [pace_criticism, pace_praise],
+                        "suggested_action": "Slow down.",
+                    }
+                ],
+                "overall_summary": "Clear and knowledgeable; the pace worries students.",
+            }
+        ), {"engine": "groq:m"}
+
+    monkeypatch.setattr(summarize.llm, "complete_json", fake)
+    out = summarize.summarise(stats)
+    # The LLM only ever saw pace as an area to improve, with its critical sentences.
+    assert pace_praise not in seen["prompt"] and pace_criticism in seen["prompt"]
+    assert [s["aspect"] for s in out["strengths"]] == ["clarity", "knowledge"]
+    assert [s["text"] for s in out["strengths"]] == ["Clear again.", "Knows it."]
+    pace = out["improvements"][0]
+    assert pace["aspect"] == "pace" and pace["evidence_ids"] == [pace_criticism]
+    assert pace["suggested_action"] == "Slow down."
+    assert out["dropped_ungrounded"] == 2
 
 
 def test_llm_with_nothing_grounded_falls_back(stats, monkeypatch):

@@ -8,6 +8,7 @@ itself (max_retries); a decommissioned or unknown model switches to GROQ_FALLBAC
 
 import json
 import logging
+import re
 import threading
 import time
 from typing import Any
@@ -60,6 +61,17 @@ def _record(model: str | None, error: str | None) -> None:
     _status["calls"] += 1
 
 
+MAX_RATE_LIMIT_WAIT = 30.0  # seconds in total per call, before using the no-LLM fallback
+
+
+def rate_limit_wait(message: str) -> float:
+    """Seconds to wait from Groq's "Please try again in 3.825s" (or 1m2s); 10 s if absent."""
+    match = re.search(r"try again in (?:(\d+)m)?([\d.]+)s", message)
+    if not match:
+        return 10.0
+    return min(int(match.group(1) or 0) * 60 + float(match.group(2)) + 0.5, MAX_RATE_LIMIT_WAIT)
+
+
 def _chat(model: str, messages: list[dict[str, str]]) -> str:
     response = _get_client().chat.completions.create(
         model=model,
@@ -83,12 +95,24 @@ def complete_json[T: BaseModel](
     started = time.perf_counter()
     messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
     models = [settings.groq_model, settings.groq_fallback_model]
-    model_index, attempts = 0, 0
+    model_index, attempts, waited = 0, 0, 0.0
     error: str | None = None
     while attempts < 2 and model_index < len(models):
         model = models[model_index]
         try:
             raw = _chat(model, messages)
+        except groq.RateLimitError as exc:
+            # The free tier allows a few thousand tokens a minute; a batch of summaries goes over
+            # it. Wait as long as Groq asks (bounded), then try again before falling back.
+            pause = rate_limit_wait(str(exc))
+            if waited + pause <= MAX_RATE_LIMIT_WAIT:
+                log.info("Groq rate limit; waiting %.1f s", pause)
+                time.sleep(pause)
+                waited += pause
+                continue
+            error = f"{type(exc).__name__}: {exc}"
+            log.warning("Groq call failed: %s", error)
+            break
         except groq.APIError as exc:
             if _model_gone(exc) and model_index == 0:
                 log.warning("Groq model %s unavailable (%s); trying %s", model, exc, models[1])

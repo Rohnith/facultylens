@@ -1,10 +1,11 @@
 """Grounded strengths / improvements for one teaching form (SPEC §5 "Summaries").
 
-Input is the form's aggregate only: aspect statistics plus at most 40 evidence sentences that
-are already moderated and redacted, each with its id. The LLM sees nothing else, and every item
-it returns must cite evidence ids from that set or it is dropped. Without an LLM (no key, Groq
-down, or nothing valid came back) a deterministic summary is built from the same statistics,
-so it is grounded by construction; distilbart only writes the optional digest of comments.
+Input is the form's aggregate only: aspect statistics plus evidence sentences that are already
+moderated and redacted, each with its id. WHICH aspects are strengths and which need work is
+decided by the counts (choose_aspects), never by the LLM. The LLM only words those items, sees
+only each chosen aspect's own evidence, and every item must cite ids from it or it is dropped
+(the template sentence takes its place). Without an LLM (no key, Groq down, or nothing valid
+came back) the template summary is used; distilbart only writes the optional digest.
 """
 
 import json
@@ -210,57 +211,102 @@ def digest(pool: list[dict[str, Any]]) -> str | None:
 
 # --------------------------------------------------------------------------- LLM path
 
+# The counts decide WHAT the summary says (choose_aspects, the same rule as the no-LLM path);
+# the LLM only decides HOW to say it. It never picks a strength the counts call a concern.
 SYSTEM = (
-    "You summarise anonymous student feedback for one teacher and one course. Use ONLY the "
-    "statistics and evidence sentences given. Do not invent facts, numbers, names or quotes. "
-    "Every strength and improvement must cite the ids of the evidence sentences that support "
-    "it. Write in plain, respectful English for the teacher. Return one JSON object with keys "
-    '"strengths" (list of {"text", "aspect", "evidence_ids"}), "improvements" (list of '
-    '{"text", "aspect", "evidence_ids", "suggested_action"}) and "overall_summary" (2-3 '
-    f"sentences). At most {MAX_ITEMS} of each. Aspect must be one of: {', '.join(ASPECT_KEYS)}."
+    "You write the wording of a feedback summary for one teacher and one course. The "
+    "strengths and the areas to improve have already been chosen from the counts; write "
+    "exactly one item for each listed aspect, in the order given, and no others. Use ONLY the "
+    "evidence sentences listed under that aspect, and cite their ids. Do not invent facts, "
+    "numbers, names or quotes. Write in plain, respectful English, addressed to the teacher. "
+    'Return one JSON object with keys "strengths" (list of {"text", "aspect", '
+    '"evidence_ids"}), "improvements" (list of {"text", "aspect", "evidence_ids", '
+    '"suggested_action"}) and "overall_summary" (2-3 sentences that mention only the listed '
+    "strengths as strengths and only the listed areas to improve as concerns)."
 )
+EVIDENCE_PER_ASPECT = 8
 
 
-def _prompt(stats: dict[str, Any], pool: list[dict[str, Any]]) -> str:
+def _evidence(stats: dict[str, Any], key: str, polarity: str) -> list[dict[str, Any]]:
+    """An aspect's evidence of one polarity, sincere sentences before possibly sarcastic ones."""
+    items = ((stats.get("aspects") or {}).get(key) or {}).get("evidence", {}).get(polarity, [])
+    return sorted(items, key=lambda e: e.get("uncertain", False))[:EVIDENCE_PER_ASPECT]
+
+
+def allowed_evidence(stats: dict[str, Any]) -> dict[str, dict[str, list[dict[str, Any]]]]:
+    """{"strengths": {aspect: [evidence]}, "improvements": {...}}, in the counts' order."""
+    strengths, gaps = choose_aspects(stats)
+    return {
+        "strengths": {r["aspect"]: _evidence(stats, r["aspect"], "positive") for r in strengths},
+        "improvements": {r["aspect"]: _evidence(stats, r["aspect"], "negative") for r in gaps},
+    }
+
+
+def _prompt(stats: dict[str, Any], allowed: dict[str, dict[str, list[dict]]]) -> str:
+    rows = {r["aspect"]: r for r in _aspect_rows(stats)}
+
+    def section(kind: str) -> list[dict[str, Any]]:
+        return [
+            {
+                **{k: rows[key][k] for k in ("aspect", "label", "positive", "negative")},
+                "rating_out_of_5": rows[key]["rating_out_of_5"],
+                "evidence": [
+                    {
+                        "id": e["id"],
+                        "possibly_sarcastic": bool(e.get("uncertain")),
+                        "text": e["text"],
+                    }
+                    for e in evidence
+                ],
+            }
+            for key, evidence in allowed[kind].items()
+        ]
+
     return json.dumps(
         {
             "responses": stats.get("responses"),
             "sentiment_weights": stats.get("sentiment"),
-            "aspects": _aspect_rows(stats),
-            "evidence": [
-                {
-                    "id": e["id"],
-                    "aspect": e["aspect"],
-                    "polarity": e["polarity"],
-                    "possibly_sarcastic": bool(e.get("uncertain")),
-                    "text": e["text"],
-                }
-                for e in pool
-            ],
+            "strengths": section("strengths"),
+            "areas_to_improve": section("improvements"),
         },
         ensure_ascii=False,
     )
 
 
-def ground(summary: _Summary, valid_ids: set[str]) -> tuple[list[dict], list[dict]]:
-    """Keep only items about a known aspect that cite at least one real evidence id."""
+def ground(
+    summary: _Summary, allowed: dict[str, dict[str, list[dict]]]
+) -> tuple[list[dict], list[dict]]:
+    """One item per chosen aspect, citing only that aspect's own evidence, in the counts' order.
 
-    def keep(items, extra: tuple[str, ...] = ()):
-        out = []
+    Items about any other aspect, repeats, and citations outside the aspect's evidence are
+    dropped; an aspect left without a valid item is missing from the result (the caller fills
+    it from the template).
+    """
+
+    def keep(items, kind: str, extra: tuple[str, ...] = ()):
+        found: dict[str, dict] = {}
         for item in items:
-            ids = [i for i in dict.fromkeys(item.evidence_ids) if i in valid_ids]
-            if item.aspect in ASPECT_KEYS and ids:
-                out.append(
-                    {
-                        "text": item.text.strip(),
-                        "aspect": item.aspect,
-                        "evidence_ids": ids,
-                        **{k: getattr(item, k).strip() for k in extra},
-                    }
-                )
-        return out[:MAX_ITEMS]
+            valid = {e["id"] for e in allowed[kind].get(item.aspect, [])}
+            ids = [i for i in dict.fromkeys(item.evidence_ids) if i in valid]
+            if ids and item.aspect not in found:
+                found[item.aspect] = {
+                    "text": item.text.strip(),
+                    "aspect": item.aspect,
+                    "evidence_ids": ids,
+                    **{k: getattr(item, k).strip() for k in extra},
+                }
+        return [found[key] for key in allowed[kind] if key in found]
 
-    return keep(summary.strengths), keep(summary.improvements, ("suggested_action",))
+    return (
+        keep(summary.strengths, "strengths"),
+        keep(summary.improvements, "improvements", ("suggested_action",)),
+    )
+
+
+def _fill(written: list[dict], template: list[dict]) -> list[dict]:
+    """The LLM's items, with the template's item for any chosen aspect it didn't cover."""
+    by_aspect = {item["aspect"]: item for item in written}
+    return [by_aspect.get(item["aspect"], item) for item in template]
 
 
 # --------------------------------------------------------------------------- entry point
@@ -268,26 +314,30 @@ def ground(summary: _Summary, valid_ids: set[str]) -> tuple[list[dict], list[dic
 
 def summarise(stats: dict[str, Any]) -> dict[str, Any]:
     pool = evidence_pool(stats)
-    valid = {e["id"] for e in pool}
     base = overall_sentence(stats)
-    if pool:
-        out, meta = llm.complete_json(SYSTEM, _prompt(stats, pool), _Summary)
+    template_strengths, template_improvements = fallback_items(stats)
+    allowed = allowed_evidence(stats)
+    if allowed["strengths"] or allowed["improvements"]:
+        out, meta = llm.complete_json(SYSTEM, _prompt(stats, allowed), _Summary)
         if out is not None:
-            strengths, improvements = ground(out, valid)
+            strengths, improvements = ground(out, allowed)
             dropped = (
                 len(out.strengths) + len(out.improvements) - len(strengths) - len(improvements)
             )
             if strengths or improvements:
+                filled = len(template_strengths) + len(template_improvements)
+                filled -= len(strengths) + len(improvements)
                 return {
-                    "strengths": strengths,
-                    "improvements": improvements,
+                    "strengths": _fill(strengths, template_strengths),
+                    "improvements": _fill(improvements, template_improvements),
                     "overall_summary": out.overall_summary.strip() or base,
                     "digest": None,
                     "engine": meta["engine"],
                     "dropped_ungrounded": dropped,
+                    "filled_from_template": filled,
                 }
             log.warning("LLM summary had no grounded items; using the fallback")
-    strengths, improvements = fallback_items(stats)
+    strengths, improvements = template_strengths, template_improvements
     return {
         "strengths": strengths,
         "improvements": improvements,

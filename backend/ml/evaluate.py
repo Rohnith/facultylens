@@ -330,7 +330,12 @@ def system_summary(texts: list[dict[str, Any]]) -> dict[str, Any]:
         rows.append({"response": {"likert": {}}, "analysis": doc})
     stats = compute_stats(rows, "teaching")
     out = summarize.summarise(stats)
-    pool = {e["id"]: e["text"] for e in summarize.evidence_pool(stats)}
+    pool = {
+        e["id"]: e["text"]
+        for aspect in (stats.get("aspects") or {}).values()
+        for items in (aspect.get("evidence") or {}).values()
+        for e in items
+    }
     bullets = []
     for kind, key in (("strength", "strengths"), ("improvement", "improvements")):
         for item in out[key]:

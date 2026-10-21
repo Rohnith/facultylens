@@ -6,6 +6,10 @@ import pytest
 os.environ["MONGODB_DB"] = "facultylens_test"
 os.environ["BCRYPT_ROUNDS"] = "4"
 os.environ["ANALYSIS_ON_SUBMIT"] = "false"  # no background model runs during tests
+# Never call a live API or spend a real quota from tests, whatever keys .env holds; tests that
+# need an LLM answer mock llm.complete_json.
+os.environ["GROQ_API_KEY"] = ""
+os.environ["S2_API_KEY"] = ""
 
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 

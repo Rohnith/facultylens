@@ -358,3 +358,11 @@ Charts must use accessible colours (not red/green only), have text labels and em
 | **7 NAAC report** | Draft ATR, editable table, PDF + DOCX export | Exported files open correctly and contain no unredacted text |
 | **8 Evaluation** | Labelling tool, kappa, baselines vs transformer, aspect/PII/summary metrics, survey, `RESULTS.md`, evaluation page | `python -m ml.evaluate` produces real results files |
 | **9 Polish** | Postman collection, README, screenshots, demo script (`docs/DEMO.md`, 5-minute walkthrough), coverage ≥ 70%, final CPU performance check | Fresh clone → setup → demo works by following the README |
+
+*Changed after Phase 9 (2026-10-21), found when the user added a Groq key:*
+- **Summary topics come from the counts.** With the key set, Groq listed a teacher's punctuality as a strength: it cited two real positive sentences, although 12 of 19 punctuality comments were critical. Each point cited a real sentence, but the overall picture was wrong.
+  - The counts rule (`summarize.choose_aspects`, shared with the template path, analytics and the NAAC report) now decides which aspects are strengths and which need work.
+  - The LLM sees only those aspects, each with its own evidence of the matching polarity, and only writes the wording.
+  - Items about any other aspect, or citing evidence outside the aspect, are dropped. A chosen aspect the LLM skipped gets the template sentence (`filled_from_template`).
+- **Groq rate limits:** the free tier allows 8,000 tokens a minute. On a 429, `llm.py` waits as long as Groq asks, up to 30 s per call in total, before using the fallback.
+- **Tests never call live APIs:** `conftest.py` blanks `GROQ_API_KEY` and `S2_API_KEY`, whatever `.env` holds.
