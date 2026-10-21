@@ -169,9 +169,16 @@ def main() -> None:
         "",
     ]
     doc = DOC.read_text(encoding="utf-8") if DOC.exists() else "# Model check (CPU)\n"
+    section = "\n".join(lines).rstrip() + "\n"
     if MARKER in doc:
-        doc = doc[: doc.index(MARKER)].rstrip() + "\n\n"
-    DOC.write_text(doc.rstrip() + "\n\n" + "\n".join(lines), encoding="utf-8")
+        # Replace this section only; later sections (written by other phases) stay.
+        start = doc.index(MARKER)
+        end = doc.find("\n## ", start + len(MARKER))
+        rest = doc[end + 1 :] if end != -1 else ""
+        doc = doc[:start] + section + ("\n" + rest if rest else "")
+    else:
+        doc = doc.rstrip() + "\n\n" + section
+    DOC.write_text(doc, encoding="utf-8")
     print(json.dumps(result, indent=2))
     db.close_sync_client()
 

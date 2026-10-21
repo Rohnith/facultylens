@@ -98,22 +98,22 @@ Measured 2026-10-20 from an analysis run in the app (553 responses, `TOX_HIDE=0.
 
 ## Full pipeline on a seeded cycle
 
-Measured 2026-10-20T06:57:03+00:00 with `python -m app.pipeline.bench` on **2026-27 Odd Sem** (synthetic seed data), `TORCH_NUM_THREADS=4`, batch size 16, `model_version=light-r1-912bb0b3`.
+Measured 2026-10-21T07:03:40+00:00 with `python -m app.pipeline.bench` on **2026-27 Odd Sem** (synthetic seed data), `TORCH_NUM_THREADS=4`, batch size 16, `model_version=light-r1-912bb0b3`.
 
 | Measure | Value |
 |---|---:|
-| Responses analysed (teaching + curriculum) | 553 |
-| Total time, cold start (includes loading all models) | 213.8 s |
-| Per response, warm batches, mean | 310.6 ms |
-| Per response, warm batches, p95 | 599.5 ms |
-| First batch per response (model loading) | 2801.4 ms |
-| Peak process RAM | 2820 MB |
+| Responses analysed (teaching + curriculum) | 614 |
+| Total time, cold start (includes loading all models) | 322.4 s |
+| Per response, warm batches, mean | 366.9 ms |
+| Per response, warm batches, p95 | 750.9 ms |
+| First batch per response (model loading) | 4189.6 ms |
+| Peak process RAM | 3938 MB |
 | Responses re-scored on a second run (cache check) | 0 |
 
-What the pipeline flagged: hidden 19, review 0, pii 16, sarcastic 37 (answers; PII is the number of items redacted).
+What the pipeline flagged: hidden 22, review 0, pii 18, sarcastic 41, summaries_built 11 (answers; PII is the number of items redacted).
 Budget: 300 responses in under 10 minutes on a 4-core CPU (SPEC §13).
 
-Sarcasm flag (`SARC_FLAG=0.95`) against the seed's own sarcastic lines: 37 answers flagged, 22 of the 22 seeded sarcastic answers among them (precision 0.59, recall 1.0). The irony model is trained on tweets and scores short sincere praise almost as high as sarcasm (0.97-0.99 against 0.98-0.99), so no threshold separates them; at the earlier 0.70 it flagged 181 answers for 22 seeded ones (precision 0.12). Flags are shown as *possibly* sarcastic and only halve an answer's weight; Phase 8 measures this on hand-labelled comments.
+Sarcasm flag (`SARC_FLAG=0.95`) against the seed's own sarcastic lines: 41 answers flagged, 23 of the 23 seeded sarcastic answers among them (precision 0.56, recall 1.0). The irony model is trained on tweets and scores short sincere praise almost as high as sarcasm (0.97-0.99 against 0.98-0.99), so no threshold separates them; at the earlier 0.70 it flagged 181 answers for 22 seeded ones (precision 0.12). Flags are shown as *possibly* sarcastic and only halve an answer's weight; Phase 8 measures this on hand-labelled comments.
 
 ## NAAC report export (Phase 7)
 
@@ -129,3 +129,31 @@ Both files were read back (pypdf, python-docx) and searched for the seed's raw s
 - every teacher's full name (11) and surname.
 
 None appeared. Draft previews carry the "DRAFT – not for submission" mark on every page; the final files carry none.
+
+## Final CPU check (Phase 9)
+
+Measured on 2026-10-21 on the machine above (`TORCH_NUM_THREADS=4`), with no LLM key.
+
+**Pipeline.** The table under "Full pipeline on a seeded cycle" is this run:
+- 614 responses analysed from a cold start in **322.4 s**: 367 ms per response warm (p95 751 ms) and 3.9 GB peak RAM.
+- The SPEC §13 budget is 300 responses in under 10 minutes. 614 took 5.4 minutes.
+
+It is slower and heavier than the Phase 4 run (213.8 s, 2.8 GB) for three reasons:
+- The cycle now has 614 responses, against 553.
+- The job now also writes the 11 grounded summaries, so the distilbart summariser is in memory.
+- The run shared the CPU with the browser screenshot session.
+
+On an 8 GB machine, 3.9 GB for every model is within budget.
+
+**API latency** (dev database after analysis, 20 calls each, cached analytics; the SPEC target is p95 under 500 ms):
+
+| Endpoint | median | p95 |
+|---|---:|---:|
+| `GET /analytics/department/{CSE}` | 19.2 ms | 24.4 ms |
+| `GET /analytics/bias?department={CSE}` | 43.5 ms | 50.6 ms |
+| `GET /faculty/{id}/overview` | 19.8 ms | 24.6 ms |
+| `GET /reports/naac/{cycle}/status` | 20.5 ms | 30.5 ms |
+| `GET /evaluation/results` | 5.0 ms | 5.7 ms |
+| `GET /labels/progress` | 9.5 ms | 11.5 ms |
+
+**CPU fine-tune** (`ml.evaluate --finetune`): DistilBERT on 2,388 comments for 2 epochs at 128 tokens took 14.3 minutes.
