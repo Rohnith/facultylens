@@ -21,18 +21,37 @@ export function RequireAuth() {
   return <Outlet />;
 }
 
+function NotAllowed({ children }) {
+  return (
+    <div className="mx-auto flex max-w-[1184px] flex-col gap-2">
+      <h1 className="m-0 font-serif text-title font-semibold">Not available for your account</h1>
+      <p className="m-0 max-w-[60ch] text-muted">{children}</p>
+    </div>
+  );
+}
+
 /** Renders the child routes for the listed roles, otherwise a plain "not allowed" page. */
 export function RequireRole({ roles }) {
   const { user } = useAuth();
   if (!roles.includes(user.role)) {
     return (
-      <div className="mx-auto flex max-w-[1184px] flex-col gap-2">
-        <h1 className="m-0 font-serif text-title font-semibold">Not available for your account</h1>
-        <p className="m-0 max-w-[60ch] text-muted">
-          This page is for other roles. If you think you should have access, ask your IQAC
-          coordinator.
-        </p>
-      </div>
+      <NotAllowed>
+        This page is for other roles. If you think you should have access, ask your IQAC
+        coordinator.
+      </NotAllowed>
+    );
+  }
+  return <Outlet />;
+}
+
+/** The labelling tool: only accounts the admin marked as annotator or adjudicator. */
+export function RequireAnnotator() {
+  const { user } = useAuth();
+  if (!user.annotator) {
+    return (
+      <NotAllowed>
+        Labelling is for the evaluation team. The IQAC coordinator can add you on the Users page.
+      </NotAllowed>
     );
   }
   return <Outlet />;

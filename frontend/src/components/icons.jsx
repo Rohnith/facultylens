@@ -107,6 +107,24 @@ export function ChartIcon() {
   );
 }
 
+export function TagIcon() {
+  return (
+    <Icon>
+      <path d="M1.75 2.75v4.5l6.5 6.5 5-5-6.5-6.5h-4.5z" />
+      <circle cx="4.75" cy="5.25" r="1" />
+    </Icon>
+  );
+}
+
+export function GaugeIcon() {
+  return (
+    <Icon>
+      <path d="M2.25 11.75a5.75 5.75 0 1 1 11.5 0" />
+      <path d="M8 11.75l2.5-3.5" />
+    </Icon>
+  );
+}
+
 export function DocumentIcon() {
   return (
     <Icon>

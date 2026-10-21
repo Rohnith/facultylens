@@ -12,7 +12,9 @@ import {
   PeopleIcon,
   ChartIcon,
   DocumentIcon,
+  GaugeIcon,
   LensIcon,
+  TagIcon,
   PersonIcon,
   ShieldIcon,
   SparkIcon,
@@ -31,6 +33,7 @@ const NAV_BY_ROLE = {
     { to: "/admin/analysis", label: "Analysis", icon: SparkIcon },
     { to: "/admin/moderation", label: "Moderation", icon: ShieldIcon, badge: "moderation" },
     { to: "/admin/reports", label: "NAAC report", icon: DocumentIcon },
+    { to: "/admin/evaluation", label: "Evaluation", icon: GaugeIcon },
     { to: "/admin/status", label: "System status", icon: PulseIcon },
   ],
   hod: [
@@ -172,7 +175,10 @@ function Account({ onNavigate }) {
 
 export function AppShell() {
   const { user } = useAuth();
-  const nav = NAV_BY_ROLE[user.role] ?? [];
+  const nav = [
+    ...(NAV_BY_ROLE[user.role] ?? []),
+    ...(user.annotator ? [{ to: "/label", label: "Labelling", icon: TagIcon }] : []),
+  ];
   const health = useAsync(getHealth);
   const badges = { moderation: usePendingModeration(user.role === "admin") };
   const institution = health.data?.institution ?? (health.error ? "Institution unavailable" : null);

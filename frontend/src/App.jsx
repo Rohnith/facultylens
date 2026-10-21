@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { AppShell } from "./components/AppShell";
-import { RequireAuth, RequireRole } from "./components/guards";
+import { RequireAnnotator, RequireAuth, RequireRole } from "./components/guards";
 import { useAuth } from "./context/auth";
 import { CourseDetailPage } from "./pages/admin/CourseDetailPage";
 import { CoursesPage } from "./pages/admin/CoursesPage";
@@ -19,11 +19,16 @@ import { ProfileEditorPage } from "./pages/profile/ProfileEditorPage";
 import { ProfileReviewPage } from "./pages/profile/ProfileReviewPage";
 import { StatusPage } from "./pages/StatusPage";
 import { FeedbackFormPage } from "./pages/student/FeedbackFormPage";
+import { LabelPage } from "./pages/label/LabelPage";
+import { SurveyPage } from "./pages/faculty/SurveyPage";
 import { MyFormsPage } from "./pages/student/MyFormsPage";
 
 // The unified page carries Recharts; load it (and the chart library) only when opened.
 const InsightsPage = lazy(() =>
   import("./pages/insights/InsightsPage").then((m) => ({ default: m.InsightsPage })),
+);
+const EvaluationPage = lazy(() =>
+  import("./pages/admin/EvaluationPage").then((m) => ({ default: m.EvaluationPage })),
 );
 const FacultyPage = lazy(() =>
   import("./pages/faculty/FacultyPage").then((m) => ({ default: m.FacultyPage })),
@@ -60,6 +65,7 @@ export default function App() {
           <Route element={<RequireRole roles={["faculty", "hod"]} />}>
             <Route path="profile" element={<ProfileEditorPage />} />
             <Route path="profile/review" element={<ProfileReviewPage />} />
+            <Route path="survey" element={<SurveyPage />} />
             <Route
               path="me"
               element={
@@ -89,6 +95,9 @@ export default function App() {
               }
             />
           </Route>
+          <Route path="label" element={<RequireAnnotator />}>
+            <Route index element={<LabelPage />} />
+          </Route>
           <Route path="admin" element={<RequireRole roles={["admin"]} />}>
             <Route index element={<Navigate to="users" replace />} />
             <Route path="users" element={<UsersPage />} />
@@ -103,6 +112,14 @@ export default function App() {
             <Route path="moderation" element={<ModerationPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="status" element={<StatusPage />} />
+            <Route
+              path="evaluation"
+              element={
+                <Suspense fallback={null}>
+                  <EvaluationPage />
+                </Suspense>
+              }
+            />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Route>

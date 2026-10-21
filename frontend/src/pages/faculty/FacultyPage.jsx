@@ -218,6 +218,14 @@ export function FacultyPage() {
           )}
         </div>
       )}
+      {data?.is_owner && data.feedback_access && (
+        <p className="m-0 flex flex-wrap items-center gap-x-2 border-t border-rule pt-4 text-body text-muted">
+          Was this page useful?
+          <Link to="/survey" className="font-medium text-text">
+            Tell us in four quick ratings
+          </Link>
+        </p>
+      )}
       <EvidenceDrawer facultyId={facultyId} request={drawer} onClose={() => setDrawer(null)} />
     </div>
   );

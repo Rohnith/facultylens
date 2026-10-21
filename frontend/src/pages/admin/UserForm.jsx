@@ -17,6 +17,7 @@ export function UserForm({ departments, user, onSaved, onCancel }) {
           roll_no: user.roll_no ?? "",
           department_id: user.department_id ?? "",
           gender: user.gender ?? "",
+          annotator: user.annotator ?? "",
         }
       : EMPTY,
   );
@@ -38,6 +39,7 @@ export function UserForm({ departments, user, onSaved, onCancel }) {
       roll_no: isStudent ? form.roll_no.trim() : null,
       department_id: needsDept ? form.department_id || null : form.department_id || null,
       gender: hasGender ? form.gender || null : null,
+      ...(editing && { annotator: isStudent ? null : form.annotator || null }),
     };
     try {
       if (editing) {
@@ -120,6 +122,20 @@ export function UserForm({ departments, user, onSaved, onCancel }) {
                 <option value="male">Male</option>
                 <option value="other">Other</option>
                 <option value="undisclosed">Prefers not to say</option>
+              </Select>
+            )}
+          </Field>
+        )}
+        {editing && !isStudent && (
+          <Field
+            label="Labelling (evaluation)"
+            hint="Annotators label comments on their own; an adjudicator settles their disagreements."
+          >
+            {(a) => (
+              <Select {...a} value={form.annotator} onChange={set("annotator")}>
+                <option value="">Not part of the evaluation</option>
+                <option value="annotator">Annotator</option>
+                <option value="adjudicator">Adjudicator</option>
               </Select>
             )}
           </Field>
