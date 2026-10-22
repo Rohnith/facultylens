@@ -225,6 +225,7 @@ function SentimentResult({ section }) {
       <div className="h-[200px]" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
+            accessibilityLayer={false}
             data={rows}
             layout="vertical"
             margin={{ top: 0, right: 48, bottom: 0, left: 0 }}

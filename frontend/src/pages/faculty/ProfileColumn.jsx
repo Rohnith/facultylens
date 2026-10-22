@@ -34,7 +34,8 @@ export function ProfileColumn({ profile, isOwner, reviewLink, showHighlights = t
         {profile.photo_url && (
           <img
             src={profile.photo_url}
-            alt=""
+            alt={profile.name}
+            referrerPolicy="no-referrer"
             width="64"
             height="64"
             className="h-16 w-16 shrink-0 rounded-card object-cover"

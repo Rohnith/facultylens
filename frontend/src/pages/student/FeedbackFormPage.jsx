@@ -63,7 +63,7 @@ function ThankYou({ form }) {
       </h1>
       <p className="m-0 text-body text-muted">
         It was saved without your name or roll number, so{" "}
-        {form.faculty ? form.faculty.name : "your teachers"} will never know it was you. Comments
+        {form.faculty ? form.faculty.name : "your teachers"} won&apos;t see who wrote it. Comments
         are checked for abusive language and personal details before any teacher reads them.
       </p>
       <div className="flex flex-wrap gap-2 pt-2">
@@ -91,6 +91,7 @@ export function FeedbackFormPage() {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -124,6 +125,10 @@ export function FeedbackFormPage() {
     setError(null);
     if (missing.length) {
       document.getElementById(`q-${missing[0].key}`)?.focus();
+      return;
+    }
+    if (!agreed) {
+      document.getElementById("consent")?.focus();
       return;
     }
     setBusy(true);
@@ -230,7 +235,8 @@ export function FeedbackFormPage() {
                 In your own words
               </h2>
               <p className="m-0 text-small text-muted">
-                Avoid names and phone numbers; they are removed before teachers read comments.
+                Leave out names and phone numbers. A filter removes them before teachers read
+                comments, but it can miss some.
               </p>
             </div>
             <div className="flex flex-col gap-7 p-[var(--card-pad)]">
@@ -274,6 +280,32 @@ export function FeedbackFormPage() {
                   ))}
                 </ul>
               </div>
+            )}
+            <label className="flex max-w-[68ch] cursor-pointer items-start gap-3 text-body">
+              <input
+                id="consent"
+                type="checkbox"
+                required
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                aria-invalid={tried && !agreed ? true : undefined}
+                aria-describedby={tried && !agreed ? "consent-error" : undefined}
+                className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
+              />
+              <span>
+                I agree that my answers are stored without my name and used to improve teaching and
+                for NAAC reporting, as described in the{" "}
+                <Link to="/privacy" target="_blank" rel="noopener">
+                  privacy notice
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </Link>
+                .
+              </span>
+            </label>
+            {tried && !agreed && (
+              <p id="consent-error" className="m-0 text-small text-negative" role="alert">
+                Tick the box to send your feedback.
+              </p>
             )}
             <FormError>{error}</FormError>
             <div>

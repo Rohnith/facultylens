@@ -42,7 +42,11 @@ function columns({ cycle, analysis, moderation, report }) {
       action: "Moderate",
     });
   else
-    cols.done.push({ title: "Moderation queue is empty", to: "/admin/moderation", action: "Open" });
+    cols.done.push({
+      title: "Moderation queue is empty",
+      to: "/admin/moderation",
+      action: "View decisions",
+    });
 
   if (report && report.actions > report.approved)
     cols.decide.push({
@@ -63,7 +67,7 @@ function columns({ cycle, analysis, moderation, report }) {
     cols.done.push({
       title: `All ${n(analysis.analysed)} responses analysed`,
       to: "/admin/analysis",
-      action: "Open",
+      action: "View analysis runs",
     });
 
   if (report && report.actions === 0 && responses > 0)
@@ -85,7 +89,7 @@ function columns({ cycle, analysis, moderation, report }) {
     cols.done.push({
       title: `${n(responses)} of ${n(eligible)} students responded`,
       to: `/admin/cycles/${cycle.id}`,
-      action: "Open",
+      action: "View the forms",
     });
 
   if (report?.ready)

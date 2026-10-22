@@ -8,15 +8,15 @@ import { useAuth } from "../context/auth";
 const FACTS = [
   {
     title: "Student feedback is anonymous",
-    body: "Teachers never see who wrote a comment; only a one-way code checks that each student submits once.",
+    body: "Teachers never see your name with a comment; a one-way code only checks that each student submits once.",
   },
   {
     title: "Comments are screened before anyone reads them",
-    body: "Abusive language is held back for IQAC, and names, phone and roll numbers are removed.",
+    body: "Abusive language is held back for IQAC, and a filter removes names, phone and roll numbers.",
   },
   {
     title: "Small classes stay private",
-    body: "Comments appear only once enough students respond that no one can be picked out.",
+    body: "Comments appear only once enough students respond, so no single answer stands out.",
   },
   {
     title: "Faculty approve their own profile",

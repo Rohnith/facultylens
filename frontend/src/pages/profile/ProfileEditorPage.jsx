@@ -272,12 +272,20 @@ export function ProfileEditorPage() {
                     />
                   )}
                 </Field>
-                <Field label="Photo link (optional)" hint="An https:// link to a square photo.">
+                <Field
+                  label="Photo link (optional)"
+                  hint="An https:// link to a square photo of you that you have the right to use. The site hosting it can see when it is viewed."
+                >
                   {(a) => (
                     <div className="flex items-center gap-3">
                       <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-active text-small font-medium text-muted">
                         {form.photo_url?.startsWith("https://") ? (
-                          <img src={form.photo_url} alt="" className="size-full object-cover" />
+                          <img
+                            src={form.photo_url}
+                            alt={`${u.name}, preview`}
+                            referrerPolicy="no-referrer"
+                            className="size-full object-cover"
+                          />
                         ) : (
                           u.name
                             .split(/\s+/)

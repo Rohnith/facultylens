@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { useAsync } from "../hooks/useAsync";
 import { getHealth } from "../api/client";
 import { Mark } from "./Mark";
@@ -11,6 +12,24 @@ const STARTS = [
   [-50, -60, 6],
   [90, 40, -7],
 ];
+
+/** The three policy pages, linked wherever someone signs in. */
+export function PolicyLinks({ onBoard = false }) {
+  const tone = onBoard ? "text-on-board-muted hover:text-on-board" : "text-muted hover:text-text";
+  return (
+    <nav aria-label="Policies" className="flex flex-wrap gap-x-4 gap-y-1 text-small">
+      <Link to="/privacy" className={tone}>
+        Privacy
+      </Link>
+      <Link to="/terms" className={tone}>
+        Terms
+      </Link>
+      <Link to="/cookies" className={tone}>
+        Cookies
+      </Link>
+    </nav>
+  );
+}
 
 /** Facts pinned as notes: they settle in once, like comments landing on the wall. */
 function PinnedNotes({ notes, className = "" }) {
@@ -81,10 +100,11 @@ export function StandaloneLayout({ children, notes = [] }) {
         {notes.length > 0 && (
           <PinnedNotes notes={notes} className="mx-auto grid w-full max-w-[420px] pt-2 lg:hidden" />
         )}
-        <div className="mx-auto w-full max-w-[420px] lg:mt-6">
+        <div className="mx-auto flex w-full max-w-[420px] flex-col gap-5 lg:mt-6">
           <div className="w-60">
             <ThemeSwitch />
           </div>
+          <PolicyLinks />
         </div>
       </main>
     </div>

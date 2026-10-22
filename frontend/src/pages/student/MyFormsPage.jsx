@@ -36,7 +36,7 @@ export function MyFormsPage() {
           `${pending} of ${list.length} forms waiting for you in ${cycle.name}, open until ${formatDate(cycle.closes_at)}.`
         )}
         <span className="mt-1 block">
-          Your answers are anonymous: teachers never see who wrote them.
+          Your answers are stored without your name: teachers never see who wrote them.
         </span>
       </PageHeader>
 

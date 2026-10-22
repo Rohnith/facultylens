@@ -86,8 +86,9 @@ function Feedback({ data, facultyId, onPick, onEvidence }) {
       <Pickers data={data} selected={sel} onPick={onPick} />
       {sel.status === "below_minimum" && (
         <Notice title="Not enough responses yet">
-          Feedback is shown once at least {sel.min_required} students respond, so no one can be
-          identified. {sel.responses} {sel.responses === 1 ? "has" : "have"} responded so far.
+          Feedback is shown once at least {sel.min_required} students respond, so individual
+          students are harder to identify. {sel.responses} {sel.responses === 1 ? "has" : "have"}{" "}
+          responded so far.
         </Notice>
       )}
       {sel.status === "awaiting_analysis" && (

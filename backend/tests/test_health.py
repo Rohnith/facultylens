@@ -30,6 +30,7 @@ def test_health_ok_when_mongo_up(client, monkeypatch):
     body = r.json()
     assert body["status"] == "ok" and body["mongo"] == "ok"
     assert body["ml_mode"] in {"light", "full"}
+    assert body["privacy_contact"]  # the privacy notice names who to contact
 
 
 def test_health_503_when_mongo_down(client, monkeypatch):

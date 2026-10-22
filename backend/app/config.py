@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     app_name: str = "FacultyLens"
     app_version: str = "0.1.0"
     institution_name: str = "Maturi Venkata Subba Rao (MVSR) Engineering College"
+    # Who students and staff write to about their data (shown on the privacy notice).
+    privacy_contact: str = "the IQAC office"
     frontend_origin: str = "http://localhost:5173"
     jwt_secret: str = Field(default="change-me", min_length=8)
     jwt_access_minutes: int = 60

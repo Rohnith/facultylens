@@ -20,6 +20,7 @@ import {
   SparkIcon,
 } from "./icons";
 import { Mark } from "./Mark";
+import { PolicyLinks } from "./StandaloneLayout";
 import { ThemeSwitch } from "./ThemeSwitch";
 
 /** Navigation per role. Only screens that exist are listed; later phases add theirs here. */
@@ -233,6 +234,7 @@ export function AppShell() {
           <div className="mt-auto flex flex-col gap-4 px-2.5">
             <Account />
             <ThemeSwitch onBoard />
+            <PolicyLinks onBoard />
           </div>
         </div>
       </aside>
@@ -293,6 +295,7 @@ export function AppShell() {
           <div className="mt-auto flex flex-col gap-4">
             <Account onNavigate={() => setSheetOpen(false)} />
             <ThemeSwitch onBoard />
+            <PolicyLinks onBoard />
           </div>
         </div>
       </dialog>

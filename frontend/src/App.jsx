@@ -15,6 +15,7 @@ import { ReportsPage } from "./pages/admin/ReportsPage";
 import { UsersPage } from "./pages/admin/UsersPage";
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { LoginPage } from "./pages/LoginPage";
+import { CookiesPage, PrivacyPage, TermsPage } from "./pages/legal/LegalPages";
 import { MyCoursesPage } from "./pages/MyCoursesPage";
 import { ProfileEditorPage } from "./pages/profile/ProfileEditorPage";
 import { ProfileReviewPage } from "./pages/profile/ProfileReviewPage";
@@ -55,6 +56,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/cookies" element={<CookiesPage />} />
       <Route path="/change-password" element={<ChangePasswordPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
