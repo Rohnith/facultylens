@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from "../../components/icons";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -69,7 +70,7 @@ export function ProfileColumn({ profile, isOwner, reviewLink, showHighlights = t
           No approved profile yet.{" "}
           {isOwner && (
             <Link to={reviewLink} className="font-medium text-text">
-              Generate and approve yours →
+              Generate and approve yours <ArrowRightIcon />
             </Link>
           )}
         </p>
@@ -144,7 +145,7 @@ export function ProfileColumn({ profile, isOwner, reviewLink, showHighlights = t
 
       {isOwner && fields && (
         <Link to={reviewLink} className="w-fit text-small text-muted hover:text-text">
-          Edit or regenerate the profile →
+          Edit or regenerate the profile <ArrowRightIcon />
         </Link>
       )}
     </article>

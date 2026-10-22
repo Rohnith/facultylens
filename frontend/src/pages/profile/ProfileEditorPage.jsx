@@ -1,3 +1,4 @@
+import { ArrowLeftIcon, ArrowRightIcon } from "../../components/icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { errorMessage } from "../../api/client";
@@ -174,7 +175,7 @@ export function ProfileEditorPage() {
       <div className="flex flex-col gap-3">
         {!ownPage && (
           <Link to="/admin/users" className="w-fit text-body text-muted hover:text-text">
-            ← Users
+            <ArrowLeftIcon /> Users
           </Link>
         )}
         <PageHeader
@@ -211,11 +212,11 @@ export function ProfileEditorPage() {
               to={ownPage ? "/profile/review" : `/admin/faculty/${facultyId}/profile/review`}
               className="font-medium text-text"
             >
-              Generated profile →
+              Generated profile <ArrowRightIcon />
             </Link>
             {" · "}
             <Link to={ownPage ? "/me" : `/faculty/${facultyId}`} className="font-medium text-text">
-              {ownPage ? "My page" : "Their page"} →
+              {ownPage ? "My page" : "Their page"} <ArrowRightIcon />
             </Link>
           </span>
         </PageHeader>

@@ -1,3 +1,4 @@
+import { SortIcon } from "../../components/icons";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { pct, signed } from "../../api/insights";
@@ -79,8 +80,8 @@ function TeacherTable({ rows, minimum }) {
                     }
                   >
                     {label}
-                    <span aria-hidden="true" className="w-2 text-[10px]">
-                      {sort.key === key ? (sort.dir === 1 ? "▲" : "▼") : ""}
+                    <span aria-hidden="true" className="inline-flex w-2.5">
+                      {sort.key === key && <SortIcon ascending={sort.dir === 1} />}
                     </span>
                   </button>
                 </th>

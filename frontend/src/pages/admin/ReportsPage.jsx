@@ -1,3 +1,4 @@
+import { CheckIcon } from "../../components/icons";
 import { useEffect, useMemo, useState } from "react";
 import { errorMessage } from "../../api/client";
 import { feedbackApi } from "../../api/feedback";
@@ -22,7 +23,7 @@ function Check({ done, children }) {
             : "bg-active text-muted"
         }`}
       >
-        {done ? "✓" : ""}
+        {done && <CheckIcon />}
       </span>
       <span>
         <span className="sr-only">{done ? "Done: " : "Not yet: "}</span>

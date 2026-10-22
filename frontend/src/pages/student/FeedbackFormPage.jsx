@@ -1,3 +1,4 @@
+import { ArrowLeftIcon } from "../../components/icons";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import { errorMessage } from "../../api/client";
@@ -149,7 +150,7 @@ export function FeedbackFormPage() {
         <h1 className="m-0 font-marker text-marker">Feedback form</h1>
         <FormError>{loadError}</FormError>
         <Link to="/" className="text-body text-muted">
-          ← All my forms
+          <ArrowLeftIcon /> All my forms
         </Link>
       </div>
     );
@@ -171,7 +172,7 @@ export function FeedbackFormPage() {
     <div className="mx-auto flex max-w-[880px] flex-col gap-8">
       <div className="flex flex-col gap-3">
         <Link to="/" className="w-fit text-body text-muted hover:text-text">
-          ← All my forms
+          <ArrowLeftIcon /> All my forms
         </Link>
         <header className="board flex flex-col gap-2 p-6">
           <h1 className="m-0 font-marker text-marker">

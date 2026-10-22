@@ -1,3 +1,4 @@
+import { ArrowLeftIcon } from "../../components/icons";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { errorMessage } from "../../api/client";
@@ -132,7 +133,7 @@ export function CycleDetailPage() {
     return (
       <div className="mx-auto flex max-w-[1184px] flex-col gap-3">
         <Link to="/admin/cycles" className="text-body text-muted">
-          ← All cycles
+          <ArrowLeftIcon /> All cycles
         </Link>
         <FormError>{error}</FormError>
       </div>
@@ -143,7 +144,7 @@ export function CycleDetailPage() {
     <div className="mx-auto flex max-w-[1184px] flex-col gap-8">
       <div className="flex flex-col gap-3">
         <Link to="/admin/cycles" className="w-fit text-body text-muted hover:text-text">
-          ← All cycles
+          <ArrowLeftIcon /> All cycles
         </Link>
         <PageHeader
           title={cycle ? cycle.name : "Cycle"}

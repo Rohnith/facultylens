@@ -1,3 +1,4 @@
+import { ArrowLeftIcon } from "../../components/icons";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { api, errorMessage } from "../../api/client";
@@ -241,7 +242,7 @@ export function CourseDetailPage() {
     return (
       <div className="mx-auto flex max-w-[1184px] flex-col gap-4">
         <Link to="/admin/courses" className="text-body text-muted">
-          ← All courses
+          <ArrowLeftIcon /> All courses
         </Link>
         <FormError>{error}</FormError>
       </div>
@@ -253,7 +254,7 @@ export function CourseDetailPage() {
     <div className="mx-auto flex max-w-[1184px] flex-col gap-8">
       <div className="flex flex-col gap-3">
         <Link to="/admin/courses" className="w-fit text-body text-muted hover:text-text">
-          ← All courses
+          <ArrowLeftIcon /> All courses
         </Link>
         <PageHeader title={course ? `${course.code} · ${course.name}` : "Course"}>
           {course ? (

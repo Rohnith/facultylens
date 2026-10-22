@@ -1,3 +1,4 @@
+import { ArrowLeftIcon, ArrowRightIcon } from "../../components/icons";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { engineLabel } from "../../api/profiles";
 
@@ -203,8 +204,12 @@ export function Aspects({ insights, showAgreement = true, title = "Teaching aspe
             <th scope="col" className="h-10 px-3 font-medium max-md:hidden">
               <span className="sr-only">Comments: </span>
               <span aria-hidden="true" className="flex justify-between">
-                <span>← criticism</span>
-                <span>praise →</span>
+                <span>
+                  <ArrowLeftIcon /> criticism
+                </span>
+                <span>
+                  praise <ArrowRightIcon />
+                </span>
               </span>
             </th>
             <th

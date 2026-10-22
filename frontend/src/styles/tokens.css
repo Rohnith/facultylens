@@ -63,11 +63,11 @@
   --selection: #ffe78a;
   --shadow-color: 22 32 30;
 
-  /* Shape and space (4px base). Paper is square-ish; buttons are pills. */
+  /* Shape and space (4px base). Paper and buttons are square-ish; only status labels are round. */
   --r-card: 6px;
   --r-note: 3px;
   --r-control: 6px;
-  --r-button: 999px;
+  --r-button: 6px;
   --r-chip: 999px;
   --gap: 12px;
   --card-pad: 20px;

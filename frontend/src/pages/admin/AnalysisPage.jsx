@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from "../../components/icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { analysisApi, formatSeconds } from "../../api/analysis";
@@ -131,7 +132,7 @@ function Findings({ job }) {
         <span>Counts are text answers; one response can have up to three.</span>
         {flagged > 0 && (
           <Link to="/admin/moderation" className="text-body font-medium text-text">
-            Review flagged answers →
+            Review flagged answers <ArrowRightIcon />
           </Link>
         )}
       </div>

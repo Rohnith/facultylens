@@ -1,9 +1,10 @@
 /** One outline icon set: 16px, 1.5px stroke, currentColor. */
-function Icon({ children }) {
+function Icon({ children, size = 16, className }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width={size}
+      height={size}
+      className={className}
       viewBox="0 0 16 16"
       fill="none"
       stroke="currentColor"
@@ -130,6 +131,42 @@ export function DocumentIcon() {
     <Icon>
       <path d="M4 1.75h5.5L12.75 5v9.25H4z" />
       <path d="M9.25 1.75V5.25h3.5M6.25 8.25h4M6.25 10.75h4" />
+    </Icon>
+  );
+}
+
+/** Inline with text: sits on the baseline of the words around it. */
+const INLINE = "inline-block shrink-0 align-[-0.15em]";
+
+export function ArrowLeftIcon() {
+  return (
+    <Icon size={14} className={INLINE}>
+      <path d="M13 8H3.5M7.5 4 3.5 8l4 4" />
+    </Icon>
+  );
+}
+
+export function ArrowRightIcon() {
+  return (
+    <Icon size={14} className={INLINE}>
+      <path d="M3 8h9.5M8.5 4l4 4-4 4" />
+    </Icon>
+  );
+}
+
+export function CheckIcon() {
+  return (
+    <Icon size={10}>
+      <path d="M3 8.5 6.5 12 13 4.5" strokeWidth="2.2" />
+    </Icon>
+  );
+}
+
+/** Sort direction for a table column: up for ascending, down for descending. */
+export function SortIcon({ ascending }) {
+  return (
+    <Icon size={10}>
+      <path d={ascending ? "M3 11 8 5l5 6Z" : "M3 5l5 6 5-6Z"} fill="currentColor" stroke="none" />
     </Icon>
   );
 }

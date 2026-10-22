@@ -51,19 +51,19 @@ All text pairs above were checked for WCAG AA in both themes when the tokens wer
 ## Space, shape and depth
 
 - 4px base. `--gap` 12px between sibling cards, card padding 20px, canvas padding 32px on desktop and 16px on a phone. Content column max 1184px.
-- Radius: paper 6px, notes 3px, inputs 6px; buttons, pills and nav items are full pills.
+- Radius: paper, inputs, buttons, nav items and tabs 6px; notes 3px. Only status labels are fully rounded, so nothing you can press looks like a pill (changed on 2026-10-22, a departure from the Figma frames).
 - Depth is physical: paper sits on the wall with a short offset shadow (`--shadow-paper`), notes lift a little more (`--shadow-note`) and lift further on hover (`--shadow-lift`). No zero-offset glows, no gradients, no glass.
 
 ## Shell
 
-- A 248px rail on the deep board: mark, name and institution at the top, the account and theme switch at the bottom. The current page is a highlighter-yellow pill; the moderation badge is a small peach pill with its count.
+- A 248px rail on the deep board: mark, name and institution at the top, the account and theme switch at the bottom. The current page is a highlighter-yellow 6px block; the moderation badge is a small peach pill with its count.
 - The mark (`components/Mark.jsx`, `public/mark.svg`) is two tilted notes, praise over criticism, taped to the board.
 - **Below 1024px** the rail folds into a 48px board-green top bar (mark, screen name, menu) and a full-screen `<dialog>` sheet; Esc closes it and focus returns to the trigger.
 - **Signed-out screens** (`StandaloneLayout`): the board on the left with the promise "Every comment, sorted and heard." and the privacy facts pinned as notes; the form on paper on the wall to the right. Phones stack them.
 
 ## Components (in `styles/index.css`)
 
-- `.btn` + `.btn-primary` (ink), `.btn-secondary` (sage), `.btn-ghost`: 38px pill.
+- `.btn` + `.btn-primary` (ink), `.btn-secondary` (sage), `.btn-ghost`: 38px tall, 6px corners.
 - `.pill` + `.pill-positive|negative|warning|neutral`.
 - `.card`: white paper, 1px border, 6px radius, paper shadow.
 - `.board`: the deep green strip for page headers and summaries.
@@ -80,7 +80,7 @@ All text pairs above were checked for WCAG AA in both themes when the tokens wer
 - **Student form**: the course on a board header, the 1–5 scale with the chosen rating in highlighter, and the free-text answers written on blank neutral notes.
 
 - **Every other screen** opens with the shared board header (`PageHeader`: marker title, one sentence in board-muted, actions on the right). On the board, buttons invert: the primary is pale on green, the secondary is `--board-2`.
-- **Tabs** (`components/Tabs.jsx`) are a pill row on the wall; the current tab wears the highlighter, and the arrow keys move between tabs. Used on moderation, labelling and department insights. Tabs inside a card (the import review) keep the underline style.
+- **Tabs** (`components/Tabs.jsx`) are a row of 6px tabs on the wall; the current tab wears the highlighter, and the arrow keys move between tabs. Used on moderation, labelling and department insights. Tabs inside a card (the import review) keep the underline style.
 - **Moderation queue**: each flagged answer is a held note (neutral paper, the flagged sentence marked in coral) in a two-column wall, with its decision buttons under it. The main button follows the check: "Keep hidden" for answers it hid, "Show to faculty" for answers it only wants read. A decided note lifts and fades out in 160ms before the gap closes (instant under reduced motion).
 - **Labelling**: the comment is one large note on the left, sticky while you work. Its paper follows the sentiment you choose (mint, peach, grey), instantly and with no animation, because the 1/2/3 keys drive it. The form sits on paper to the right.
 - **List screens** (users, departments, courses, cycles, analysis, NAAC report, evaluation, system status) keep their tables and forms on paper under the board header. Tables are the right shape for that data; they take the new tokens.
@@ -290,6 +290,8 @@ Recharts, styled to these tokens, never library defaults.
 - A crosshair tooltip on hover; a table view for accessibility; an empty chart draws its zero line with one sentence.
 
 ## Checks used
+
+- 2026-10-22 house rules: no gradients or purple, no emoji or text glyphs as icons (arrows, ticks and sort marks are drawn SVG in `components/icons.jsx`), no em dashes in interface copy, no pill-shaped buttons, no scroll or cursor effects, no AI credit tags, favicon set, privacy, terms and cookie pages linked from sign-in and the rail.
 
 - Affinity Wall (2026-10-21): token contrast pairs checked in both themes; every role's main screens visited in light and dark, at 1440 and 390, with no console errors; screenshots in `docs/screenshots` retaken. design-taste `lint --app` on the changed files: 0 FAIL; its shadow warnings are the paper and note depth this world chose (offset, soft blur) and the mono warning is the model-key token.
 

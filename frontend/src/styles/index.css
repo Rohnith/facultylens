@@ -134,7 +134,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Buttons: one pill shape, ink primary, sage secondary, press feedback. */
+  /* Buttons: one 6px shape, ink primary, sage secondary, press feedback. */
   .btn {
     display: inline-flex;
     align-items: center;

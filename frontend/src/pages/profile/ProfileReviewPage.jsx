@@ -1,3 +1,4 @@
+import { ArrowLeftIcon, ArrowRightIcon } from "../../components/icons";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { errorMessage } from "../../api/client";
@@ -88,7 +89,7 @@ function FactsRail({ facts, cited }) {
         </section>
       ))}
       <Link to={facts.editLink} className="text-small text-muted hover:text-text">
-        Edit facts →
+        Edit facts <ArrowRightIcon />
       </Link>
     </aside>
   );
@@ -175,7 +176,7 @@ export function ProfileReviewPage() {
           to={routeId ? `/admin/faculty/${facultyId}/profile` : "/profile"}
           className="w-fit text-body text-muted hover:text-text"
         >
-          ← Profile facts
+          <ArrowLeftIcon /> Profile facts
         </Link>
         <PageHeader
           title="Generated profile"
