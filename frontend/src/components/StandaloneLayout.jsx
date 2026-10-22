@@ -78,7 +78,8 @@ export function StandaloneLayout({ children, notes = [] }) {
         </header>
         <div className="flex max-w-[30rem] flex-col gap-3 lg:mt-10">
           <p className="m-0 font-marker text-[2.5rem] leading-[1.1] md:text-[3.25rem]">
-            Every comment, sorted and heard.
+            <span className="write-in block">Every comment,</span>
+            <span className="write-in block [--write-delay:420ms]">sorted and heard.</span>
           </p>
           <p className="m-0 max-w-[44ch] text-lead text-on-board-muted">
             Student feedback, read the way researchers sort it by hand: each comment a note,

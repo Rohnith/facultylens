@@ -35,7 +35,7 @@ function Marked({ text, flagged }) {
     parts.push(
       <mark
         key={`m${span.start}`}
-        className="rounded-chip bg-[var(--pill-negative-bg)] px-0.5 text-[var(--pill-negative-ink)]"
+        className="swipe rounded-chip bg-transparent px-0.5 text-[var(--pill-negative-ink)] [--swipe:var(--pill-negative-bg)]"
         title={`Abuse score ${span.score.toFixed(2)}`}
       >
         {text.slice(span.start, span.end)}

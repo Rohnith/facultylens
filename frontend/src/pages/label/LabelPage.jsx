@@ -20,6 +20,8 @@ function LabelTab() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [skipping, setSkipping] = useState(false);
+  // The id of the note being taken off the wall; it stays lifted until the next one arrives.
+  const [leavingId, setLeavingId] = useState(null);
   const item = next.data?.item;
   const progress = next.data?.progress;
 
@@ -34,6 +36,9 @@ function LabelTab() {
         sarcastic: value.sarcastic,
         ...extra,
       });
+      const instant = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      setLeavingId(item.id);
+      await new Promise((resolve) => setTimeout(resolve, instant ? 0 : 200));
       setValue(emptyJudgement());
       setSkipping(false);
       next.reload();
@@ -72,7 +77,7 @@ function LabelTab() {
         {/* The comment as a note; its paper follows the sentiment you pick, instantly. */}
         <figure
           key={item.id}
-          className={`note settle m-0 flex flex-col gap-3 px-7 py-6 ${TONE_NOTE[value.sentiment] ?? "note-neutral"}`}
+          className={`note settle m-0 flex flex-col gap-3 px-7 py-6 ${TONE_NOTE[value.sentiment] ?? "note-neutral"} ${leavingId === item.id ? "note-leave" : ""}`}
           style={{ "--tilt": "-0.8deg", "--dy": "36px", "--r0": "-5deg", transition: "none" }}
         >
           <blockquote className="m-0 max-w-[60ch] text-lead leading-8 whitespace-pre-line">

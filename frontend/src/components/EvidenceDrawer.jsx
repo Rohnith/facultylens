@@ -11,15 +11,18 @@ const TINT = {
 };
 
 /** One redacted answer with its supporting sentence marked in place. */
-function Answer({ item, tone }) {
+function Answer({ item, tone, index }) {
   const { text, highlight } = item;
   const parts = highlight
     ? [
         text.slice(0, highlight.start),
         <mark
           key="m"
-          className="rounded-chip px-0.5 text-text"
-          style={{ background: TINT[tone] ?? TINT.neutral }}
+          className="swipe rounded-chip bg-transparent px-0.5 text-text"
+          style={{
+            "--swipe": TINT[tone] ?? TINT.neutral,
+            "--swipe-delay": `${200 + Math.min(index, 8) * 70}ms`,
+          }}
         >
           {text.slice(highlight.start, highlight.end)}
         </mark>,
@@ -127,8 +130,9 @@ export function EvidenceDrawer({ facultyId, request, onClose }) {
               </p>
             ) : (
               <ul className="m-0 list-none p-0">
-                {state.items.map((item) => (
+                {state.items.map((item, i) => (
                   <Answer
+                    index={i}
                     key={item.id}
                     item={item}
                     tone={request.toneFromItem ? item.sentiment : request.tone}

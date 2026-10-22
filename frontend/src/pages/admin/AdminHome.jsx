@@ -1,3 +1,4 @@
+import { CountUp } from "../../components/CountUp";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { analysisApi } from "../../api/analysis";
@@ -189,10 +190,10 @@ export function AdminHome() {
   const responses = cycle.counts?.responses ?? 0;
   const eligible = cycle.counts?.eligible ?? 0;
   const stats = [
-    ["Responded", `${n(responses)}`, eligible ? `of ${n(eligible)}` : ""],
-    ["To moderate", n(moderation), "comments"],
-    ["Analysed", n(analysis?.analysed), `of ${n(analysis?.responses)}`],
-    ...(report ? [["Actions approved", n(report.approved), `of ${n(report.actions)}`]] : []),
+    ["Responded", responses, eligible ? `of ${n(eligible)}` : ""],
+    ["To moderate", moderation ?? 0, "comments"],
+    ["Analysed", analysis?.analysed ?? 0, `of ${n(analysis?.responses)}`],
+    ...(report ? [["Actions approved", report.approved, `of ${n(report.actions)}`]] : []),
   ];
   let order = 0;
 
@@ -210,7 +211,8 @@ export function AdminHome() {
             <div key={label} className="flex flex-col gap-0.5">
               <dt className="text-small text-on-board-muted">{label}</dt>
               <dd className="num m-0 text-kpi font-bold">
-                {value} <span className="text-body font-normal text-on-board-muted">{unit}</span>
+                <CountUp value={value} format={(v) => n(Math.round(v))} />{" "}
+                <span className="text-body font-normal text-on-board-muted">{unit}</span>
               </dd>
             </div>
           ))}

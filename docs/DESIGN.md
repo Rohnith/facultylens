@@ -278,6 +278,14 @@ These notes describe how each page was laid out when it was built. Their structu
 ## Motion
 
 - **One authored moment:** notes settle onto the wall. Each note starts from a scattered offset (`--dx`, `--dy`, `--r0`), slightly scaled down and transparent, and lands at its tilt in 400ms on the strong ease-out, staggered 40ms across the whole wall (`.settle`). The cluster's marker stroke draws itself as its notes land (`.marker-line`). It plays once per load: on the faculty page, the IQAC home board and the sign-in board.
+- **Supporting moments** (added 2026-10-22, the same scale as the notes: once, meaningful, under about 0.7s):
+  - the highlighter (`.here`) is drawn on left to right wherever it appears: the current page, the current tab, the chosen rating;
+  - highlighted sentences in the evidence drawer and moderation queue are swept in like a highlighter pen (`.swipe`), one after another;
+  - headline numbers count up once (`components/CountUp.jsx`); screen readers get the final value straight away;
+  - sentiment, response and diverging bars grow out of the edge they are measured from (`.grow-x`);
+  - in labelling, a saved note lifts up and away in 200ms (`.note-leave`) before the next one settles;
+  - the landing and sign-in promise is written in line by line (`.write-in`);
+  - after submitting feedback, the student sees their course pinned as a note settling onto the page.
 - Everything else is feedback, not entrance: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`; press 140ms (`scale(0.97)` on `:active`), UI 180ms, the sheet and drawer 240ms from the edge they belong to (`@starting-style`).
 - Hover effects (note lift, button shadow) are gated behind `(hover: hover) and (pointer: fine)`. Keyboard-driven changes (labelling keys) never animate.
 - `prefers-reduced-motion`: notes arrive with a 150ms fade in place, no travel; the marker stroke is drawn already; transitions drop to 1ms.

@@ -1,3 +1,4 @@
+import { CountUp } from "../../components/CountUp";
 import { ArrowLeftIcon, ArrowRightIcon } from "../../components/icons";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { engineLabel } from "../../api/profiles";
@@ -73,7 +74,7 @@ export function Overall({ insights, responses, eligible }) {
           Net sentiment
         </h2>
         <span className="num font-marker text-[2.75rem] leading-none">
-          {net == null ? "–" : signed(net)}
+          {net == null ? "–" : <CountUp value={net} format={signed} />}
         </span>
         <span className="mt-1 max-w-[30ch] text-small text-on-board-muted">
           Positive share minus negative, from −1 to +1. Possibly sarcastic answers count half.
@@ -83,7 +84,7 @@ export function Overall({ insights, responses, eligible }) {
         {total > 0 && (
           <div className="flex flex-col gap-2">
             <div
-              className="flex h-3.5 w-full gap-[3px] overflow-hidden rounded-full"
+              className="grow-x flex h-3.5 w-full gap-[3px] overflow-hidden rounded-full"
               role="img"
               aria-label={SENT.map(
                 (s) => `${SENT_LABEL[s]} ${pct((weights[s] ?? 0) / total)}`,
@@ -115,7 +116,7 @@ export function Overall({ insights, responses, eligible }) {
             <div className="flex flex-col gap-0.5">
               <dt className="text-small text-on-board-muted">Responded</dt>
               <dd className="num m-0 text-lead font-semibold">
-                {responses}{" "}
+                <CountUp value={responses} />{" "}
                 <span className="text-body font-normal text-on-board-muted">of {eligible}</span>
               </dd>
             </div>
@@ -124,7 +125,7 @@ export function Overall({ insights, responses, eligible }) {
             <div className="flex min-w-0 flex-col gap-0.5">
               <dt className="text-small text-on-board-muted">Best rated</dt>
               <dd className="num m-0 truncate text-lead font-semibold" title={best.label}>
-                {best.likert_mean.toFixed(1)}{" "}
+                <CountUp value={best.likert_mean} format={(v) => v.toFixed(1)} />{" "}
                 <span className="text-body font-normal text-on-board-muted">{best.label}</span>
               </dd>
             </div>
@@ -152,7 +153,7 @@ function DivergingBar({ polarity, scale, label }) {
         className="absolute top-[-3px] bottom-[-3px] left-1/2 w-px bg-control"
         aria-hidden="true"
       />
-      <div className="flex h-3 w-1/2 justify-end gap-[2px] pr-px">
+      <div className="grow-x grow-x-from-right flex h-3 w-1/2 justify-end gap-[2px] pr-px">
         {negative > 0 && (
           <span
             className="rounded-l-[3px]"
@@ -161,7 +162,7 @@ function DivergingBar({ polarity, scale, label }) {
         )}
         {neutral > 0 && <span style={{ width: w(neutral / 2), background: SENT_VAR.neutral }} />}
       </div>
-      <div className="flex h-3 w-1/2 gap-[2px] pl-px">
+      <div className="grow-x flex h-3 w-1/2 gap-[2px] pl-px">
         {neutral > 0 && <span style={{ width: w(neutral / 2), background: SENT_VAR.neutral }} />}
         {positive > 0 && (
           <span

@@ -1,3 +1,4 @@
+import { CountUp } from "../../components/CountUp";
 import { SortIcon } from "../../components/icons";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
@@ -161,13 +162,21 @@ export function OverviewTab({ data }) {
           </span>
         </Stat>
         <Stat label="Net sentiment" note="Positive minus negative share of answers, −1 to +1">
-          <span className="num text-kpi font-medium">{signed(t.net_score)}</span>
+          <span className="num text-kpi font-medium">
+            {t.net_score == null ? (
+              signed(t.net_score)
+            ) : (
+              <CountUp value={t.net_score} format={signed} />
+            )}
+          </span>
         </Stat>
         <Stat
           label="Hidden by moderation"
           note={t.in_review ? `${t.in_review} awaiting review` : "None awaiting review"}
         >
-          <span className="num text-lead font-medium">{t.hidden_comments}</span>
+          <span className="num text-lead font-medium">
+            <CountUp value={t.hidden_comments} />
+          </span>
         </Stat>
       </div>
       {data.teachers.length === 0 ? (

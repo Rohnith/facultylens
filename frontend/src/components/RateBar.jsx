@@ -23,7 +23,10 @@ export function RateBar({ value, total, label = "responses" }) {
         role="img"
         aria-label={`${value} of ${total} ${label}, ${pct} percent`}
       >
-        <div className="h-full rounded-full bg-chart-main" style={{ width: `${ratio * 100}%` }} />
+        <div
+          className="grow-x h-full rounded-full bg-chart-main"
+          style={{ width: `${ratio * 100}%` }}
+        />
       </div>
     </div>
   );

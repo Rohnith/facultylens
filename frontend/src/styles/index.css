@@ -317,6 +317,31 @@
     }
   }
 
+  /* Marker lettering written in from the left, one line after another. */
+  .write-in {
+    animation: write-in 700ms var(--ease-out) both;
+    animation-delay: calc(var(--write-delay, 0ms) + 80ms);
+  }
+  @keyframes write-in {
+    from {
+      clip-path: inset(-0.2em 100% -0.3em 0);
+    }
+    to {
+      clip-path: inset(-0.2em -0.1em -0.3em 0);
+    }
+  }
+
+  /* A sorted note is taken off the wall: a quick lift up and away, faster than it arrived. */
+  .note-leave {
+    animation: note-leave 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+  @keyframes note-leave {
+    to {
+      opacity: 0;
+      transform: translate(56px, -28px) rotate(6deg) scale(0.96);
+    }
+  }
+
   /* A marker stroke under a wall heading, drawn as its cluster settles. */
   .marker-line {
     stroke-dasharray: 1;
@@ -331,8 +356,57 @@
 
   /* Highlighter for "where you are": the current nav item, the selected row. */
   .here {
-    background: var(--highlight);
+    position: relative;
+    isolation: isolate;
     color: var(--highlight-ink);
+  }
+  /* The highlighter is a layer behind the text, so it can be drawn on left to right. */
+  .here::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--highlight);
+    animation: highlight-in 320ms var(--ease-out) both;
+  }
+  @keyframes highlight-in {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  /* Bars grow out of the edge they are measured from, once. */
+  .grow-x {
+    transform-origin: left center;
+    animation: grow-x 560ms var(--ease-out) both;
+    animation-delay: var(--grow-delay, 120ms);
+  }
+  .grow-x-from-right {
+    transform-origin: right center;
+  }
+  @keyframes grow-x {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  /* A highlighter pass over marked words: the tint is swept in from the left, once. */
+  .swipe {
+    /* One flat colour; the gradient function only lets its width animate. */
+    background-image: linear-gradient(var(--swipe), var(--swipe)); /* taste-skill-ignore */
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    animation: swipe-in 480ms var(--ease-out) both;
+    animation-delay: var(--swipe-delay, 160ms);
+  }
+  @keyframes swipe-in {
+    from {
+      background-size: 0% 100%;
+    }
   }
 
   /* Phone menu sheet: a short rise and fade from where it will rest. */

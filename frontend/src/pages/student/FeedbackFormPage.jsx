@@ -1,3 +1,4 @@
+import { CheckIcon } from "../../components/icons";
 import { ArrowLeftIcon } from "../../components/icons";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
@@ -59,6 +60,20 @@ function ThankYou({ form }) {
 
   return (
     <div className="mx-auto flex max-w-[640px] flex-col gap-4 pt-8">
+      {/* Their feedback, pinned: the same note the wall uses, settling in once. */}
+      <div
+        aria-hidden="true"
+        className="note settle note-praise mb-4 flex w-fit items-center gap-2.5 px-5 pt-5 pb-4"
+        style={{ "--tilt": "-2deg", "--dy": "40px", "--r0": "-8deg" }}
+      >
+        <span className="grid size-6 place-items-center rounded-full bg-[var(--edge-praise)] text-[var(--note-praise)]">
+          <CheckIcon />
+        </span>
+        <span className="font-marker text-lead">
+          {form.course.code}
+          {form.faculty ? ` · ${form.faculty.name}` : " · syllabus"}
+        </span>
+      </div>
       <h1 ref={heading} tabIndex={-1} className="m-0 font-marker text-marker outline-none">
         Thank you. Your feedback was recorded.
       </h1>

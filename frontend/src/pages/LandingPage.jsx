@@ -82,7 +82,8 @@ export function LandingPage() {
             id="landing-h"
             className="m-0 max-w-[16ch] font-marker text-[2.75rem] leading-[1.08] md:text-[4rem]"
           >
-            Every comment, sorted and heard.
+            <span className="write-in block">Every comment,</span>
+            <span className="write-in block [--write-delay:420ms]">sorted and heard.</span>
           </h1>
           <p className="m-0 max-w-[56ch] text-lead text-muted">
             Students rate their teachers and write freely. FacultyLens removes names, holds back
