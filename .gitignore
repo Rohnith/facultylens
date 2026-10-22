@@ -42,3 +42,6 @@ desktop.ini
 
 # Raw public datasets (real names inside); only the import script and results are committed
 backend/ml/data/rmp/
+
+# graphify knowledge-graph output (generated)
+graphify-out/

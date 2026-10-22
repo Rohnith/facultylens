@@ -25,7 +25,7 @@ def _csv(tmp_path):
                     "department_name": "Physics",
                     "student_star": star,
                     "gender": "x",
-                    "comments": f"{SURNAMES[p]} explains topic {c} well, I\'d take it again.",
+                    "comments": f"{SURNAMES[p]} explains topic {c} well, I'd take it again.",
                 }
             )
     rows.append({**rows[0], "comments": "No Comments"})
