@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router";
 import { useAuth } from "../context/auth";
+import { LandingPage } from "../pages/LandingPage";
 
 function SessionCheck() {
   return (
@@ -15,6 +16,8 @@ export function RequireAuth() {
   const location = useLocation();
   if (status === "loading") return <SessionCheck />;
   if (status === "signedOut") {
+    // Visitors to the front door get the landing page; anywhere else goes to sign-in.
+    if (location.pathname === "/") return <LandingPage />;
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
   if (user.must_change_pw) return <Navigate to="/change-password" replace />;
