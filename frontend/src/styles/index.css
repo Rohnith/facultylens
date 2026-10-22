@@ -175,9 +175,9 @@
     color: var(--text);
   }
   @media (hover: hover) and (pointer: fine) {
+    /* Hover shifts the fill a step toward the surface; buttons never fade. */
     .btn-primary:hover:not(:disabled) {
-      opacity: 0.9;
-      box-shadow: var(--shadow-note);
+      background: color-mix(in srgb, var(--primary) 84%, var(--surface));
     }
     .btn-secondary:hover:not(:disabled),
     .btn-ghost:hover:not(:disabled) {
@@ -235,6 +235,11 @@
     background: var(--on-board);
     color: var(--board);
   }
+  @media (hover: hover) and (pointer: fine) {
+    .board .btn-primary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--on-board) 84%, var(--board));
+    }
+  }
   .board .btn-secondary {
     background: var(--board-2);
     color: var(--on-board);
@@ -252,13 +257,11 @@
     color: var(--on-board);
   }
 
-  /* A student comment as a sticky note: tinted paper, a sentiment edge, a strip of tape. */
+  /* A student comment as a sticky note: paper tinted by sentiment, a strip of tape. */
   .note {
     position: relative;
     border-radius: var(--r-note);
-    box-shadow:
-      inset 5px 0 0 var(--note-edge, var(--edge-neutral)),
-      var(--shadow-note);
+    box-shadow: var(--shadow-note);
     background: var(--note-paper, var(--note-neutral));
     color: var(--text);
     transform: rotate(var(--tilt, 0deg));
@@ -281,22 +284,17 @@
   }
   .note-praise {
     --note-paper: var(--note-praise);
-    --note-edge: var(--edge-praise);
   }
   .note-criticism {
     --note-paper: var(--note-criticism);
-    --note-edge: var(--edge-criticism);
   }
   .note-neutral {
     --note-paper: var(--note-neutral);
-    --note-edge: var(--edge-neutral);
   }
   @media (hover: hover) and (pointer: fine) {
     .note-lift:hover {
       transform: rotate(0deg) translateY(-2px);
-      box-shadow:
-        inset 5px 0 0 var(--note-edge, var(--edge-neutral)),
-        var(--shadow-lift);
+      box-shadow: var(--shadow-lift);
     }
   }
 

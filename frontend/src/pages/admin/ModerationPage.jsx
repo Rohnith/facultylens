@@ -80,7 +80,7 @@ function QueueItem({ item, index, onDecided }) {
       }`}
     >
       <div
-        className={`note settle note-lift flex flex-col gap-3 py-4 pr-4 pl-6 ${
+        className={`note settle note-lift flex flex-col gap-3 px-5 py-4 ${
           item.status === "decided" && item.decision === "approve" ? "note-praise" : "note-neutral"
         }`}
         style={{

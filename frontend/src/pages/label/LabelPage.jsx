@@ -72,7 +72,7 @@ function LabelTab() {
         {/* The comment as a note; its paper follows the sentiment you pick, instantly. */}
         <figure
           key={item.id}
-          className={`note settle m-0 flex flex-col gap-3 py-6 pr-6 pl-8 ${TONE_NOTE[value.sentiment] ?? "note-neutral"}`}
+          className={`note settle m-0 flex flex-col gap-3 px-7 py-6 ${TONE_NOTE[value.sentiment] ?? "note-neutral"}`}
           style={{ "--tilt": "-0.8deg", "--dy": "36px", "--r0": "-5deg", transition: "none" }}
         >
           <blockquote className="m-0 max-w-[60ch] text-lead leading-8 whitespace-pre-line">

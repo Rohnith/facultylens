@@ -29,7 +29,7 @@ function TextQuestion({ id, label, value, onChange, index }) {
           maxLength={MAX}
           onChange={(e) => onChange(e.target.value)}
           aria-describedby={`${id}-count`}
-          className="block min-h-32 w-full resize-y border-0 bg-transparent py-4 pr-4 pl-6 text-body leading-6 text-text outline-none placeholder:text-faint"
+          className="block min-h-32 w-full resize-y border-0 bg-transparent px-5 py-4 text-body leading-6 text-text outline-none placeholder:text-faint"
         />
       </div>
       <span

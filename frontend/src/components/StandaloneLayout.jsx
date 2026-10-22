@@ -40,7 +40,7 @@ function PinnedNotes({ notes, className = "" }) {
         return (
           <li
             key={n.title}
-            className={`note settle ${KINDS[i % KINDS.length]} flex flex-col gap-1.5 py-4 pr-4 pl-6`}
+            className={`note settle ${KINDS[i % KINDS.length]} flex flex-col gap-1.5 px-5 py-4`}
             style={{
               "--tilt": `${TILTS[i % TILTS.length]}deg`,
               "--tape-tilt": `${i % 2 ? 4 : -3}deg`,

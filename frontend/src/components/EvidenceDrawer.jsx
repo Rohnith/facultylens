@@ -87,10 +87,10 @@ export function EvidenceDrawer({ facultyId, request, onClose }) {
         <div className="flex h-full flex-col">
           <div className="flex items-start justify-between gap-4 border-b border-rule px-[var(--card-pad)] py-4">
             <div className="flex min-w-0 flex-col gap-1">
-              <span className="text-small text-muted">{request.kicker}</span>
               <h2 id="evidence-title" className="m-0 font-marker text-[1.375rem] leading-7">
                 {request.title}
               </h2>
+              <span className="text-small text-muted">{request.kicker}</span>
             </div>
             <button
               type="button"

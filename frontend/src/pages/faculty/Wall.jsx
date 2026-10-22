@@ -79,7 +79,7 @@ function Note({ item, tone, order }) {
   const [dx, dy, r0] = STARTS[order % STARTS.length];
   return (
     <li
-      className={`note settle note-lift ${NOTE_CLASS[tone]} flex flex-col gap-1.5 py-3 pr-3.5 pl-5`}
+      className={`note settle note-lift ${NOTE_CLASS[tone]} flex flex-col gap-1.5 px-4 py-3`}
       style={{
         "--tilt": `${TILTS[order % TILTS.length]}deg`,
         "--tape-tilt": `${order % 2 ? 4 : -3}deg`,

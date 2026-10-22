@@ -5,11 +5,9 @@ export function Mark({ size = 28 }) {
       <rect width="32" height="32" rx="7" fill="var(--board)" />
       <g transform="rotate(-7 13 18)">
         <rect x="6" y="11" width="15" height="14" rx="1.5" fill="var(--note-criticism)" />
-        <rect x="6" y="11" width="2.4" height="14" fill="var(--edge-criticism)" />
       </g>
       <g transform="rotate(6 19 13)">
         <rect x="11.5" y="6" width="15" height="14" rx="1.5" fill="var(--note-praise)" />
-        <rect x="11.5" y="6" width="2.4" height="14" fill="var(--edge-praise)" />
         <rect x="16" y="4.2" width="7" height="3" rx="0.6" fill="var(--highlight)" />
       </g>
     </svg>

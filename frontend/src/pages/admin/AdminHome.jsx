@@ -112,7 +112,7 @@ const TILTS = [-1.2, 0.9, -0.4, 1.3];
 function Card({ card, index, done }) {
   return (
     <li
-      className={`note settle note-lift ${done ? "note-praise" : "note-neutral"} flex flex-col gap-2 py-3.5 pr-4 pl-5`}
+      className={`note settle note-lift ${done ? "note-praise" : "note-neutral"} flex flex-col gap-2 px-4 py-3.5`}
       style={{
         "--tilt": `${TILTS[index % TILTS.length]}deg`,
         "--tape-tilt": `${index % 2 ? 4 : -3}deg`,

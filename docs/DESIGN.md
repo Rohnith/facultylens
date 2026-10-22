@@ -8,7 +8,7 @@ Redesigned on 2026-10-21 as the **Affinity Wall**, replacing the Phase 0 "achrom
 
 - **The wall:** a pale sage ground (`#dde5e1`) under white paper cards.
 - **The board:** a deep green (`#183f3a`) carries the rail, page headers and summary strips, like the board the notes are pinned to.
-- **Notes:** tinted paper with a strip of tape, tilted a degree or two. Sentiment lives on the note's 5px left edge and in its words (Praise / Criticism / Neutral), never in colour alone.
+- **Notes:** tinted paper with a strip of tape, tilted a degree or two. Sentiment lives in the paper colour and in its words (Praise / Criticism / Neutral), never in colour alone. (Until 2026-10-22 notes also had a coloured left edge; it was removed under the house rules.)
 - **Highlighter yellow** (`#ffd84d`) is reserved for "where you are": the current nav item and the chosen rating.
 - **Its signature moment:** on load, notes fly in from scattered positions and settle into their clusters.
 
@@ -67,7 +67,7 @@ All text pairs above were checked for WCAG AA in both themes when the tokens wer
 - `.pill` + `.pill-positive|negative|warning|neutral`.
 - `.card`: white paper, 1px border, 6px radius, paper shadow.
 - `.board`: the deep green strip for page headers and summaries.
-- `.note` + `.note-praise|criticism|neutral`: tinted paper, sentiment edge, tape, `--tilt`. `.note-lift` straightens and lifts it on hover.
+- `.note` + `.note-praise|criticism|neutral`: tinted paper, tape, `--tilt`, even padding on all sides. `.note-lift` straightens and lifts it on hover.
 - `.here`: highlighter fill for "where you are".
 - `.skeleton`: a flat bar at the real size of the value it replaces, no shimmer.
 - Tables keep their Phase 1 rules (sentence-case headers, 44px rows, 1px rules, two-line rows on phones).
@@ -291,7 +291,7 @@ Recharts, styled to these tokens, never library defaults.
 
 ## Checks used
 
-- 2026-10-22 house rules: no gradients or purple, no emoji or text glyphs as icons (arrows, ticks and sort marks are drawn SVG in `components/icons.jsx`), no em dashes in interface copy, no pill-shaped buttons, no scroll or cursor effects, no AI credit tags, favicon set, privacy, terms and cookie pages linked from sign-in and the rail.
+- 2026-10-22 house rules: no gradients or purple, no emoji or text glyphs as icons (arrows, ticks and sort marks are drawn SVG in `components/icons.jsx`), no em dashes in interface copy, no pill-shaped buttons, no scroll or cursor effects, no AI credit tags, no coloured left edges, no button fades on hover (the fill shifts instead), no label above a heading, favicon set, privacy, terms and cookie pages linked from sign-in and the rail.
 
 - Affinity Wall (2026-10-21): token contrast pairs checked in both themes; every role's main screens visited in light and dark, at 1440 and 390, with no console errors; screenshots in `docs/screenshots` retaken. design-taste `lint --app` on the changed files: 0 FAIL; its shadow warnings are the paper and note depth this world chose (offset, soft blur) and the mono warning is the model-key token.
 
