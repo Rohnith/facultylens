@@ -85,6 +85,8 @@ pip install -r requirements-dev.txt
 python -m spacy download en_core_web_sm
 ```
 
+Teammates labelling from their own laptops against the shared cloud database follow the shorter [`docs/TEAM_SETUP.md`](docs/TEAM_SETUP.md) instead.
+
 Copy `.env.example` to `.env`: `copy .env.example .env` on Windows, `cp .env.example .env` on Mac or Linux. Then set `JWT_SECRET` and `STUDENT_HASH_SALT` to long random strings. `GROQ_API_KEY` is optional; without it the app uses its no-LLM fallback.
 
 Download the models once (about 4 GB, cached in `backend/.hf_cache`; this is the only step that needs a fast connection):
