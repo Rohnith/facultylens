@@ -17,6 +17,11 @@ def _round(probs: dict[str, float], keys=None) -> dict[str, float]:
     return {k: round(v, 4) for k, v in probs.items() if keys is None or k in keys}
 
 
+def _predict(task: str, texts: list[str]) -> list[dict[str, float]]:
+    """Run a model only when there is text: a ratings-only response must not load anything."""
+    return registry.get(task).predict(texts) if texts else []
+
+
 def analyze_batch(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     version = registry.model_version()
 
@@ -45,11 +50,11 @@ def analyze_batch(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     sentence_texts = [s["text"] for s in sentences]
 
     # 3. Moderation on each sentence.
-    for s, probs in zip(sentences, registry.get("toxicity").predict(sentence_texts), strict=True):
+    for s, probs in zip(sentences, _predict("toxicity", sentence_texts), strict=True):
         s["toxicity"] = scoring.toxicity_score(probs)
 
     # 4. Sentiment for whole answers and for each sentence (one call).
-    sentiment = registry.get("sentiment").predict(field_texts + sentence_texts)
+    sentiment = _predict("sentiment", field_texts + sentence_texts)
     for f, probs in zip(fields, sentiment[: len(fields)], strict=True):
         f["sentiment"] = _round(probs)
     for s, probs in zip(sentences, sentiment[len(fields) :], strict=True):
@@ -72,9 +77,9 @@ def analyze_batch(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
             aspect["conf"] = round(probs[label], 4)
 
     # 7-8. Emotion and irony per answer.
-    for f, probs in zip(fields, registry.get("emotion").predict(field_texts), strict=True):
+    for f, probs in zip(fields, _predict("emotion", field_texts), strict=True):
         f["emotion"] = _round(probs, EMOTIONS)
-    for f, probs in zip(fields, registry.get("irony").predict(field_texts), strict=True):
+    for f, probs in zip(fields, _predict("irony", field_texts), strict=True):
         f["irony"] = round(probs.get("irony", 0.0), 4)
 
     # Assemble one document per response.

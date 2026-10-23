@@ -170,3 +170,14 @@ def test_assign_threshold_lexicon_and_second_margin():
 def test_lexicon_word_boundaries():
     assert aspects.lexicon_hits("She always comes late.") == {"punctuality"}
     assert aspects.lexicon_hits("The translation was poor.") == set()  # 'late' inside a word
+
+
+def test_ratings_only_responses_load_no_model(monkeypatch):
+    """A response with no written answers must not load any model (each one costs seconds)."""
+
+    def refuse(task):
+        raise AssertionError(f"{task} was loaded for a response with no text")
+
+    monkeypatch.setattr(registry, "get", refuse)
+    docs = analyze.analyze_batch([item(1, {"liked": "", "improve": None}), item(2, {})])
+    assert [d["fields"] for d in docs] == [[], []]
