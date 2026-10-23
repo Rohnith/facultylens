@@ -5,7 +5,7 @@ and rendered to MP4 at 1920×1080, 30 fps.
 
 | Video | Composition | Length | Output |
 |---|---|---|---|
-| Publishing promo | `Promo` | 50.4 s, cut to a 100 BPM beat | `out/facultylens-promo.mp4` |
+| Publishing promo | `Promo` | 76.8 s, cut to a 100 BPM beat, with a tour of each role | `out/facultylens-promo.mp4` |
 | How it works (technical) | `Tech` | about 3 min 46 s | `out/facultylens-how-it-works.mp4` |
 
 Everything is made on this computer and is free to publish:

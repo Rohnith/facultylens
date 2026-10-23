@@ -13,8 +13,8 @@ RATE = 44100
 BPM = 100
 BEAT = 60 / BPM
 BAR = 4 * BEAT
-BARS = 21  # 50.4 s, the promo's length
-DROP_BAR, OUTRO_BAR = 6, 20
+BARS = 32  # 76.8 s, the promo's length
+DROP_BAR, OUTRO_BAR = 6, 31
 OUT = Path(__file__).resolve().parent.parent / "public" / "sound"
 rng = np.random.default_rng(11)
 

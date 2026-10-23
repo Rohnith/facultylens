@@ -15,7 +15,7 @@ import timings from "../public/audio/promo/timings.json";
 import { C, FONT, FPS, FontGate, MARKER, Mark, Marker, Sfx, Text, useIn } from "./kit";
 
 /*
- * The publishing promo: 50.4 s at 100 BPM. Every scene is a whole number of beats, so cuts land on
+ * The publishing promo: 76.8 s at 100 BPM. Every scene is a whole number of beats, so cuts land on
  * the music, and the pile snaps into the wall on the drop at 12.0 s (bar 6).
  */
 const BEAT = 0.6;
@@ -26,9 +26,12 @@ const SCENES = [
   ["p3", 7, 0.2],
   ["p4", 12, 0.2],
   ["p5", 10, 0.25],
-  ["p6", 14, 0.25],
-  ["p7", 14, 0.25],
-  ["p8", 11, 0.6],
+  ["s1", 16, 0.25],
+  ["f1", 14, 0.25],
+  ["f2", 14, 0.25],
+  ["h1", 15, 0.25],
+  ["q1", 10, 0.25],
+  ["p8", 14, 0.6],
 ];
 const frames = (beats) => Math.round(beats * BEAT * FPS);
 const say = Object.fromEntries(script.map((s) => [s.id, s.say]));
@@ -379,31 +382,8 @@ function Pointer({ path, clickAt }) {
 
 const S = 1360 / 1920; // screenshot scale inside the browser window
 
-/** p6: the real faculty page; the pointer opens a cluster's notes, and the drawer slides in. */
-function TeacherPage() {
-  const frame = useCurrentFrame();
-  const CLICK = 112;
-  const zoom = interpolate(frame, [CLICK + 10, 250], [1, 1.12], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const enter = useIn(0, 16);
-  return (
-    <AbsoluteFill style={{ background: C.wall }}>
-      <div style={{ position: "absolute", inset: 0, transform: `scale(${zoom})`, transformOrigin: "78% 35%", opacity: enter }}>
-        <Browser src={frame < CLICK + 6 ? "faculty-top" : "faculty-drawer"}>
-          {frame < CLICK + 30 && (
-            <Pointer clickAt={[CLICK]} path={[[0, 1180, 760], [40, 1180, 760], [CLICK - 4, 911 * S, 764 * S + 4]]} />
-          )}
-        </Browser>
-      </div>
-      <Sfx name="click" at={CLICK} volume={0.45} />
-      <Sfx name="swipe" at={CLICK + 4} volume={0.25} />
-      <DemoLabel />
-      <Voice id="p6" lead={0.25} />
-    </AbsoluteFill>
-  );
-}
-
-/** A role label that slides in from the left. */
-function Role({ children, at }) {
+/** A role label that slides in from the left, naming who this part of the app is for. */
+function Role({ children, at = 2 }) {
   const p = useIn(at, 14);
   return (
     <div style={{ position: "absolute", left: 280, top: 6, padding: "6px 18px", borderRadius: 6, background: C.highlight, color: C.ink,
@@ -413,45 +393,164 @@ function Role({ children, at }) {
   );
 }
 
-/** p7: the HoD opens the bias tab; IQAC presses Download PDF and the real report page flies out. */
-function Roles() {
+/** A short explanatory label pinned over a screen (it explains; it never pretends to be the app). */
+function Callout({ children, x, y, at, kind = "praise" }) {
+  const { fps } = useVideoConfig();
+  const p = spring({ frame: useCurrentFrame() - at, fps, config: { damping: 13, stiffness: 160 } });
+  const paper = { praise: C.praise, criticism: C.criticism, neutral: C.neutral }[kind];
+  return (
+    <div style={{ position: "absolute", left: x, top: y, width: 420, padding: "20px 22px", borderRadius: 4, background: paper, boxShadow: SHADOW,
+      fontFamily: FONT, fontSize: 28, fontWeight: 700, lineHeight: 1.3, color: C.ink, zIndex: 6, opacity: Math.min(1, p * 1.6),
+      transform: `translateY(${(1 - p) * 40}px) rotate(${-2 + (1 - p) * 6}deg) scale(${0.85 + 0.15 * p})` }}>
+      <div style={{ position: "absolute", top: -10, left: "50%", width: 60, height: 20, marginLeft: -30, background: C.tape, opacity: 0.85 }} />
+      {children}
+    </div>
+  );
+}
+
+/** Pick the screen for the current frame from [fromFrame, shot] steps. */
+const screenAt = (frame, steps) => steps.reduce((cur, [f, src]) => (frame >= f ? src : cur), steps[0][1]);
+
+/** s1: a student opens a form, rates, ticks the consent box, and sends. */
+function Students() {
+  const frame = useCurrentFrame();
+  const GIVE = 54;
+  const RATE = 128;
+  const TICK = 218;
+  const src = screenAt(frame, [[0, "student-forms"], [GIVE + 6, "student-form"], [RATE + 30, "student-form-end"]]);
+  const rated = frame >= RATE && src === "student-form";
+  const ticked = frame >= TICK;
+  return (
+    <AbsoluteFill style={{ background: C.wall }}>
+      <Role>Students</Role>
+      <Browser src={src}>
+        {rated && (
+          <div style={{ position: "absolute", left: (1370 - 40) * S, top: (340 - 23) * S, width: 80 * S, height: 46 * S, borderRadius: 4,
+            background: C.highlight, border: `1px solid ${C.ink}`, display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: FONT, fontWeight: 700, fontSize: 15, color: C.ink }}>4</div>
+        )}
+        {ticked && src === "student-form-end" && (
+          <svg width={20} height={20} viewBox="0 0 16 16" style={{ position: "absolute", left: 652 * S - 10, top: 898 * S - 10 }}>
+            <rect x="1" y="1" width="14" height="14" rx="2" fill={C.ink} />
+            <path d="M4 8.5 7 11.5 12 5" stroke={C.paper} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+        <Pointer
+          clickAt={[GIVE, RATE, TICK]}
+          path={[
+            [0, 900, 600], [10, 900, 600], [GIVE - 4, 1481 * S, 285 * S + 4],
+            [GIVE + 20, 1481 * S, 285 * S + 4], [RATE - 4, 1370 * S, 340 * S + 4],
+            [RATE + 26, 1000, 500], [TICK - 6, 652 * S, 898 * S + 4],
+          ]}
+        />
+      </Browser>
+      {[GIVE, RATE, TICK].map((t) => <Sfx key={t} name="click" at={t} volume={0.4} />)}
+      <Sfx name="swipe" at={GIVE + 6} volume={0.2} />
+      <Callout x={1300} y={420} at={TICK + 26}>Sent. Saved without the student's name.</Callout>
+      <Sfx name="pin" at={TICK + 28} volume={0.35} />
+      <DemoLabel />
+      <Voice id="s1" lead={0.25} />
+    </AbsoluteFill>
+  );
+}
+
+/** f1: the faculty page; the pointer opens a cluster's notes and the drawer slides in. */
+function TeacherPage() {
+  const frame = useCurrentFrame();
+  const CLICK = 120;
+  const zoom = interpolate(frame, [CLICK + 10, 252], [1, 1.1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill style={{ background: C.wall }}>
+      <Role>Faculty</Role>
+      <div style={{ position: "absolute", inset: 0, transform: `scale(${zoom})`, transformOrigin: "78% 35%" }}>
+        <Browser src={frame < CLICK + 6 ? "faculty-top" : "faculty-drawer"}>
+          {frame < CLICK + 30 && (
+            <Pointer clickAt={[CLICK]} path={[[0, 1100, 700], [40, 1100, 700], [CLICK - 4, 911 * S, 764 * S + 4]]} />
+          )}
+        </Browser>
+      </div>
+      <Sfx name="click" at={CLICK} volume={0.45} />
+      <Sfx name="swipe" at={CLICK + 4} volume={0.25} />
+      <DemoLabel />
+      <Voice id="f1" lead={0.25} />
+    </AbsoluteFill>
+  );
+}
+
+/** f2: strengths, areas to improve with next steps, then the profile that waits for approval. */
+function Strengths() {
+  const frame = useCurrentFrame();
+  const CUT = 140;
+  const GEN = 200;
+  return (
+    <AbsoluteFill style={{ background: C.wall }}>
+      <Role>Faculty</Role>
+      <Browser src={frame < CUT ? "faculty-summary" : "profile-review"}>
+        {frame >= CUT && frame < GEN + 30 && (
+          <Pointer clickAt={[GEN]} path={[[CUT, 900, 500], [CUT + 12, 900, 500], [GEN - 4, 580 * S, 342 * S + 4]]} />
+        )}
+      </Browser>
+      {frame < CUT && <Callout x={1320} y={600} at={70} kind="neutral">A next step for every area to improve</Callout>}
+      {frame >= CUT && <Callout x={1320} y={430} at={GEN + 10}>Nothing is published until the teacher approves it</Callout>}
+      <Sfx name="swipe" at={CUT} volume={0.22} />
+      <Sfx name="click" at={GEN} volume={0.4} />
+      <Sfx name="pin" at={72} volume={0.3} />
+      <DemoLabel />
+      <Voice id="f2" lead={0.25} />
+    </AbsoluteFill>
+  );
+}
+
+/** h1: department insights, the bias tab, then Action taken. */
+function HeadOfDepartment() {
+  const frame = useCurrentFrame();
+  const BIAS = 70;
+  const ACTIONS = 168;
+  const src = screenAt(frame, [[0, "insights"], [BIAS + 6, "bias"], [ACTIONS + 6, "hod-actions"]]);
+  return (
+    <AbsoluteFill style={{ background: C.wall }}>
+      <Role>Head of department</Role>
+      <Browser src={src}>
+        {frame < ACTIONS + 28 && (
+          <Pointer
+            clickAt={[BIAS, ACTIONS]}
+            path={[[0, 900, 600], [8, 900, 600], [BIAS - 4, 1489 * S, 198 * S + 4], [BIAS + 30, 1489 * S, 198 * S + 4], [ACTIONS - 4, 1611 * S, 198 * S + 4]]}
+          />
+        )}
+      </Browser>
+      <Sfx name="click" at={BIAS} volume={0.45} />
+      <Sfx name="click" at={ACTIONS} volume={0.45} />
+      {frame >= ACTIONS && <Callout x={1300} y={560} at={ACTIONS + 20}>Approved here, then into the NAAC report</Callout>}
+      <DemoLabel />
+      <Voice id="h1" lead={0.25} />
+    </AbsoluteFill>
+  );
+}
+
+/** q1: IQAC presses Download PDF and the real report page flies out. */
+function Iqac() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const CUT = 118;
-  const TAB = 64;
-  const PDF = 196;
+  const PDF = 74;
   const pdf = spring({ frame: frame - PDF - 6, fps, config: { damping: 14, stiffness: 110 } });
   return (
     <AbsoluteFill style={{ background: C.wall }}>
-      {frame < CUT ? (
-        <>
-          <Role at={2}>Head of department</Role>
-          <Browser src={frame < TAB + 6 ? "insights" : "bias"}>
-            <Pointer clickAt={[TAB]} path={[[0, 1000, 600], [8, 1000, 600], [TAB - 4, 1489 * S, 198 * S + 4]]} />
-          </Browser>
-          <Sfx name="click" at={TAB} volume={0.45} />
-        </>
-      ) : (
-        <>
-          <Role at={CUT}>IQAC office</Role>
-          <Browser src="naac">
-            {frame < PDF + 26 && <Pointer clickAt={[PDF]} path={[[CUT, 900, 700], [CUT + 20, 900, 700], [PDF - 4, 1414 * S, 519 * S + 4]]} />}
-          </Browser>
-          <Sfx name="click" at={PDF} volume={0.45} />
-          {frame > PDF && (
-            <div style={{ position: "absolute", left: 1350, top: 120, opacity: Math.min(1, pdf * 2),
-              transform: `translate(${(1 - pdf) * -200}px, ${(1 - pdf) * 260}px) rotate(${4 * pdf - 8 * (1 - pdf)}deg) scale(${0.4 + 0.6 * pdf})` }}>
-              <Img src={staticFile("shots/naac-pdf.png")} style={{ width: 430, borderRadius: 4, border: "1px solid #c3cfca",
-                boxShadow: "0 30px 60px -16px rgba(22,32,30,0.6)" }} />
-              <div style={{ marginTop: 14, fontFamily: FONT, fontSize: 26, fontWeight: 700, color: C.ink, textAlign: "center" }}>NAAC 1.4 report.pdf</div>
-            </div>
-          )}
-          <Sfx name="swipe" at={PDF + 6} volume={0.3} />
-        </>
+      <Role>IQAC office</Role>
+      <Browser src="naac">
+        {frame < PDF + 26 && <Pointer clickAt={[PDF]} path={[[0, 900, 700], [12, 900, 700], [PDF - 4, 1414 * S, 519 * S + 4]]} />}
+      </Browser>
+      <Sfx name="click" at={PDF} volume={0.45} />
+      {frame > PDF && (
+        <div style={{ position: "absolute", left: 1350, top: 120, opacity: Math.min(1, pdf * 2),
+          transform: `translate(${(1 - pdf) * -200}px, ${(1 - pdf) * 260}px) rotate(${4 * pdf - 8 * (1 - pdf)}deg) scale(${0.4 + 0.6 * pdf})` }}>
+          <Img src={staticFile("shots/naac-pdf.png")} style={{ width: 430, borderRadius: 4, border: "1px solid #c3cfca",
+            boxShadow: "0 30px 60px -16px rgba(22,32,30,0.6)" }} />
+          <div style={{ marginTop: 14, fontFamily: FONT, fontSize: 26, fontWeight: 700, color: C.ink, textAlign: "center" }}>NAAC 1.4 report.pdf</div>
+        </div>
       )}
-      <Sfx name="swipe" at={CUT} volume={0.25} />
+      <Sfx name="swipe" at={PDF + 6} volume={0.3} />
       <DemoLabel />
-      <Voice id="p7" lead={0.25} />
+      <Voice id="q1" lead={0.25} />
     </AbsoluteFill>
   );
 }
@@ -478,7 +577,7 @@ function End() {
   );
 }
 
-const VIEWS = { p1: Hook, p2: Pile, p3: Snap, p4: Sort, p5: Redact, p6: TeacherPage, p7: Roles, p8: End };
+const VIEWS = { p1: Hook, p2: Pile, p3: Snap, p4: Sort, p5: Redact, s1: Students, f1: TeacherPage, f2: Strengths, h1: HeadOfDepartment, q1: Iqac, p8: End };
 
 /** The beat, ducked under the voice so every word is clear, and faded out at the end. */
 function Beat() {
