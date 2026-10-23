@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { Link, NavLink, Outlet, useLocation, useNavigate, useNavigationType } from "react-router";
 import { MODERATION_CHANGED, analysisApi } from "../api/analysis";
 import { getHealth } from "../api/client";
 import { ROLE_LABELS, useAuth } from "../context/auth";
@@ -202,6 +202,13 @@ export function AppShell() {
   const sheetRef = useRef(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const location = useLocation();
+  const navigationType = useNavigationType();
+
+  // A new page opens at its top; Back and Forward ("POP") are left to the browser, and a
+  // change of tab within a page (only the ?query changes) leaves the scroll alone.
+  useEffect(() => {
+    if (navigationType !== "POP") window.scrollTo(0, 0);
+  }, [location.pathname, navigationType]);
   const current =
     nav.find((n) => (n.end ? location.pathname === n.to : location.pathname.startsWith(n.to)))
       ?.label ?? "FacultyLens";
