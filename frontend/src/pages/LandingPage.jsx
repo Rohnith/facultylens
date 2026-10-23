@@ -28,6 +28,9 @@ function Cluster({ notes, side, offset }) {
   return (
     <Reveal
       as="ul"
+      threshold={0.5}
+      rootMargin="0px 0px -30% 0px"
+      afterScroll
       aria-hidden="true"
       className={`relative z-20 m-0 hidden list-none flex-col gap-6 p-0 pt-16 xl:flex ${
         side === "left" ? "-mr-14 items-end" : "-ml-14 items-start"
