@@ -1,3 +1,4 @@
+import { Reveal } from "../components/Reveal";
 import { Link } from "react-router";
 import { getHealth } from "../api/client";
 import { Mark } from "../components/Mark";
@@ -25,7 +26,8 @@ const STEPS = [
 
 function Cluster({ notes, side, offset }) {
   return (
-    <ul
+    <Reveal
+      as="ul"
       aria-hidden="true"
       className={`relative z-20 m-0 hidden list-none flex-col gap-6 p-0 pt-16 xl:flex ${
         side === "left" ? "-mr-14 items-end" : "-ml-14 items-start"
@@ -47,7 +49,7 @@ function Cluster({ notes, side, offset }) {
           <span className="font-marker text-lead leading-6">{label}</span>
         </li>
       ))}
-    </ul>
+    </Reveal>
   );
 }
 

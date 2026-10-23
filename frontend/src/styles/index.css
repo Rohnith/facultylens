@@ -342,6 +342,12 @@
     }
   }
 
+  /* Inside a Reveal group, notes wait (at their first frame) until the group scrolls into view. */
+  [data-reveal]:not(.in-view) .settle,
+  [data-reveal]:not(.in-view) .marker-line {
+    animation-play-state: paused;
+  }
+
   /* A marker stroke under a wall heading, drawn as its cluster settles. */
   .marker-line {
     stroke-dasharray: 1;

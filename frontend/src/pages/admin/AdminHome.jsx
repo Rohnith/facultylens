@@ -1,3 +1,4 @@
+import { Reveal } from "../../components/Reveal";
 import { CountUp } from "../../components/CountUp";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
@@ -219,7 +220,7 @@ export function AdminHome() {
         </dl>
       </section>
 
-      <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
+      <Reveal className="grid gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map(([key, title, empty]) => (
           <section key={key} aria-labelledby={`col-${key}`} className="flex flex-col gap-4">
             <h2
@@ -242,7 +243,7 @@ export function AdminHome() {
             )}
           </section>
         ))}
-      </div>
+      </Reveal>
     </div>
   );
 }

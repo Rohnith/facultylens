@@ -1,3 +1,4 @@
+import { Reveal } from "./Reveal";
 import { Link } from "react-router";
 import { useAsync } from "../hooks/useAsync";
 import { getHealth } from "../api/client";
@@ -34,7 +35,7 @@ export function PolicyLinks({ onBoard = false }) {
 /** Facts pinned as notes: they settle in once, like comments landing on the wall. */
 function PinnedNotes({ notes, className = "" }) {
   return (
-    <ul className={`m-0 list-none gap-x-6 gap-y-8 p-0 ${className}`}>
+    <Reveal as="ul" className={`m-0 list-none gap-x-6 gap-y-8 p-0 ${className}`}>
       {notes.map((n, i) => {
         const [dx, dy, r0] = STARTS[i % STARTS.length];
         return (
@@ -55,7 +56,7 @@ function PinnedNotes({ notes, className = "" }) {
           </li>
         );
       })}
-    </ul>
+    </Reveal>
   );
 }
 

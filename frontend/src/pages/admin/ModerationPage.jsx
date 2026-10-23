@@ -1,3 +1,4 @@
+import { Reveal } from "../../components/Reveal";
 import { useCallback, useEffect, useState } from "react";
 import { FIELD_LABELS, MODERATION_CHANGED, analysisApi } from "../../api/analysis";
 import { errorMessage } from "../../api/client";
@@ -74,7 +75,8 @@ function QueueItem({ item, index, onDecided }) {
   }
 
   return (
-    <li
+    <Reveal
+      as="li"
       className={`flex flex-col gap-3 transition-[opacity,transform] duration-150 ease-in ${
         leaving ? "-translate-y-2 scale-[0.97] opacity-0" : ""
       }`}
@@ -86,7 +88,7 @@ function QueueItem({ item, index, onDecided }) {
         style={{
           "--tilt": `${TILTS[index % TILTS.length]}deg`,
           "--tape-tilt": `${index % 2 ? 4 : -3}deg`,
-          "--i": index,
+          "--i": index % 2,
           "--dy": "28px",
           "--r0": `${index % 2 ? 5 : -5}deg`,
         }}
@@ -194,7 +196,7 @@ function QueueItem({ item, index, onDecided }) {
           {error && <FormError>{error}</FormError>}
         </div>
       )}
-    </li>
+    </Reveal>
   );
 }
 

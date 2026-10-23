@@ -1,3 +1,4 @@
+import { Reveal } from "../../components/Reveal";
 import { useEffect, useMemo, useState } from "react";
 import { FIELD_LABELS } from "../../api/analysis";
 import { errorMessage } from "../../api/client";
@@ -105,7 +106,12 @@ function Cluster({ aspect, notes, index, firstOrder, onReadAll }) {
   const { positive = 0, negative = 0, neutral = 0 } = aspect.polarity;
   const allIds = ["positive", "negative", "neutral"].flatMap((t) => aspect.note_ids?.[t] ?? []);
   return (
-    <section aria-labelledby={headingId} className="flex min-w-0 flex-col gap-4">
+    <Reveal
+      as="section"
+      ready={notes !== null}
+      aria-labelledby={headingId}
+      className="flex min-w-0 flex-col gap-4"
+    >
       <header className="flex flex-col gap-1">
         <h3 id={headingId} className="m-0 font-marker text-[1.375rem] leading-7">
           {aspect.label}
@@ -151,7 +157,7 @@ function Cluster({ aspect, notes, index, firstOrder, onReadAll }) {
           Read {allIds.length} notes in full
         </button>
       )}
-    </section>
+    </Reveal>
   );
 }
 
@@ -215,8 +221,6 @@ export function Wall({ facultyId, insights, onEvidence }) {
         ? []
         : null,
   }));
-  // Notes settle one after another across the whole wall, not per cluster.
-  const starts = clusters.reduce((acc, c) => [...acc, acc.at(-1) + (c.notes?.length ?? 0)], [0]);
 
   return (
     <section aria-labelledby="wall-h" className="flex flex-col gap-5">
@@ -251,8 +255,8 @@ export function Wall({ facultyId, insights, onEvidence }) {
               key={aspect.key}
               aspect={aspect}
               notes={notes}
-              index={i}
-              firstOrder={starts[i]}
+              index={i % 3}
+              firstOrder={(i % 3) * 2}
               onReadAll={(a, allIds, tone) =>
                 onEvidence({
                   ids: allIds,
