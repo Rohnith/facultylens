@@ -1,0 +1,42 @@
+[
+  {
+    "id": "p1",
+    "say": "What are your students really saying?",
+    "speed": 1.03
+  },
+  {
+    "id": "p2",
+    "say": "Every semester, hundreds of comments pile up. And most of them? Never read.",
+    "speed": 1.03
+  },
+  {
+    "id": "p3",
+    "say": "FacultyLens reads them all.",
+    "speed": 1.03
+  },
+  {
+    "id": "p4",
+    "say": "It sorts every comment by what it's about. Subject knowledge. Clarity. Punctuality. Pace.",
+    "speed": 1.03
+  },
+  {
+    "id": "p5",
+    "say": "Names and phone numbers vanish before anyone sees them. Abuse is held back.",
+    "speed": 1.03
+  },
+  {
+    "id": "p6",
+    "say": "Every teacher gets one honest page. What students love, what they want changed, and the real words behind it.",
+    "speed": 1.03
+  },
+  {
+    "id": "p7",
+    "say": "Heads of department spot the patterns. And the I Q A C office exports the N A A C report, in one click.",
+    "speed": 1.03
+  },
+  {
+    "id": "p8",
+    "say": "FacultyLens. Every comment, sorted and heard.",
+    "speed": 1.03
+  }
+]
