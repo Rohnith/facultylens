@@ -36,6 +36,8 @@ More screens are in [`docs/screenshots`](docs/screenshots). A 5-minute demo scri
 
 ## Quick start
 
+> **Moving to another laptop?** Follow [`SETUP_NEW_LAPTOP.md`](SETUP_NEW_LAPTOP.md): it covers secrets, data backup and restore, and the Claude setup.
+
 ### Prerequisites
 
 - **Python 3.13** and **Node 22+** (developed on Node 24).

@@ -97,3 +97,4 @@ facultylens/
 12. Keep `postman/FacultyLens.postman_collection.json` updated with every endpoint.
 13. Commit after each working step with a clear message. Never force-push.
 14. Be honest in reports and the README: report real metrics from `ml/results/`, never made-up numbers.
+15. On a new machine, or when no project memory is available, also read `docs/claude/PROJECT_NOTES.md` (project status and settled decisions) and follow `SETUP_NEW_LAPTOP.md` to set the project up. The user's global web design house rules are in `docs/claude/USER_CLAUDE.md`.
